@@ -1,26 +1,390 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ==========================================================================
+   JARZ DIGITAL — DESIGN TOKENS
+   Documented in docs/DESIGN_SYSTEM.md. The brand hue (#00AFB9) is sampled
+   directly from the Jarz Digital logo; every scale is built around it.
+   ========================================================================== */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  /* Brand — "Jarz Teal" (logo #00AFB9) */
+  --color-brand-50: #e8fbfc;
+  --color-brand-100: #c5f3f5;
+  --color-brand-200: #8fe6eb;
+  --color-brand-300: #52d4dc;
+  --color-brand-400: #1ec1ca;
+  --color-brand-500: #00afb9;
+  --color-brand-600: #008d96;
+  --color-brand-700: #05707a;
+  --color-brand-800: #0a5a62;
+  --color-brand-900: #0d4a51;
+  --color-brand-950: #032e34;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Supporting azure used only inside gradients */
+  --color-azure-300: #8ab8ff;
+  --color-azure-400: #5c9cff;
+  --color-azure-500: #2f7bff;
+  --color-azure-600: #1b5fe0;
+
+  /* Ink & navy — dark surfaces */
+  --color-ink-950: #03060b;
+  --color-ink-900: #060b13;
+  --color-ink-850: #09111c;
+  --color-ink-800: #0c1726;
+  --color-ink-700: #132236;
+  --color-ink-600: #1c3048;
+  --color-ink-500: #2a415e;
+
+  /* Cool neutrals */
+  --color-mist-25: #fbfcfd;
+  --color-mist-50: #f4f7f9;
+  --color-mist-100: #eaeff3;
+  --color-mist-200: #d9e1e8;
+  --color-mist-300: #bcc8d3;
+  --color-mist-400: #8e9dac;
+  --color-mist-500: #677787;
+  --color-mist-600: #4d5b6a;
+  --color-mist-700: #3a4654;
+  --color-mist-800: #253039;
+  --color-mist-900: #151c23;
+
+  /* Status */
+  --color-success-500: #16a34a;
+  --color-success-50: #ecfdf3;
+  --color-warning-500: #d97706;
+  --color-warning-50: #fff7e6;
+  --color-danger-500: #dc2626;
+  --color-danger-50: #fef2f2;
+  --color-info-500: #2f7bff;
+  --color-info-50: #eef4ff;
+
+  /* Typography */
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-display-sm: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);
+  --text-display-sm--line-height: 1.02;
+  --text-display-md: clamp(2.5rem, 1.7rem + 3.4vw, 4.5rem);
+  --text-display-md--line-height: 0.98;
+  --text-display-lg: clamp(2.75rem, 1.4rem + 4.3vw, 5.5rem);
+  --text-display-lg--line-height: 0.94;
+
+  --tracking-display: -0.04em;
+  --tracking-eyebrow: 0.18em;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+
+  /* Shadows */
+  --shadow-soft: 0 1px 2px rgb(6 11 19 / 0.04), 0 8px 24px -12px rgb(6 11 19 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(6 11 19 / 0.04), 0 24px 48px -24px rgb(6 11 19 / 0.28);
+  --shadow-glow: 0 0 0 1px rgb(0 175 185 / 0.25), 0 12px 40px -12px rgb(0 175 185 / 0.45);
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 500ms;
+
+  /* Layout */
+  --container-page: 1320px;
+  --container-prose: 720px;
+
+  --animate-marquee: marquee var(--marquee-duration, 40s) linear infinite;
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 2.4s var(--ease-out-expo) infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-reveal-up: reveal-up 1.1s var(--ease-out-expo) both;
+  --animate-fade-up: fade-up 0.9s var(--ease-out-expo) both;
+  --animate-fade-in: fade-in 1.2s ease both;
+
+  @keyframes marquee {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-50%, 0, 0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -10px, 0); }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.6; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  @keyframes reveal-up {
+    from { transform: translate3d(0, 105%, 0); }
+    to { transform: translate3d(0, 0, 0); }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translate3d(0, 16px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Semantic tokens — the names requested in the brief. Components use these. */
+:root {
+  --color-primary: var(--color-brand-500);
+  --color-primary-dark: var(--color-brand-700);
+  --color-primary-light: var(--color-brand-100);
+  --color-background: #ffffff;
+  --color-surface: var(--color-mist-50);
+  --color-surface-raised: #ffffff;
+  --color-text: var(--color-ink-900);
+  --color-muted: var(--color-mist-600);
+  --color-border: var(--color-mist-200);
+  --color-ring: var(--color-brand-500);
+  --header-height: 76px;
+}
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-primary-light: var(--color-primary-light);
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-raised: var(--color-surface-raised);
+  --color-text: var(--color-text);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+}
+
+/* Dark surfaces re-map the semantic tokens for everything inside them. */
+.theme-dark {
+  --color-background: var(--color-ink-900);
+  --color-surface: var(--color-ink-850);
+  --color-surface-raised: var(--color-ink-800);
+  --color-text: #f3f7fa;
+  --color-muted: #9fb0c1;
+  --color-border: rgb(255 255 255 / 0.1);
+  color: var(--color-text);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-padding-top: calc(var(--header-height) + 16px);
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  ::selection {
+    background: var(--color-brand-300);
+    color: var(--color-ink-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 40rem) { padding-inline: 1.5rem; }
+  @media (width >= 64rem) { padding-inline: 2.5rem; }
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1rem;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+@utility text-balance-pretty {
+  text-wrap: pretty;
+}
+
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.055) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+@utility bg-grid-light {
+  background-image:
+    linear-gradient(to right, rgb(6 11 19 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(6 11 19 / 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+@utility bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+@utility mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+@utility mask-fade-b {
+  mask-image: linear-gradient(to bottom, black 55%, transparent);
+}
+
+@utility mask-radial {
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 72%);
+}
+
+@utility text-gradient-brand {
+  background-image: linear-gradient(100deg, var(--color-brand-300) 0%, var(--color-brand-500) 45%, var(--color-azure-400) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility skeleton {
+  background: linear-gradient(90deg, var(--color-mist-100) 0%, var(--color-mist-50) 50%, var(--color-mist-100) 100%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+  border-radius: var(--radius-md);
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+@utility link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size var(--duration-slow) var(--ease-out-expo);
+  &:hover, &:focus-visible { background-size: 100% 1px; }
+}
+
+/* ==========================================================================
+   Long-form content (blog articles, CMS pages)
+   ========================================================================== */
+
+.prose-jarz {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: var(--color-mist-700);
+  max-width: var(--container-prose);
+}
+.prose-jarz > * + * { margin-top: 1.25em; }
+.prose-jarz h2, .prose-jarz h3, .prose-jarz h4 {
+  color: var(--color-ink-900);
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  scroll-margin-top: calc(var(--header-height) + 24px);
+}
+.prose-jarz h2 { font-size: 1.875rem; margin-top: 2.2em; font-weight: 600; }
+.prose-jarz h3 { font-size: 1.45rem; margin-top: 2em; font-weight: 600; }
+.prose-jarz h4 { font-size: 1.15rem; margin-top: 1.8em; font-weight: 600; }
+.prose-jarz a {
+  color: var(--color-brand-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.prose-jarz a:hover { color: var(--color-brand-600); }
+.prose-jarz strong { color: var(--color-ink-900); font-weight: 600; }
+.prose-jarz ul, .prose-jarz ol { padding-left: 1.25em; }
+.prose-jarz ul { list-style: disc; }
+.prose-jarz ol { list-style: decimal; }
+.prose-jarz li { margin-top: 0.5em; padding-left: 0.25em; }
+.prose-jarz li::marker { color: var(--color-brand-600); }
+.prose-jarz blockquote {
+  border-left: 2px solid var(--color-brand-500);
+  padding-left: 1.25em;
+  font-size: 1.2rem;
+  color: var(--color-ink-800);
+  font-family: var(--font-display);
+}
+.prose-jarz img { border-radius: var(--radius-lg); width: 100%; height: auto; }
+.prose-jarz pre {
+  background: var(--color-ink-900);
+  color: #e6edf3;
+  padding: 1.25em;
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.prose-jarz code { font-family: var(--font-mono); font-size: 0.9em; }
+.prose-jarz :not(pre) > code {
+  background: var(--color-mist-100);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+.prose-jarz table { width: 100%; border-collapse: collapse; font-size: 0.95rem; display: block; overflow-x: auto; }
+.prose-jarz th, .prose-jarz td { border: 1px solid var(--color-mist-200); padding: 0.6em 0.8em; text-align: left; }
+.prose-jarz th { background: var(--color-mist-50); color: var(--color-ink-900); font-weight: 600; }
+.prose-jarz hr { border-color: var(--color-mist-200); margin: 2.5em 0; }
+
+/* Rich-text editor surface uses the same typography */
+.tiptap { outline: none; min-height: 360px; }
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--color-mist-400);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.tiptap .selectedCell { background: var(--color-brand-50); }
+
+/* ==========================================================================
+   Motion preferences
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

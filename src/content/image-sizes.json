@@ -1,0 +1,298 @@
+{
+ "/images/before-after/blissful.png": {
+  "w": 1600,
+  "h": 900
+ },
+ "/images/before-after/cravin-crabs.png": {
+  "w": 1600,
+  "h": 900
+ },
+ "/images/before-after/puff-picks.png": {
+  "w": 1600,
+  "h": 900
+ },
+ "/images/before-after/rides-on-time.png": {
+  "w": 1600,
+  "h": 900
+ },
+ "/images/before-after/yonge-rehab.png": {
+  "w": 1600,
+  "h": 900
+ },
+ "/images/blog/how-to-open-a-google-business-profile.webp": {
+  "w": 1080,
+  "h": 720
+ },
+ "/images/blog/how-to-rank-1-on-google-map-dallas.webp": {
+  "w": 1080,
+  "h": 720
+ },
+ "/images/blog/how-to-rank-your-junk-car-buyer-business.webp": {
+  "w": 1080,
+  "h": 720
+ },
+ "/images/blog/why-full-business-management-package.webp": {
+  "w": 1280,
+  "h": 720
+ },
+ "/images/blog/why-local-seo-is-a-game-changer-for-dallas.webp": {
+  "w": 1080,
+  "h": 720
+ },
+ "/images/blog/why-map-ranking-is-crucial.webp": {
+  "w": 1080,
+  "h": 720
+ },
+ "/images/blog/why-small-business-owners-should-invest.webp": {
+  "w": 1280,
+  "h": 720
+ },
+ "/images/blog/why-website-local-seo-is-important.webp": {
+  "w": 1080,
+  "h": 720
+ },
+ "/images/brand/logo.png": {
+  "w": 1000,
+  "h": 300
+ },
+ "/images/brand/mark.png": {
+  "w": 270,
+  "h": 270
+ },
+ "/images/clients/client-06.png": {
+  "w": 480,
+  "h": 144
+ },
+ "/images/clients/client-12.png": {
+  "w": 480,
+  "h": 144
+ },
+ "/images/clients/client-18.png": {
+  "w": 480,
+  "h": 144
+ },
+ "/images/clients/client-27.png": {
+  "w": 480,
+  "h": 144
+ },
+ "/images/locations/calgary.jpg": {
+  "w": 1359,
+  "h": 772
+ },
+ "/images/locations/dallas.jpg": {
+  "w": 2000,
+  "h": 1499
+ },
+ "/images/locations/denver.jpeg": {
+  "w": 7360,
+  "h": 4140
+ },
+ "/images/misc/agency.webp": {
+  "w": 2000,
+  "h": 2000
+ },
+ "/images/platforms/laravel.png": {
+  "w": 1600,
+  "h": 1600
+ },
+ "/images/platforms/shopify.png": {
+  "w": 1600,
+  "h": 1600
+ },
+ "/images/platforms/wordpress.png": {
+  "w": 1600,
+  "h": 1600
+ },
+ "/images/process/ads.png": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/process/local-seo.png": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/process/planning.png": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/process/seo.png": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/process/social-media-marketing.png": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/process/website-development.png": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/services/advertising.webp": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/services/business-management.webp": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/services/local-seo.webp": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/services/social-media-marketing.webp": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/services/software-development.webp": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/services/web-application-development.webp": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/services/website-development.webp": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/services/website-seo.webp": {
+  "w": 1000,
+  "h": 1000
+ },
+ "/images/team/abir.png": {
+  "w": 150,
+  "h": 150
+ },
+ "/images/team/ammar-mazrui.jpg": {
+  "w": 150,
+  "h": 150
+ },
+ "/images/team/asad.png": {
+  "w": 150,
+  "h": 150
+ },
+ "/images/team/denial.png": {
+  "w": 150,
+  "h": 150
+ },
+ "/images/team/fardin.webp": {
+  "w": 150,
+  "h": 150
+ },
+ "/images/team/rokonuzzaman-jony.png": {
+  "w": 150,
+  "h": 150
+ },
+ "/images/team/salman-hafiz.png": {
+  "w": 150,
+  "h": 150
+ },
+ "/images/team/shahriar.webp": {
+  "w": 150,
+  "h": 150
+ },
+ "/images/team/shawn.png": {
+  "w": 150,
+  "h": 150
+ },
+ "/images/work/commercial-roofing-seo.png": {
+  "w": 1600,
+  "h": 1123
+ },
+ "/images/work/cravin-crabs-management.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/cravin-crabs-seo-2.png": {
+  "w": 1600,
+  "h": 1123
+ },
+ "/images/work/cravin-crabs-seo.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/cravin-crabs-social.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/cravin-crabs-web.webp": {
+  "w": 1137,
+  "h": 798
+ },
+ "/images/work/creative-tree-management.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/creative-tree-seo.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/creative-tree-social.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/creative-tree-web.webp": {
+  "w": 1137,
+  "h": 798
+ },
+ "/images/work/doorstep-spa-web.webp": {
+  "w": 1137,
+  "h": 798
+ },
+ "/images/work/fire-wood-web.webp": {
+  "w": 1137,
+  "h": 798
+ },
+ "/images/work/jarz-digital-web.webp": {
+  "w": 1658,
+  "h": 935
+ },
+ "/images/work/pride-customizing-management.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/pride-customizing-seo.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/pride-customizing-web.webp": {
+  "w": 1137,
+  "h": 798
+ },
+ "/images/work/puff-picks-web.webp": {
+  "w": 1137,
+  "h": 798
+ },
+ "/images/work/quirky-cart-web.webp": {
+  "w": 1137,
+  "h": 798
+ },
+ "/images/work/richmond-hill-management.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/rides-on-time-management.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/rides-on-time-seo.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/rides-on-time-social.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/rides-on-time-web.webp": {
+  "w": 1137,
+  "h": 798
+ },
+ "/images/work/yonge-rehab-management.webp": {
+  "w": 2274,
+  "h": 1596
+ },
+ "/images/work/yonge-rehab-social.webp": {
+  "w": 2274,
+  "h": 1596
+ }
+}
