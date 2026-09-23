@@ -106,6 +106,19 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
                 <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden />
                 {o.address}
               </p>
+              {/* Offices with their own line (e.g. Dhaka) list their direct contacts. */}
+              {o.phone !== contact.phone && (
+                <div className="mt-2.5 space-y-1.5 text-sm">
+                  <a href={`tel:${o.phone.replace(/[^+\d]/g, "")}`} className="flex items-center gap-2 text-white/70 hover:text-white">
+                    <Phone className="size-3.5 shrink-0" aria-hidden /> {o.phone}
+                  </a>
+                  {o.email && (
+                    <a href={`mailto:${o.email}`} className="flex items-center gap-2 text-white/70 hover:text-white">
+                      <Mail className="size-3.5 shrink-0" aria-hidden /> {o.email}
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           ))}
           <div className="space-y-2.5 text-sm">
