@@ -14,7 +14,7 @@ export const revalidate = 3600;
 
 export const metadata: Metadata = buildMetadata({
   title: "Contact Jarz Digital — Let’s Grow Your Business Together",
-  description: "Request a quote or a free consultation. Offices in Dallas, Denver and Calgary — we respond within 24 hours. Call +1 267-766-9055 or email info@jarzdigital.com.",
+  description: "Request a quote or a free consultation. Offices in Dallas, Denver, Calgary and Dhaka — we respond within 24 hours. Call +1 267-766-9055 or email info@jarzdigital.com.",
   path: "/contact",
 });
 
@@ -43,7 +43,7 @@ export default async function ContactPage() {
         <dl className="mt-14 grid grid-cols-2 gap-6 border-t border-white/10 pt-8 md:grid-cols-4">
           {[
             ["24hrs", "Response time"],
-            [String(offices.filter((o) => o.image).length), "Office locations"],
+            [String(offices.length), "Office locations"],
             ["24/7", "Support available"],
             ["Free", "Initial consultation"],
           ].map(([v, l]) => (

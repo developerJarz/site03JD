@@ -18,9 +18,12 @@ import { seedStore } from "./seed-store";
  * with Next.js tags; CMS mutations call `revalidateTag` to refresh them.
  */
 const REVALIDATE = 3600;
+// The data cache outlives deployments; scoping keys to the commit makes each
+// deploy (and any direct database edit shipped with it) start from fresh data.
+const CACHE_VERSION = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ?? "local";
 
 function cached<A extends unknown[], R>(key: string, tags: string[], fn: (...args: A) => Promise<R>) {
-  const wrapped = unstable_cache(fn, [key], { tags, revalidate: REVALIDATE });
+  const wrapped = unstable_cache(fn, [CACHE_VERSION, key], { tags, revalidate: REVALIDATE });
   // React.cache de-duplicates within a single render pass.
   return cache(wrapped);
 }

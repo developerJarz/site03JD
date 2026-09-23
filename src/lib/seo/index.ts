@@ -104,11 +104,10 @@ export function websiteSchema(s: SiteSettings): Json {
   };
 }
 
-/** Service-area businesses: one ProfessionalService per market, no street address claimed. */
+/** One ProfessionalService per office; only the Dhaka office publishes a street address. */
 export function localBusinessSchemas(s: SiteSettings): Json[] {
-  return s.offices
-    .filter((o) => o.country !== "Bangladesh")
-    .map((o) => ({
+  const countryCode = (c: string) => (c === "Canada" ? "CA" : c === "Bangladesh" ? "BD" : "US");
+  return s.offices.map((o) => ({
       "@context": "https://schema.org",
       "@type": "ProfessionalService",
       "@id": `${SITE_URL}/#office-${o.code.toLowerCase()}`,
@@ -119,7 +118,13 @@ export function localBusinessSchemas(s: SiteSettings): Json[] {
       telephone: o.phone,
       ...(o.email ? { email: o.email } : {}),
       areaServed: { "@type": "City", name: o.city },
-      address: { "@type": "PostalAddress", addressLocality: o.city, addressRegion: o.region, addressCountry: o.country === "Canada" ? "CA" : "US" },
+      address: {
+        "@type": "PostalAddress",
+        ...(o.country === "Bangladesh" ? { streetAddress: o.address.replace(/, Dhaka, Bangladesh$/, "") } : {}),
+        addressLocality: o.city,
+        addressRegion: o.region,
+        addressCountry: countryCode(o.country),
+      },
       priceRange: "$$",
     }));
 }

@@ -98,18 +98,16 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
           </nav>
         </div>
 
-        <div className="mt-16 grid gap-8 border-t border-white/[0.08] pt-10 md:grid-cols-2 lg:grid-cols-4">
-          {offices
-            .filter((o) => o.image)
-            .map((o) => (
-              <div key={o.code}>
-                <p className="font-display text-3xl font-semibold tracking-tight text-white/90">{o.code}</p>
-                <p className="mt-2 flex items-start gap-2 text-sm text-white/55">
-                  <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden />
-                  {o.address}
-                </p>
-              </div>
-            ))}
+        <div className="mt-16 grid gap-8 border-t border-white/[0.08] pt-10 md:grid-cols-2 lg:grid-cols-5">
+          {offices.map((o) => (
+            <div key={o.code}>
+              <p className="font-display text-3xl font-semibold tracking-tight text-white/90">{o.code}</p>
+              <p className="mt-2 flex items-start gap-2 text-sm text-white/55">
+                <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                {o.address}
+              </p>
+            </div>
+          ))}
           <div className="space-y-2.5 text-sm">
             <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-white/70 hover:text-white">
               <Mail className="size-3.5" aria-hidden /> {contact.email}
