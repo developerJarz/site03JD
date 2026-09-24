@@ -12,8 +12,11 @@ import { Accordion } from "@/components/ui/accordion";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Section, SectionHeader } from "@/components/ui/section";
-import { getProjects, getServiceBySlug, getServices, getSiteSettings } from "@/lib/data/public";
-import { officeCountries } from "@/lib/seo/locations";
+import { PostCard } from "@/components/blog/post-card";
+import { postsForService } from "@/lib/content/links";
+import { getPosts, getProjects, getServiceBySlug, getServices, getSiteSettings } from "@/lib/data/public";
+import { lowerTitle } from "@/lib/utils";
+import { locationOffices, officeCountries, officePath } from "@/lib/seo/locations";
 import { buildMetadata, faqSchema, serviceSchema } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -39,10 +42,12 @@ export async function generateMetadata({ params }: PageProps<"/services/[slug]">
 
 export default async function ServicePage({ params }: PageProps<"/services/[slug]">) {
   const { slug } = await params;
-  const [service, projects, allServices, settings] = await Promise.all([getServiceBySlug(slug), getProjects(), getServices(), getSiteSettings()]);
+  const [service, projects, allServices, settings, posts] = await Promise.all([getServiceBySlug(slug), getProjects(), getServices(), getSiteSettings(), getPosts()]);
   if (!service) notFound();
 
   const examples = projects.filter((p) => p.services.some((s) => s.slug === service.slug)).slice(0, 3);
+  const guides = postsForService(service, posts, allServices);
+  const offices = locationOffices(settings);
   const related = service.related.length
     ? allServices.filter((s) => service.related.some((r) => r.slug === s.slug))
     : allServices.filter((s) => s.slug !== service.slug).slice(0, 3);
@@ -128,7 +133,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
       {/* What's included */}
       {service.included.length > 0 && (
         <Section tone="mist" aria-labelledby="included-heading">
-          <SectionHeader index="02" eyebrow="What’s included" title={<span id="included-heading">Everything that comes with {service.shortTitle.toLowerCase()}.</span>} />
+          <SectionHeader index="02" eyebrow="What’s included" title={<span id="included-heading">Everything that comes with {lowerTitle(service.shortTitle)}.</span>} />
           <Stagger className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {service.included.map((g) => (
               <StaggerItem key={g.title} className="flex flex-col rounded-[28px] border border-mist-200 bg-white p-7">
@@ -228,7 +233,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
         <Section tone="mist" aria-labelledby="faq-heading">
           <div className="grid gap-12 lg:grid-cols-12">
             <div className="lg:col-span-4">
-              <SectionHeader eyebrow="FAQ" title={<span id="faq-heading">Questions about {service.shortTitle.toLowerCase()}.</span>} className="mb-0 md:mb-0" />
+              <SectionHeader eyebrow="FAQ" title={<span id="faq-heading">Questions about {lowerTitle(service.shortTitle)}.</span>} className="mb-0 md:mb-0" />
             </div>
             <div className="lg:col-span-8">
               <Accordion items={service.faqs} />
@@ -260,8 +265,48 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
         </Section>
       )}
 
+      {/* Guides + locations: internal links to related articles and each office’s page */}
+      <Section tone="mist" aria-labelledby="guides-heading" className="py-20 md:py-24">
+        {guides.length > 0 && (
+          <>
+            <SectionHeader
+              eyebrow="Guides"
+              title={<span id="guides-heading">Learn more about {lowerTitle(service.shortTitle)}.</span>}
+              action={
+                <ButtonLink href="/blog" variant="outline" arrow>
+                  All insights
+                </ButtonLink>
+              }
+            />
+            <ul className="mb-16 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              {guides.map((p) => (
+                <li key={p.slug}>
+                  <PostCard post={p} />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        <div className={guides.length > 0 ? "border-t border-mist-200 pt-10" : ""}>
+          <h2 id={guides.length > 0 ? undefined : "guides-heading"} className="font-display text-xl font-semibold tracking-tight text-ink-900">
+            {service.title} near you
+          </h2>
+          <p className="mt-2 text-sm text-mist-600">Available to businesses served by our offices in {offices.map((o) => o.city).join(", ")} — and to clients worldwide.</p>
+          <ul className="mt-5 flex flex-wrap gap-2">
+            {offices.map((o) => (
+              <li key={o.code}>
+                <Link href={officePath(o)} className="inline-flex items-center gap-2 rounded-full border border-mist-200 bg-white px-4 py-2 text-sm text-mist-700 transition-colors hover:border-ink-900 hover:text-ink-900">
+                  <span className="font-mono text-xs text-brand-700">{o.code}</span>
+                  {service.shortTitle} in {o.city}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Section>
+
       <CtaBanner
-        title={`Ready to start with ${service.shortTitle.toLowerCase()}?`}
+        title={`Ready to start with ${lowerTitle(service.shortTitle)}?`}
         primary={{ label: "Request a Quote", href: `/contact?service=${service.slug}` }}
         secondary={{ label: "Talk to Our Team", href: "/contact" }}
       />

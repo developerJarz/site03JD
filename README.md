@@ -162,6 +162,8 @@ Deployment checklist:
 - **Global SEO** — homepage title/description, title template, keywords, default share image, Google and Bing verification codes.
 - Every page emits a canonical URL and Open Graph/Twitter image (falling back to the generated `/opengraph-image`); noindex pages are left out of the sitemap.
 - SEO copy for migrated content lives in [`src/content/seed/seo.ts`](src/content/seed/seo.ts), so re-seeding keeps it.
+- **Internal links** — each blog post ends with a box for the service matching its category (set the category when publishing), and each service page lists those posts as “Guides” plus “[service] in [city]” links to the location pages ([`src/lib/content/links.ts`](src/lib/content/links.ts)).
+- **Content plan** — pillars, topic clusters, scored topics and a 12-week calendar are in [`docs/CONTENT_STRATEGY.md`](docs/CONTENT_STRATEGY.md).
 
 ## Architecture
 

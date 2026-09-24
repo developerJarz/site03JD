@@ -110,3 +110,10 @@ export function pick<T extends object, K extends keyof T>(obj: T, keys: readonly
   for (const k of keys) if (k in obj) out[k] = obj[k];
   return out;
 }
+
+const PROPER_NOUNS = new Set(["Google", "Meta", "Facebook", "Instagram", "TikTok", "LinkedIn", "YouTube", "Shopify", "WordPress", "Laravel"]);
+
+/** Lower-cases a name for use mid-sentence, keeping acronyms and brands: “Local SEO” → “local SEO”, “Google Ads” → “Google ads”. */
+export function lowerTitle(input: string): string {
+  return input.replace(/\S+/g, (w) => ((w.match(/[A-Z]/g)?.length ?? 0) >= 2 || PROPER_NOUNS.has(w) ? w : w.toLowerCase()));
+}

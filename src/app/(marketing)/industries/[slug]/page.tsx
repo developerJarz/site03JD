@@ -10,6 +10,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { getIndustries, getIndustryBySlug, getProjects, getServices } from "@/lib/data/public";
+import { lowerTitle } from "@/lib/utils";
 import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -73,7 +74,7 @@ export default async function IndustryPage({ params }: PageProps<"/industries/[s
           <div className="grid gap-16 lg:grid-cols-2">
             {industry.challenges.length > 0 && (
               <div>
-                <SectionHeader index="01" eyebrow="Industry challenges" title={<span id="challenges-heading">What makes {industry.name.toLowerCase()} marketing hard.</span>} className="mb-10 md:mb-12" />
+                <SectionHeader index="01" eyebrow="Industry challenges" title={<span id="challenges-heading">What makes {lowerTitle(industry.name)} marketing hard.</span>} className="mb-10 md:mb-12" />
                 <Stagger className="space-y-4">
                   {industry.challenges.map((c) => (
                     <StaggerItem key={c.title} className="rounded-3xl border border-mist-200 p-6">
@@ -103,7 +104,7 @@ export default async function IndustryPage({ params }: PageProps<"/industries/[s
 
       {relevant.length > 0 && (
         <Section tone="mist" aria-labelledby="relevant-heading">
-          <SectionHeader index="03" eyebrow="Relevant services" title={<span id="relevant-heading">Services for {industry.name.toLowerCase()} businesses.</span>} />
+          <SectionHeader index="03" eyebrow="Relevant services" title={<span id="relevant-heading">Services for {lowerTitle(industry.name)} businesses.</span>} />
           <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {relevant.map((s) => (
               <li key={s.slug}>
@@ -153,7 +154,7 @@ export default async function IndustryPage({ params }: PageProps<"/industries/[s
         </ul>
       </Section>
 
-      <CtaBanner title={`Grow your ${industry.name.toLowerCase()} business online.`} primary={{ label: "Get a Free Consultation", href: `/contact?industry=${industry.slug}` }} secondary={{ label: "Explore Services", href: "/services" }} />
+      <CtaBanner title={`Grow your ${lowerTitle(industry.name)} business online.`} primary={{ label: "Get a Free Consultation", href: `/contact?industry=${industry.slug}` }} secondary={{ label: "Explore Services", href: "/services" }} />
     </>
   );
 }

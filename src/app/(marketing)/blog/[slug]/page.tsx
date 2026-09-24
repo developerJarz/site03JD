@@ -11,7 +11,9 @@ import { JsonLd } from "@/components/marketing/json-ld";
 import { Breadcrumbs } from "@/components/marketing/page-hero";
 import { ViewTracker } from "@/components/marketing/view-tracker";
 import { Section, SectionHeader } from "@/components/ui/section";
-import { getPostBySlug, getPosts, getRelatedPosts } from "@/lib/data/public";
+import { ServiceCallout } from "@/components/marketing/service-callout";
+import { serviceForPost } from "@/lib/content/links";
+import { getPostBySlug, getPosts, getRelatedPosts, getServices } from "@/lib/data/public";
 import { sanitizeRichText, withHeadingAnchors } from "@/lib/security/sanitize";
 import { abs, articleSchema, buildMetadata } from "@/lib/seo";
 
@@ -42,7 +44,8 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) notFound();
-  const related = await getRelatedPosts(post);
+  const [related, services] = await Promise.all([getRelatedPosts(post), getServices()]);
+  const service = serviceForPost(post, services);
   const { html, toc } = withHeadingAnchors(sanitizeRichText(post.content));
   const url = abs(`/blog/${post.slug}`);
 
@@ -130,6 +133,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
                 ))}
               </ul>
             )}
+            {service && <ServiceCallout service={service} />}
           </article>
         </div>
       </div>
@@ -147,7 +151,11 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
         </Section>
       )}
 
-      <CtaBanner title="Want help ranking your business?" primary={{ label: "Get a Free Consultation", href: "/contact" }} secondary={{ label: "Explore Local SEO", href: "/services/local-seo" }} />
+      <CtaBanner
+        title="Want help ranking your business?"
+        primary={{ label: "Get a Free Consultation", href: service ? `/contact?service=${service.slug}` : "/contact" }}
+        secondary={{ label: `Explore ${service?.shortTitle ?? "Local SEO"}`, href: `/services/${service?.slug ?? "local-seo"}` }}
+      />
     </>
   );
 }
