@@ -7,7 +7,7 @@ Source: the HTTrack mirror at `../jarzdigital.com` (the original WordPress/Eleme
 | Content | Source page(s) | Destination |
 |---|---|---|
 | Business info, phone, WhatsApp, email, mailing address, hours | Home footer, Contact | `src/content/seed/site.ts` → Settings |
-| Locations: Dallas, Denver, Calgary (service-based), Dhaka office (near Ibn Sina Diagnostic & Consultation Center, Section 2, Mirpur — supplied by the owner) | Home / About “Locations”, Contact, footer, LocalBusiness JSON-LD | Settings → `offices` |
+| Locations: Dallas, Denver, Calgary (service-based), Dhaka office (near Ibn Sina Diagnostic & Consultation Center, Section 2, Mirpur — supplied by the owner) | Home / About “Locations”, `/locations` + `/locations/<city>` pages, Contact, footer, LocalBusiness JSON-LD | Admin → Settings → Offices & locations |
 | 8 services incl. pricing plans, inclusions, process, FAQs | Each service page + Subscription | Services |
 | 6-step “work strategy planning process” | Home | `growthProcess` (homepage) |
 | Mission, vision, values, story, milestones | About | `brandFacts` |

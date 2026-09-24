@@ -7,11 +7,12 @@
  *     so the marketing site can be previewed and built without a database.
  */
 import postsJson from "./posts.json";
-import { industrySeed } from "./industries";
+import { industrySeed as industries } from "./industries";
 import { pageSeed } from "./pages";
 import { categorySeed, faqSeed, tagSeed, teamSeed } from "./people";
-import { projectSeed } from "./projects";
-import { serviceSeed } from "./services";
+import { projectSeed as projects } from "./projects";
+import { withSeo } from "./seo";
+import { serviceSeed as services } from "./services";
 import { beforeAfterShowcase, brandFacts, growthProcess, siteSeed } from "./site";
 
 export interface SeedPost {
@@ -26,9 +27,13 @@ export interface SeedPost {
   tags: string[];
   coverImage: string | null;
   wordCount: number;
+  seo?: { title?: string; description?: string };
 }
 
-export const postSeed = postsJson as SeedPost[];
+export const postSeed = withSeo(postsJson as SeedPost[], "posts");
+const serviceSeed = withSeo(services, "services");
+const projectSeed = withSeo(projects, "projects");
+const industrySeed = withSeo(industries, "industries");
 
 export {
   beforeAfterShowcase,

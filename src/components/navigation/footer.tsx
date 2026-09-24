@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { SOCIAL_ICONS, WhatsappIcon } from "@/components/ui/brand-icons";
 import { Logo } from "@/components/ui/logo";
+import { officePath } from "@/lib/seo/locations";
 import type { Industry, Service, SiteSettings } from "@/types/content";
 import { NewsletterForm } from "./newsletter-form";
 
@@ -22,6 +23,7 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
         { label: "About", href: "/about" },
         { label: "Our work", href: "/work" },
         { label: "Team", href: "/about#team" },
+        { label: "Locations", href: "/locations" },
         { label: "Pricing", href: "/pricing" },
         { label: "Contact", href: "/contact" },
       ],
@@ -101,7 +103,15 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
         <div className="mt-16 grid gap-8 border-t border-white/[0.08] pt-10 md:grid-cols-2 lg:grid-cols-5">
           {offices.map((o) => (
             <div key={o.code}>
-              <p className="font-display text-3xl font-semibold tracking-tight text-white/90">{o.code}</p>
+              <p className="font-display text-3xl font-semibold tracking-tight text-white/90">
+                {o.hidePage ? (
+                  o.code
+                ) : (
+                  <Link href={officePath(o)} className="transition-colors hover:text-brand-300" aria-label={`${o.city} office`}>
+                    {o.code}
+                  </Link>
+                )}
+              </p>
               <p className="mt-2 flex items-start gap-2 text-sm text-white/55">
                 <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden />
                 {o.address}

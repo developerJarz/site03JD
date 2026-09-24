@@ -1,13 +1,15 @@
 import Image from "next/image";
-import { Mail, MapPin, Phone } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import { Stagger, StaggerItem } from "@/components/animations";
+import { officePath } from "@/lib/seo/locations";
 import type { Office } from "@/types/content";
 
 export function Locations({ offices }: { offices: Office[] }) {
   return (
     <Stagger className={`grid gap-5 md:grid-cols-2 ${offices.length >= 4 ? "xl:grid-cols-4" : "lg:grid-cols-3"}`} stagger={0.1}>
       {offices.map((o) => (
-        <StaggerItem key={o.code} as="article" className="group flex flex-col overflow-hidden rounded-[28px] border border-mist-200 bg-white">
+        <StaggerItem key={o.code} as="article" className="group relative flex flex-col overflow-hidden rounded-[28px] border border-mist-200 bg-white">
           <div className="relative aspect-[4/3] overflow-hidden">
             {o.image ? (
               <Image
@@ -22,13 +24,21 @@ export function Locations({ offices }: { offices: Office[] }) {
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-ink-950/80 via-ink-950/10 to-transparent" />
             <div className="absolute bottom-5 left-6 right-6 flex items-end justify-between">
-              <h3 className="font-display text-3xl font-semibold tracking-tight text-white">{o.city}</h3>
+              <h3 className="font-display text-3xl font-semibold tracking-tight text-white">
+                {o.hidePage ? (
+                  o.city
+                ) : (
+                  <Link href={officePath(o)} className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none">
+                    {o.city}
+                  </Link>
+                )}
+              </h3>
               <span className="font-mono text-sm text-white/70">{o.code}</span>
             </div>
           </div>
           <div className="flex flex-1 flex-col p-6">
             <p className="text-[0.95rem] leading-relaxed text-mist-600">{o.description}</p>
-            <ul className="mt-auto space-y-2 border-t border-mist-100 pt-5 text-sm text-mist-700">
+            <ul className="relative z-10 mt-auto space-y-2 border-t border-mist-100 pt-5 text-sm text-mist-700">
               <li className="flex items-start gap-2.5">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-brand-600" aria-hidden />
                 {o.address}
@@ -46,6 +56,11 @@ export function Locations({ offices }: { offices: Office[] }) {
                 </li>
               )}
             </ul>
+            {!o.hidePage && (
+              <span aria-hidden className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-ink-900">
+                Office details <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </span>
+            )}
           </div>
         </StaggerItem>
       ))}

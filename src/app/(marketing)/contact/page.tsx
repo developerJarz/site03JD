@@ -7,16 +7,17 @@ import { PageHero } from "@/components/marketing/page-hero";
 import { Accordion } from "@/components/ui/accordion";
 import { WhatsappIcon } from "@/components/ui/brand-icons";
 import { Section, SectionHeader } from "@/components/ui/section";
+import Link from "next/link";
 import { getFaqs, getServices, getSiteSettings } from "@/lib/data/public";
-import { buildMetadata, faqSchema } from "@/lib/seo";
+import { officePath } from "@/lib/seo/locations";
+import { faqSchema } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = buildMetadata({
-  title: "Contact Jarz Digital — Let’s Grow Your Business Together",
-  description: "Request a quote or a free consultation. Offices in Dallas, Denver, Calgary and Dhaka — we respond within 24 hours. Call +1 267-766-9055 or email info@jarzdigital.com.",
-  path: "/contact",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/contact");
+}
 
 export default async function ContactPage() {
   const [settings, services, faqs] = await Promise.all([getSiteSettings(), getServices(), getFaqs("contact")]);
@@ -109,7 +110,7 @@ export default async function ContactPage() {
       </Section>
 
       <Section tone="light" aria-labelledby="offices-heading">
-        <SectionHeader eyebrow="Our office locations" title={<span id="offices-heading">Offices across North America — and a global team.</span>} description="Visit us or connect virtually from anywhere in the world." />
+        <SectionHeader eyebrow="Our office locations" title={<span id="offices-heading">Offices in the USA, Canada and Bangladesh.</span>} description="Visit us or connect virtually from anywhere in the world." />
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {offices.map((o) => (
             <div key={o.code} className="rounded-3xl border border-mist-200 p-6">
@@ -134,11 +135,18 @@ export default async function ContactPage() {
                   </li>
                 )}
               </ul>
-              {o.mapQuery && (
-                <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.mapQuery)}`} target="_blank" rel="noopener noreferrer" className="mt-5 inline-block text-sm font-medium text-brand-700 underline-offset-4 hover:underline">
-                  Get directions →
-                </a>
-              )}
+              <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium">
+                {!o.hidePage && (
+                  <Link href={officePath(o)} className="text-ink-900 underline-offset-4 hover:underline">
+                    Office details →
+                  </Link>
+                )}
+                {o.mapQuery && (
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.mapQuery)}`} target="_blank" rel="noopener noreferrer" className="text-brand-700 underline-offset-4 hover:underline">
+                    Get directions →
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>

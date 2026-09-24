@@ -76,6 +76,8 @@ export const siteSeed: SiteSettings = {
       description: "Jarz Digital’s Bangladesh office in Mirpur, Dhaka — home to our development, SEO and design team serving clients in the USA, Canada, Europe and Bangladesh.",
       image: null,
       mapQuery: "Ibn Sina Diagnostic & Consultation Center, Mirpur 2, Dhaka",
+      intro:
+        "Our Dhaka office in Mirpur, Section 2 is where much of Jarz Digital’s design, development and SEO work happens. Businesses in Dhaka and across Bangladesh can work with the team directly — by phone, email, WhatsApp or at the office — for websites, e-commerce, local SEO and digital marketing, while the same team delivers projects for clients in the USA, Canada and Europe.",
     },
   ],
   socials: {},
@@ -88,9 +90,9 @@ export const siteSeed: SiteSettings = {
   trust: ["Serving 500+ global clients", "100% client satisfaction", "100% 5-star reviews"],
   seo: {
     titleTemplate: "%s | Jarz Digital",
-    defaultTitle: "Jarz Digital — Local SEO, Web Development & Digital Marketing",
+    defaultTitle: "Jarz Digital — Local SEO, Web Design & Digital Marketing",
     defaultDescription:
-      "Full-service digital agency in Dallas, Denver & Calgary. Local SEO, website development, Google Ads, social media and monthly business management for growing brands across the USA and Canada.",
+      "Digital agency with offices in Dallas, Denver, Calgary and Dhaka, Bangladesh. Local SEO, web development, Google Ads and social media for growing brands.",
     ogImage: "/opengraph-image",
     keywords: [
       "local SEO",
@@ -100,6 +102,10 @@ export const siteSeed: SiteSettings = {
       "website development",
       "Denver SEO",
       "Calgary web design",
+      "digital marketing agency in Dhaka",
+      "web development company in Bangladesh",
+      "SEO agency Bangladesh",
+      "website design Dhaka",
     ],
   },
   email: { notifyOnLead: true, adminRecipients: ["info@jarzdigital.com"] },

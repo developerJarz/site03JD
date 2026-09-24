@@ -89,7 +89,7 @@ const posts: Post[] = postSeed
       featured: false,
       views: 0,
       readingTime: readingTime(p.content),
-      seo: {},
+      seo: p.seo ?? {},
       updatedAt: p.publishedAt,
     };
   })

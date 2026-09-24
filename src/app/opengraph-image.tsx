@@ -41,7 +41,7 @@ export default async function OpengraphImage() {
           <span>·</span>
           <span>Google Ads</span>
           <span>·</span>
-          <span>Dallas · Denver · Calgary</span>
+          <span>Dallas · Denver · Calgary · Dhaka</span>
         </div>
       </div>
     ),

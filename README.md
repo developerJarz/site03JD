@@ -149,9 +149,19 @@ Deployment checklist:
 1. Set `SITE_URL`, `MONGODB_URI`, `AUTH_SECRET`, email and storage variables.
 2. `npm run db:seed` against production, then `npm run create-admin`.
 3. Point DNS; old WordPress URLs are 301-redirected to their new routes (see `redirects()` in `next.config.ts`), including `/YYYY/MM/DD/slug` blog links.
-4. Submit `https://<domain>/sitemap.xml` in Google Search Console and add the verification code in **Admin → SEO**.
+4. Submit `https://<domain>/sitemap.xml` in Google Search Console (and Bing Webmaster Tools) and add the verification codes in **Admin → SEO**.
 
 ---
+
+## SEO & local SEO
+
+- **Location pages** — every office in **Admin → Settings → Offices & locations** gets `/locations/<city>` (plus the `/locations` overview): address, map, direct contacts, all services, local portfolio projects (matched by project location), FAQ built only from the office’s own details, and links to the other offices. Toggle “Publish a location page” to hide one.
+- **Structured data** — Organization (areaServed from office countries, one ContactPoint per office phone, departments linking the offices), a ProfessionalService per office (location-page URL, map link, street address for physical offices), plus Service, FAQPage, BreadcrumbList, BlogPosting and CreativeWork.
+- **Page SEO** — built-in pages (Services, Work, Industries, About, Pricing, Insights, Contact, Locations and each location page) take their defaults from [`src/lib/seo/pages.ts`](src/lib/seo/pages.ts); editors override title, description, share image or noindex in **Admin → SEO → Page SEO** (stored in `settings.seo.pages`). CMS content uses its own SEO section.
+- **Audit** — Page SEO checks every public page for title/description length, missing descriptions and duplicates, with a “Needs attention” filter. Limits live in [`src/lib/seo/audit.ts`](src/lib/seo/audit.ts).
+- **Global SEO** — homepage title/description, title template, keywords, default share image, Google and Bing verification codes.
+- Every page emits a canonical URL and Open Graph/Twitter image (falling back to the generated `/opengraph-image`); noindex pages are left out of the sitemap.
+- SEO copy for migrated content lives in [`src/content/seed/seo.ts`](src/content/seed/seo.ts), so re-seeding keeps it.
 
 ## Architecture
 

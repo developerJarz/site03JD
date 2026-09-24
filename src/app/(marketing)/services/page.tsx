@@ -7,16 +7,13 @@ import { ButtonLink } from "@/components/ui/button";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { brandFacts } from "@/content/seed";
 import { getServices } from "@/lib/data/public";
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = buildMetadata({
-  title: "Services — Web Development, SEO, Local SEO, Ads & Business Management",
-  description:
-    "Full-service digital agency: website development, SEO, Local SEO, social media marketing, Google Ads, monthly business management, web applications and custom software.",
-  path: "/services",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/services");
+}
 
 export default async function ServicesPage() {
   const services = await getServices();

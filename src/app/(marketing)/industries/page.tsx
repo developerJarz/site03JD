@@ -5,15 +5,13 @@ import { IndustriesGrid } from "@/components/sections/industries-grid";
 import { ButtonLink } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
 import { getIndustries } from "@/lib/data/public";
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = buildMetadata({
-  title: "Industries — Web Design & Local SEO by Industry",
-  description: "Web design, local SEO and digital growth for auto repair, dental, healthcare, HVAC, law firms, restaurants, real estate, construction and more.",
-  path: "/industries",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/industries");
+}
 
 export default async function IndustriesPage() {
   const industries = await getIndustries();

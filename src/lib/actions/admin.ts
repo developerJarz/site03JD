@@ -12,6 +12,7 @@ import { requestUpdateEmail } from "@/lib/email/templates";
 import { LEAD_STATUSES, ROLES } from "@/models/shared";
 import { Lead, Message, Notification, ProjectRequest, SiteSettingsModel } from "@/models/operations";
 import { User } from "@/models/User";
+import { STATIC_PAGES } from "@/lib/seo/pages";
 import type { ActionResult } from "./types";
 
 const oid = z.string().regex(/^[a-f0-9]{24}$/);
@@ -207,8 +208,49 @@ const settingsSections = {
     defaultTitle: z.string().trim().min(1).max(120),
     defaultDescription: z.string().trim().max(320),
     keywords: z.array(z.string().trim().max(60)).max(30),
+    ogImage: z.string().trim().max(500).refine((v) => v === "" || v.startsWith("/") || v.startsWith("https://"), "Use a site path (/images/…) or an https:// URL").optional(),
     googleVerification: z.string().trim().max(120).optional(),
+    bingVerification: z.string().trim().max(120).optional(),
   }),
+  offices: z
+    .array(
+      z.object({
+        city: z.string().trim().min(1, "Enter the city").max(60),
+        code: z.string().trim().min(2, "2–6 characters").max(6, "2–6 characters"),
+        region: z.string().trim().max(60),
+        country: z.string().trim().min(1, "Enter the country").max(60),
+        address: z.string().trim().min(1, "Enter the address").max(200),
+        phone: z.string().trim().min(3, "Enter a phone number").max(40),
+        email: z.email("Enter a valid email").or(z.literal("")).optional(),
+        description: z.string().trim().min(1, "Add a short description").max(400),
+        intro: z.string().trim().max(1200).optional(),
+        mapQuery: z.string().trim().max(200).optional(),
+        slug: z
+          .string()
+          .trim()
+          .max(60)
+          .regex(/^[a-z0-9-]*$/, "Lowercase letters, numbers and hyphens only")
+          .optional(),
+        hidePage: z.boolean().optional(),
+        image: z
+          .object({ src: z.string().trim().max(500), alt: z.string().trim().max(200), width: z.number().optional(), height: z.number().optional() })
+          .nullable()
+          .optional()
+          .transform((img) => (img && img.src ? img : null)),
+      }),
+    )
+    .min(1, "Keep at least one office")
+    .max(12)
+    .superRefine((list, ctx) => {
+      const seen = new Map<string, number>();
+      list.forEach((o, i) => {
+        for (const [field, value] of [["code", o.code.toUpperCase()], ["slug", o.slug || o.city.toLowerCase()]] as const) {
+          const key = `${field}:${value}`;
+          if (seen.has(key)) ctx.addIssue({ code: "custom", path: [i, field], message: `Same ${field} as office ${seen.get(key)! + 1}` });
+          else seen.set(key, i);
+        }
+      });
+    }),
   email: z.object({ notifyOnLead: z.boolean(), adminRecipients: z.array(z.email()).max(10) }),
   security: z.object({ allowRegistration: z.boolean() }),
   branding: z.object({ logo: z.string().trim().max(500), mark: z.string().trim().max(500) }),
@@ -229,10 +271,52 @@ export async function saveSettingsAction(section: SettingsSection, data: unknown
       for (const i of p.error.issues) fieldErrors[i.path.join(".")] ??= i.message;
       return { ok: false, error: "Please fix the highlighted fields.", fieldErrors };
     }
-    await SiteSettingsModel.updateOne({ key: "site" }, { $set: { [`data.${section}`]: p.data } }, { upsert: true });
+    // Objects are saved key by key so separately-managed keys (e.g. seo.pages) are never overwritten.
+    const update =
+      Array.isArray(p.data) || typeof p.data !== "object" || p.data === null
+        ? { [`data.${section}`]: p.data }
+        : Object.fromEntries(Object.entries(p.data).map(([k, v]) => [`data.${section}.${k}`, v]));
+    await SiteSettingsModel.updateOne({ key: "site" }, { $set: update }, { upsert: true });
     await logActivity({ actor, action: "settings.updated", entityType: "settings", entityLabel: section });
     revalidateTag(TAGS.settings, { expire: 0 });
     revalidatePath("/", "layout");
     return { ok: true, message: "Settings saved." };
+  });
+}
+
+/* -------------------------------- Page SEO -------------------------------- */
+
+const pageSeoSchema = z.object({
+  title: z.string().trim().max(120, "Keep the title under 120 characters").optional().default(""),
+  description: z.string().trim().max(320, "Keep the description under 320 characters").optional().default(""),
+  ogImage: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((v) => v === "" || v.startsWith("/") || v.startsWith("https://"), "Use a site path (/images/…) or an https:// URL")
+    .optional()
+    .default(""),
+  noindex: z.boolean().optional().default(false),
+});
+
+/** Saves (or clears) the SEO override for one built-in page, e.g. "/about" or "/locations/dhaka". */
+export async function savePageSeoAction(path: string, data: unknown): Promise<ActionResult> {
+  return guard(async () => {
+    const actor = await assertPermission("seo:page");
+    const known = STATIC_PAGES.some((p) => p.path === path) || path === "/" || /^\/locations\/[a-z0-9-]+$/.test(path);
+    if (!known) return { ok: false, error: "This page can’t be edited here." };
+    const p = pageSeoSchema.safeParse(data);
+    if (!p.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const i of p.error.issues) fieldErrors[i.path.join(".")] ??= i.message;
+      return { ok: false, error: "Please fix the highlighted fields.", fieldErrors };
+    }
+    const field = `data.seo.pages.${path}`;
+    const empty = !p.data.title && !p.data.description && !p.data.ogImage && !p.data.noindex;
+    await SiteSettingsModel.updateOne({ key: "site" }, empty ? { $unset: { [field]: "" } } : { $set: { [field]: p.data } }, { upsert: true });
+    await logActivity({ actor, action: "seo.page_updated", entityType: "settings", entityLabel: path });
+    revalidateTag(TAGS.settings, { expire: 0 });
+    revalidatePath("/", "layout");
+    return { ok: true, message: empty ? "Reset to the default SEO." : "Page SEO saved." };
   });
 }

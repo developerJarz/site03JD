@@ -1,9 +1,11 @@
 import "server-only";
 import type { Metadata } from "next";
 import { env } from "@/lib/env";
-import type { FaqItem, Post, Project, SeoFields, Service, SiteSettings } from "@/types/content";
+import type { FaqItem, Office, Post, Project, SeoFields, Service, SiteSettings } from "@/types/content";
+import { countryCode, officeCountries, officePath } from "./locations";
 
 export const SITE_URL = env.SITE_URL.replace(/\/$/, "");
+export const DEFAULT_OG_IMAGE = "/opengraph-image";
 export const abs = (path = "/") => (/^https?:\/\//.test(path) ? path : `${SITE_URL}${path.startsWith("/") ? "" : "/"}${path}`);
 
 /**
@@ -36,7 +38,9 @@ export function buildMetadata({
   const finalTitle = seo?.title || title;
   const finalDescription = seo?.description || description;
   const canonical = seo?.canonical || abs(path);
-  const ogImage = seo?.ogImage || image || undefined;
+  // Page openGraph replaces the layout’s, so always fall back to the generated share image.
+  const ogImage = seo?.ogImage || image || DEFAULT_OG_IMAGE;
+  const ogSize = ogImage === DEFAULT_OG_IMAGE ? { width: 1200, height: 630 } : {};
   const hide = noindex || seo?.noindex;
 
   return {
@@ -50,14 +54,14 @@ export function buildMetadata({
       description: finalDescription,
       siteName: "Jarz Digital",
       locale: "en_US",
-      ...(ogImage ? { images: [{ url: abs(ogImage), width: 1200, height: 630, alt: finalTitle }] } : {}),
+      images: [{ url: abs(ogImage), ...ogSize, alt: finalTitle }],
       ...(type === "article" && publishedTime ? { publishedTime, modifiedTime: modifiedTime ?? publishedTime } : {}),
     },
     twitter: {
       card: "summary_large_image",
       title: finalTitle,
       description: finalDescription,
-      ...(ogImage ? { images: [abs(ogImage)] } : {}),
+      images: [abs(ogImage)],
     },
     robots: hide ? { index: false, follow: true } : undefined,
   };
@@ -88,10 +92,27 @@ export function organizationSchema(s: SiteSettings): Json {
       postalCode: "75006",
       addressCountry: "US",
     },
-    areaServed: ["United States", "Canada", "Europe"],
+    areaServed: [...officeCountries(s), "Europe"],
+    contactPoint: contactPoints(s),
+    department: s.offices.map((o) => ({ "@id": officeId(o) })),
     ...(sameAs.length ? { sameAs } : {}),
   };
 }
+
+/** One contact point per distinct office phone, tagged with the countries it serves. */
+function contactPoints(s: SiteSettings): Json[] {
+  const byPhone = new Map<string, Set<string>>();
+  for (const o of s.offices) byPhone.set(o.phone, (byPhone.get(o.phone) ?? new Set()).add(countryCode(o.country)));
+  return [...byPhone].map(([telephone, areas]) => ({
+    "@type": "ContactPoint",
+    telephone,
+    contactType: "customer service",
+    areaServed: [...areas],
+  }));
+}
+
+const officeId = (o: Office) => `${SITE_URL}/#office-${o.code.toLowerCase()}`;
+const mapUrl = (o: Office) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.mapQuery || o.address)}`;
 
 export function websiteSchema(s: SiteSettings): Json {
   return {
@@ -104,29 +125,41 @@ export function websiteSchema(s: SiteSettings): Json {
   };
 }
 
-/** One ProfessionalService per office; only the Dhaka office publishes a street address. */
+/**
+ * One ProfessionalService per office, linked to its location page. Only
+ * offices with a physical address (Dhaka) publish a street address; the US
+ * branches are service-based.
+ */
 export function localBusinessSchemas(s: SiteSettings): Json[] {
-  const countryCode = (c: string) => (c === "Canada" ? "CA" : c === "Bangladesh" ? "BD" : "US");
-  return s.offices.map((o) => ({
+  return s.offices.map((o) => {
+    const physical = !/online only/i.test(o.address);
+    return {
       "@context": "https://schema.org",
       "@type": "ProfessionalService",
-      "@id": `${SITE_URL}/#office-${o.code.toLowerCase()}`,
+      "@id": officeId(o),
       name: `Jarz Digital ${o.city}`,
+      description: o.description,
       parentOrganization: { "@id": `${SITE_URL}/#organization` },
-      url: SITE_URL,
-      image: abs(s.branding.logo),
+      url: o.hidePage ? SITE_URL : abs(officePath(o)),
+      image: abs(o.image?.src ?? s.branding.logo),
+      logo: abs(s.branding.logo),
       telephone: o.phone,
       ...(o.email ? { email: o.email } : {}),
-      areaServed: { "@type": "City", name: o.city },
+      hasMap: mapUrl(o),
+      areaServed: [
+        { "@type": "City", name: o.city },
+        { "@type": "Country", name: o.country },
+      ],
       address: {
         "@type": "PostalAddress",
-        ...(o.country === "Bangladesh" ? { streetAddress: o.address.replace(/, Dhaka, Bangladesh$/, "") } : {}),
+        ...(physical && o.country === "Bangladesh" ? { streetAddress: o.address.replace(/,\s*Dhaka,\s*Bangladesh$/i, "") } : {}),
         addressLocality: o.city,
         addressRegion: o.region,
         addressCountry: countryCode(o.country),
       },
       priceRange: "$$",
-    }));
+    };
+  });
 }
 
 export function breadcrumbSchema(items: { name: string; path: string }[]): Json {
@@ -137,7 +170,7 @@ export function breadcrumbSchema(items: { name: string; path: string }[]): Json 
   };
 }
 
-export function serviceSchema(service: Service): Json {
+export function serviceSchema(service: Service, areaServed: string[] = ["United States", "Canada"]): Json {
   const offers = service.plans
     .map((p) => ({ plan: p, price: Number(p.price.replace(/[^\d.]/g, "")) }))
     .filter((o) => o.price > 0)
@@ -156,7 +189,7 @@ export function serviceSchema(service: Service): Json {
     description: service.summary,
     url: abs(`/services/${service.slug}`),
     provider: { "@id": `${SITE_URL}/#organization` },
-    areaServed: ["United States", "Canada"],
+    areaServed,
     ...(offers.length ? { offers } : {}),
   };
 }

@@ -235,6 +235,12 @@ export interface Office {
   description: string;
   image?: ImageRef | null;
   mapQuery?: string;
+  /** URL segment for /locations/[slug]; defaults to the city name. */
+  slug?: string;
+  /** Longer introduction shown on the location page. */
+  intro?: string;
+  /** Hide this office’s location page (it still appears in lists). */
+  hidePage?: boolean;
 }
 
 export interface SiteSettings {
@@ -258,6 +264,9 @@ export interface SiteSettings {
     ogImage?: string;
     keywords: string[];
     googleVerification?: string;
+    bingVerification?: string;
+    /** SEO overrides for built-in pages, keyed by path (e.g. "/about", "/locations/dhaka"). */
+    pages?: Record<string, SeoFields>;
   };
   email: { notifyOnLead: boolean; adminRecipients: string[] };
   security: { allowRegistration: boolean };

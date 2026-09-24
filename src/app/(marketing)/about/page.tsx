@@ -11,16 +11,13 @@ import { Icon } from "@/components/ui/icon";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { brandFacts } from "@/content/seed";
 import { getServices, getSiteSettings, getTeam } from "@/lib/data/public";
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = buildMetadata({
-  title: "About Jarz Digital — Your Trusted Partner for Growth",
-  description:
-    "Founded in Dallas in 2019, Jarz Digital is a full-service digital agency helping businesses across the USA, Canada and Europe grow with web design, local SEO and business management.",
-  path: "/about",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/about");
+}
 
 export default async function AboutPage() {
   const [settings, team, services] = await Promise.all([getSiteSettings(), getTeam(), getServices()]);

@@ -12,7 +12,8 @@ import { Accordion } from "@/components/ui/accordion";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Section, SectionHeader } from "@/components/ui/section";
-import { getProjects, getServiceBySlug, getServices } from "@/lib/data/public";
+import { getProjects, getServiceBySlug, getServices, getSiteSettings } from "@/lib/data/public";
+import { officeCountries } from "@/lib/seo/locations";
 import { buildMetadata, faqSchema, serviceSchema } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }: PageProps<"/services/[slug]">
 
 export default async function ServicePage({ params }: PageProps<"/services/[slug]">) {
   const { slug } = await params;
-  const [service, projects, allServices] = await Promise.all([getServiceBySlug(slug), getProjects(), getServices()]);
+  const [service, projects, allServices, settings] = await Promise.all([getServiceBySlug(slug), getProjects(), getServices(), getSiteSettings()]);
   if (!service) notFound();
 
   const examples = projects.filter((p) => p.services.some((s) => s.slug === service.slug)).slice(0, 3);
@@ -48,7 +49,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
 
   return (
     <>
-      <JsonLd data={[serviceSchema(service), faqSchema(service.faqs)]} />
+      <JsonLd data={[serviceSchema(service, officeCountries(settings)), faqSchema(service.faqs)]} />
 
       <PageHero
         eyebrow={service.title}

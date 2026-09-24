@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { controlClass } from "@/components/ui/form";
 import { useToast } from "@/components/ui/toast";
 import { saveSettingsAction, type SettingsSection } from "@/lib/actions/admin";
+import { OfficesEditor } from "./offices-editor";
 import { cn } from "@/lib/utils";
 import type { SiteSettings } from "@/types/content";
 
@@ -55,9 +56,9 @@ function StringList({ value, onChange, placeholder }: { value: string[]; onChang
   );
 }
 
-export function SettingsForm({ settings, tabs }: { settings: SiteSettings; tabs: Tab[] }) {
+export function SettingsForm({ settings, tabs, initialTab }: { settings: SiteSettings; tabs: Tab[]; initialTab?: string }) {
   const toast = useToast();
-  const [tab, setTab] = useState(tabs[0].key);
+  const [tab, setTab] = useState(tabs.some((t) => t.key === initialTab) ? initialTab! : tabs[0].key);
   const [s, setS] = useState(settings);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
@@ -172,9 +173,11 @@ export function SettingsForm({ settings, tabs }: { settings: SiteSettings; tabs:
                   </button>
                 </div>
               </fieldset>
-              <p className="rounded-xl bg-mist-50 px-4 py-3 text-xs text-mist-600">Office locations are part of the migrated content. Edit them in the seed file or extend this form when office details change.</p>
+              <p className="rounded-xl bg-mist-50 px-4 py-3 text-xs text-mist-600">Office addresses and phone numbers are edited under Offices &amp; locations.</p>
             </>
           )}
+
+          {tab === "offices" && <OfficesEditor value={s.offices} onChange={(v) => patch("offices", v)} errors={errors} />}
 
           {tab === "social" && (
             <>

@@ -5,6 +5,7 @@ import { GlobalSeoForm } from "@/components/admin/seo-form";
 import { Card, PageHeader } from "@/components/admin/ui";
 import { requirePermission } from "@/lib/auth/session";
 import { getSiteSettings } from "@/lib/data/public";
+import { locationOffices, officePath } from "@/lib/seo/locations";
 
 export const metadata: Metadata = { title: "Global SEO" };
 
@@ -38,9 +39,24 @@ export default async function GlobalSeoPage() {
               ))}
             </ul>
           </Card>
+          <Card title="Local SEO">
+            <p className="text-sm text-mist-600">Each office has its own location page with address, map, services and FAQ — plus LocalBusiness data for Google.</p>
+            <ul className="mt-3 space-y-1.5 text-sm">
+              {locationOffices(settings).map((o) => (
+                <li key={o.code}>
+                  <a href={officePath(o)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 font-medium text-brand-700 hover:underline">
+                    {officePath(o)} <ExternalLink className="size-3.5" aria-hidden />
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <Link href="/admin/settings?tab=offices" className="mt-4 inline-block text-sm font-medium text-brand-700 hover:underline">
+              Edit offices &amp; addresses →
+            </Link>
+          </Card>
           <Card title="Structured data">
             <p className="text-sm text-mist-600">
-              Organization, WebSite, ProfessionalService (per market), Service, BlogPosting, FAQPage, BreadcrumbList and CreativeWork schema are generated from your content automatically.
+              Organization (with contact points per office), WebSite, ProfessionalService per office, Service, BlogPosting, FAQPage, BreadcrumbList and CreativeWork schema are generated from your content automatically.
             </p>
             <Link href="/admin/seo/pages" className="mt-4 inline-block text-sm font-medium text-brand-700 hover:underline">
               Review page-level SEO →

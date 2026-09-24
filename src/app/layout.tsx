@@ -33,7 +33,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: { card: "summary_large_image", title: seo.defaultTitle, description: seo.defaultDescription },
     alternates: { canonical: SITE_URL },
-    ...(seo.googleVerification ? { verification: { google: seo.googleVerification } } : {}),
+    verification: {
+      ...(seo.googleVerification ? { google: seo.googleVerification } : {}),
+      ...(seo.bingVerification ? { other: { "msvalidate.01": seo.bingVerification } } : {}),
+    },
   };
 }
 

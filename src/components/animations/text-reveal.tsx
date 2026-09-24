@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -24,14 +24,18 @@ export function TextReveal({
   return (
     <Tag className={className}>
       {lines.map((line, i) => (
-        <span key={i} className="block overflow-hidden pb-[0.1em] -mb-[0.1em]">
-          <span
-            className={cn("block animate-reveal-up motion-reduce:animate-none", lineClassName)}
-            style={{ animationDelay: `${delay + i * stagger}s` } as CSSProperties}
-          >
-            {line}
+        <Fragment key={i}>
+          {/* The space keeps words apart in the text search engines and screen readers get. */}
+          {i > 0 && " "}
+          <span className="block overflow-hidden pb-[0.1em] -mb-[0.1em]">
+            <span
+              className={cn("block animate-reveal-up motion-reduce:animate-none", lineClassName)}
+              style={{ animationDelay: `${delay + i * stagger}s` } as CSSProperties}
+            >
+              {line}
+            </span>
           </span>
-        </span>
+        </Fragment>
       ))}
     </Tag>
   );

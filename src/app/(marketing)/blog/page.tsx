@@ -5,18 +5,14 @@ import { CtaBanner } from "@/components/marketing/cta-banner";
 import { PageHero } from "@/components/marketing/page-hero";
 import { Section } from "@/components/ui/section";
 import { getCategories, getPosts } from "@/lib/data/public";
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  ...buildMetadata({
-    title: "Insights — Local SEO, Google Maps & Business Growth Guides",
-    description: "Practical guides from Jarz Digital on local SEO, Google Maps ranking, Google Business Profile and running your business’s digital presence.",
-    path: "/blog",
-  }),
-  alternates: { canonical: "/blog", types: { "application/rss+xml": "/blog/rss.xml" } },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const meta = await pageMetadata("/blog");
+  return { ...meta, alternates: { ...meta.alternates, types: { "application/rss+xml": "/blog/rss.xml" } } };
+}
 
 export default async function BlogPage() {
   const [posts, categories] = await Promise.all([getPosts(), getCategories("post")]);

@@ -19,18 +19,14 @@ import { Accordion } from "@/components/ui/accordion";
 import { ButtonLink } from "@/components/ui/button";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { getFaqs, getIndustries, getProjects, getServices, getSiteSettings, getTeam, getTestimonials } from "@/lib/data/public";
-import { buildMetadata, faqSchema } from "@/lib/seo";
+import { faqSchema } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-  return buildMetadata({
-    title: settings.seo.defaultTitle,
-    description: settings.seo.defaultDescription,
-    path: "/",
-    absoluteTitle: true,
-  });
+  return pageMetadata("/", { title: settings.seo.defaultTitle, description: settings.seo.defaultDescription, absoluteTitle: true });
 }
 
 export default async function HomePage() {
@@ -46,7 +42,6 @@ export default async function HomePage() {
 
   const featured = projects.filter((p) => p.featured).slice(0, 6);
   const clients = Array.from(new Set(projects.map((p) => p.client).filter((c) => !/contractor/i.test(c))));
-  const officeCount = settings.offices.filter((o) => o.image).length;
 
   return (
     <>
@@ -60,7 +55,7 @@ export default async function HomePage() {
           { value: "500+", label: "Global clients" },
           { value: "100%", label: "Client satisfaction" },
           { value: "100%", label: "5-star reviews" },
-          { value: String(officeCount), label: "Markets: Dallas · Denver · Calgary" },
+          { value: String(settings.offices.length), label: `Offices: ${settings.offices.map((o) => o.city).join(" · ")}` },
         ]}
       />
 

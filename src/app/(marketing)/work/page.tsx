@@ -10,15 +10,13 @@ import { ButtonLink } from "@/components/ui/button";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { beforeAfterShowcase } from "@/content/seed";
 import { getIndustries, getProjects } from "@/lib/data/public";
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = buildMetadata({
-  title: "Our Work — Web Design, Local SEO & Business Management Portfolio",
-  description: "Recent Jarz Digital projects in web design & development, local SEO, business management and social media marketing across the USA and Canada.",
-  path: "/work",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/work");
+}
 
 const CLIENT_LOGOS = [
   { src: "/images/clients/client-27.png", alt: "Honest Abe Roofing logo" },

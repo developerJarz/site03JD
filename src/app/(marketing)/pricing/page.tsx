@@ -6,15 +6,13 @@ import { PageHero } from "@/components/marketing/page-hero";
 import { Icon } from "@/components/ui/icon";
 import { Section } from "@/components/ui/section";
 import { getServices } from "@/lib/data/public";
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = buildMetadata({
-  title: "Pricing — Transparent Plans for Web, SEO, Social & Ads",
-  description: "Transparent pricing for Jarz Digital services: Local SEO and SEO from $40/month, websites from $50/month, ad management from $200/month, full business management $1,000/month.",
-  path: "/pricing",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return pageMetadata("/pricing");
+}
 
 export default async function PricingPage() {
   const services = (await getServices()).filter((s) => s.plans.length);

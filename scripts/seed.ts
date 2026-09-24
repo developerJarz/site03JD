@@ -132,6 +132,7 @@ async function main() {
           readingTime: readingTime(p.content),
           legacyUrl: p.legacyUrl,
           featured: p.slug === newest,
+          seo: p.seo ?? {},
         },
       },
       { upsert: true },
