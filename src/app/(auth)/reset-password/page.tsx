@@ -1,17 +1,6 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { ResetPasswordForm } from "@/components/forms/auth-forms";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Choose a new password" };
-
+/** Password resets now use an emailed code on /forgot-password; old reset links land there. */
 export default function ResetPasswordPage() {
-  return (
-    <>
-      <h1 className="font-display text-4xl font-semibold tracking-display text-ink-900">Choose a new password.</h1>
-      <p className="mb-10 mt-3 text-mist-600">For your security, you’ll be signed out of all other devices.</p>
-      <Suspense>
-        <ResetPasswordForm />
-      </Suspense>
-    </>
-  );
+  redirect("/forgot-password");
 }

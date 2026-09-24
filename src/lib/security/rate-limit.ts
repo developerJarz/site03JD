@@ -45,6 +45,8 @@ export const LIMITS = {
   login: { limit: 8, windowMs: 15 * 60_000 },
   register: { limit: 5, windowMs: 60 * 60_000 },
   forgot: { limit: 5, windowMs: 60 * 60_000 },
+  otpSend: { limit: 6, windowMs: 60 * 60_000 },
+  otpVerify: { limit: 15, windowMs: 15 * 60_000 },
   contact: { limit: 6, windowMs: 60 * 60_000 },
   newsletter: { limit: 5, windowMs: 60 * 60_000 },
   search: { limit: 60, windowMs: 60_000 },

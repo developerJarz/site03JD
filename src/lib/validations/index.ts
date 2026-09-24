@@ -45,9 +45,20 @@ export const registerSchema = z
 
 export const forgotPasswordSchema = z.object({ email: emailSchema });
 
+/** 6-digit email code; spaces are ignored so pasted "123 456" works. */
+export const otpCodeSchema = z
+  .string()
+  .transform((v) => v.replace(/\s/g, ""))
+  .pipe(z.string().regex(/^\d{6}$/, "Enter the 6-digit code from your email"));
+
+export const verifyEmailSchema = z.object({ email: emailSchema, code: otpCodeSchema });
+
+export const resendCodeSchema = z.object({ email: emailSchema, purpose: z.enum(["register", "reset"]) });
+
 export const resetPasswordSchema = z
   .object({
-    token: z.string().min(20).max(128),
+    email: emailSchema,
+    code: otpCodeSchema,
     password: passwordSchema,
     confirmPassword: z.string(),
   })

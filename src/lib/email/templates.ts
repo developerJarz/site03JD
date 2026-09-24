@@ -23,7 +23,7 @@ function layout(opts: { preheader: string; heading: string; body: string; cta?: 
 <tr><td style="font-size:15px;line-height:1.65;color:#3a4654;padding-bottom:16px">${opts.body}</td></tr>
 ${cta}
 </table></td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #eaeff3;font-size:12px;color:#677787">Jarz Digital · Dallas · Denver · Calgary<br>info@jarzdigital.com · +1 267-766-9055</td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #eaeff3;font-size:12px;color:#677787">Jarz Digital · Dallas · Denver · Calgary · Dhaka<br>info@jarzdigital.com · +1 267-766-9055</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -42,17 +42,29 @@ export function welcomeEmail(name: string) {
   };
 }
 
-export function passwordResetEmail(name: string, token: string) {
-  const link = url(`/reset-password?token=${encodeURIComponent(token)}`);
+/** One-time code for verifying a new account or resetting a password. */
+export function otpEmail(code: string, purpose: "register" | "reset", minutes: number, name?: string) {
+  const isReset = purpose === "reset";
+  const greeting = name ? `Hi ${esc(name.split(" ")[0])}, ` : "";
+  const intro = isReset
+    ? `${greeting}use this code to reset your Jarz Digital password.`
+    : `${greeting}use this code to verify your email and finish creating your Jarz Digital account.`;
+  const codeBlock = `<div style="margin:20px 0 8px;font-family:SFMono-Regular,Menlo,Consolas,monospace;font-size:34px;font-weight:700;letter-spacing:10px;color:#060b13;background:#f0fbfb;border:1px solid #bfeef0;border-radius:12px;padding:16px 0;text-align:center">${esc(code)}</div>`;
+  const ignore = isReset
+    ? "If you didn&#39;t ask to reset your password, you can ignore this email — your password won&#39;t change."
+    : "If you didn&#39;t try to create an account, you can ignore this email.";
   return {
-    subject: "Reset your Jarz Digital password",
+    subject: `${code} is your Jarz Digital ${isReset ? "password reset" : "verification"} code`,
     html: layout({
-      preheader: "This link expires in 60 minutes.",
-      heading: "Reset your password",
-      body: `Hi ${esc(name.split(" ")[0])}, we received a request to reset your password. This link expires in 60 minutes. If you didn't request it, you can safely ignore this email.`,
-      cta: { label: "Choose a new password", href: link },
+      preheader: `Your code expires in ${minutes} minutes.`,
+      heading: isReset ? "Your password reset code" : "Verify your email",
+      body: `${intro}${codeBlock}<p style="margin:12px 0 0;font-size:13px;color:#677787">This code expires in ${minutes} minutes. Never share it with anyone — Jarz Digital will never ask you for it.</p><p style="margin:12px 0 0;font-size:13px;color:#677787">${ignore}</p>`,
     }),
-    text: `Reset your password (expires in 60 minutes): ${link}\n\nIf you didn't request this, ignore this email.`,
+    text: `${isReset ? "Your Jarz Digital password reset code" : "Your Jarz Digital verification code"}: ${code}
+
+It expires in ${minutes} minutes. Never share this code with anyone.
+
+${isReset ? "If you didn't ask to reset your password, ignore this email." : "If you didn't try to create an account, ignore this email."}`,
   };
 }
 

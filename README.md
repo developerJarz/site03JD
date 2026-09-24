@@ -107,7 +107,7 @@ All configuration is via environment variables — nothing secret is committed. 
 - Email + password. Passwords hashed with **scrypt** (N=2¹⁵, parameters stored with each hash).
 - Sessions are stored in MongoDB; the browser holds only a random 256-bit token in an **httpOnly, SameSite=Lax** cookie (`__Host-` prefixed and `Secure` in production). The database stores an HMAC of the token, so a database leak can’t be replayed.
 - Sessions slide forward on use and are revoked on password change, role change and suspension. Users can sign out other devices.
-- Password reset: single-use, 60-minute tokens emailed to the user; responses never reveal whether an email exists.
+- Email codes (6-digit OTP) for sign-up and password reset: a new account is created only after the emailed code is confirmed; a reset needs the code plus the new password. Codes expire in 10 minutes, lock after 5 wrong tries, can be re-sent once a minute, and are stored only as HMAC hashes. Reset responses never reveal whether an email exists. Settings live in `src/config/otp.ts`.
 - Roles: **ADMIN** (everything), **EDITOR** (content, portfolio, services, team, media, page SEO), **USER** (own account & requests). The single source of truth is [`src/lib/auth/permissions.ts`](src/lib/auth/permissions.ts).
 
 ### Creating the first admin
@@ -129,7 +129,7 @@ Uploads are validated by **magic bytes** (PNG, JPEG, WebP, GIF, AVIF only — SV
 
 ## Email configuration
 
-Set `EMAIL_PROVIDER` and the matching credentials. Transactional emails (branded HTML + plain text): welcome, password reset, lead confirmation to the visitor, lead alert to staff, project-request alert, request status/message updates to clients. With `console`, emails are printed to the server log. Delivery failures are logged and never block the user’s action.
+Set `EMAIL_PROVIDER` and the matching credentials. Transactional emails (branded HTML + plain text): sign-up verification code, password reset code, welcome, lead confirmation to the visitor, lead alert to staff, project-request alert, request status/message updates to clients. With `console`, emails are printed to the server log — including sign-up and reset codes, so real users can only sign up or reset once a real provider is configured. Delivery failures are logged and never block the user’s action.
 
 ---
 
@@ -159,7 +159,7 @@ Deployment checklist:
 src/
   app/
     (marketing)/        Public site: home, services, work, industries, about, team, blog, pricing, contact, CMS pages
-    (auth)/             login, register, forgot-password, reset-password
+    (auth)/             login, register (+ email code), forgot-password (email code + new password); reset-password redirects there
     dashboard/          Client portal
     admin/              Admin (generic [resource] CMS routes + leads, requests, users, media, seo, settings, activity, notifications)
     api/                search, newsletter, views, auth/me, admin/media, admin/search

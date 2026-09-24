@@ -19,16 +19,34 @@ SessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 export type SessionDoc = InferSchemaType<typeof SessionSchema> & { _id: Types.ObjectId };
 export const Session = defineModel<SessionDoc>("Session", SessionSchema);
 
-const PasswordResetSchema = new Schema(
+export const OTP_PURPOSES = ["register", "reset"] as const;
+export type OtpPurpose = (typeof OTP_PURPOSES)[number];
+
+/**
+ * One-time email codes for sign-up verification and password resets.
+ * One active code per (email, purpose); only a keyed hash of the code is stored.
+ * For sign-ups, the account details wait here until the email is verified.
+ */
+const EmailOtpSchema = new Schema(
   {
-    tokenHash: { type: String, required: true, unique: true },
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    email: { type: String, required: true, lowercase: true, trim: true, maxlength: 254 },
+    purpose: { type: String, enum: OTP_PURPOSES, required: true },
+    codeHash: { type: String, required: true },
+    codeExpiresAt: { type: Date, required: true },
+    attempts: { type: Number, default: 0 },
+    sentAt: { type: Date, required: true },
+    pending: {
+      name: { type: String, maxlength: 120 },
+      company: { type: String, maxlength: 120 },
+      passwordHash: String,
+    },
+    // The whole record (including pending sign-up details) is removed after this.
     expiresAt: { type: Date, required: true },
-    usedAt: Date,
   },
   { timestamps: true },
 );
-PasswordResetSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+EmailOtpSchema.index({ email: 1, purpose: 1 }, { unique: true });
+EmailOtpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-export type PasswordResetDoc = InferSchemaType<typeof PasswordResetSchema> & { _id: Types.ObjectId };
-export const PasswordReset = defineModel<PasswordResetDoc>("PasswordReset", PasswordResetSchema);
+export type EmailOtpDoc = InferSchemaType<typeof EmailOtpSchema> & { _id: Types.ObjectId };
+export const EmailOtp = defineModel<EmailOtpDoc>("EmailOtp", EmailOtpSchema);

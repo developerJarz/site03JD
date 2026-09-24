@@ -16,6 +16,7 @@ const UserSchema = new Schema(
       emailNotifications: { type: Boolean, default: true },
       productUpdates: { type: Boolean, default: false },
     },
+    emailVerifiedAt: Date,
     lastLoginAt: Date,
     passwordChangedAt: Date,
   },
