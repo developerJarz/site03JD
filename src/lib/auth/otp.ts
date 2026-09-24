@@ -57,9 +57,9 @@ export async function issueOtp(email: string, purpose: OtpPurpose, pending?: Pen
   return { ok: true, code };
 }
 
-/** True when a record exists for (email, purpose) — e.g. a sign-up waiting for verification. */
-export async function hasOtpRecord(email: string, purpose: OtpPurpose): Promise<boolean> {
-  return Boolean(await EmailOtp.exists({ email, purpose }));
+/** The record for (email, purpose), e.g. a sign-up waiting for verification. */
+export async function findOtpRecord(email: string, purpose: OtpPurpose) {
+  return EmailOtp.findOne({ email, purpose }).select("pending.name sentAt").lean<Pick<EmailOtpDoc, "pending" | "sentAt">>();
 }
 
 export type VerifyResult = { ok: true; record: EmailOtpDoc } | { ok: false; error: string };

@@ -42,30 +42,117 @@ export function welcomeEmail(name: string) {
   };
 }
 
-/** One-time code for verifying a new account or resetting a password. */
-export function otpEmail(code: string, purpose: "register" | "reset", minutes: number, name?: string) {
+/**
+ * One-time code email for verifying a new account or resetting a password.
+ * Standalone layout: dark brand header, large copyable code, security note.
+ * The code is also in the subject and preheader so it shows in inbox previews.
+ */
+export function otpEmail(opts: { code: string; purpose: "register" | "reset"; minutes: number; to: string; name?: string }) {
+  const { code, purpose, minutes, to, name } = opts;
   const isReset = purpose === "reset";
-  const greeting = name ? `Hi ${esc(name.split(" ")[0])}, ` : "";
-  const intro = isReset
-    ? `${greeting}use this code to reset your Jarz Digital password.`
-    : `${greeting}use this code to verify your email and finish creating your Jarz Digital account.`;
-  const codeBlock = `<div style="margin:20px 0 8px;font-family:SFMono-Regular,Menlo,Consolas,monospace;font-size:34px;font-weight:700;letter-spacing:10px;color:#060b13;background:#f0fbfb;border:1px solid #bfeef0;border-radius:12px;padding:16px 0;text-align:center">${esc(code)}</div>`;
-  const ignore = isReset
-    ? "If you didn&#39;t ask to reset your password, you can ignore this email — your password won&#39;t change."
-    : "If you didn&#39;t try to create an account, you can ignore this email.";
-  return {
-    subject: `${code} is your Jarz Digital ${isReset ? "password reset" : "verification"} code`,
-    html: layout({
-      preheader: `Your code expires in ${minutes} minutes.`,
-      heading: isReset ? "Your password reset code" : "Verify your email",
-      body: `${intro}${codeBlock}<p style="margin:12px 0 0;font-size:13px;color:#677787">This code expires in ${minutes} minutes. Never share it with anyone — Jarz Digital will never ask you for it.</p><p style="margin:12px 0 0;font-size:13px;color:#677787">${ignore}</p>`,
-    }),
-    text: `${isReset ? "Your Jarz Digital password reset code" : "Your Jarz Digital verification code"}: ${code}
+  const first = name?.trim().split(/\s+/)[0];
+  const logo = url("/images/brand/logo.png");
+  const year = new Date().getFullYear();
 
-It expires in ${minutes} minutes. Never share this code with anyone.
+  const copy = isReset
+    ? {
+        subject: `${code} is your Jarz Digital password reset code`,
+        tag: "Password reset",
+        heading: "Reset your password",
+        intro: "We received a request to reset the password for your Jarz Digital account. Enter this code on the password reset page, together with your new password.",
+        notYou: "Didn’t ask to reset your password? You can safely ignore this email — your password won’t change and your account stays secure.",
+      }
+    : {
+        subject: `${code} is your Jarz Digital verification code`,
+        tag: "Verify your email",
+        heading: "Confirm your email address",
+        intro: "Thanks for signing up with Jarz Digital. Enter this code on the sign-up page to verify your email and activate your client account.",
+        notYou: "Didn’t try to create an account? You can safely ignore this email — no account will be created without this code.",
+      };
 
-${isReset ? "If you didn't ask to reset your password, ignore this email." : "If you didn't try to create an account, ignore this email."}`,
-  };
+  const font = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+  const mono = "'SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace";
+
+  const html = `<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
+<title>${esc(copy.subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#eef3f6;font-family:${font};color:#060b13;-webkit-font-smoothing:antialiased">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">Your code is ${esc(code)} — it expires in ${minutes} minutes.&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;&#8199;&#65279;&#847;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#eef3f6">
+<tr><td align="center" style="padding:32px 12px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
+
+  <!-- Header -->
+  <tr><td style="background:#06121a;border-radius:18px 18px 0 0;border-top:4px solid #00afb9;padding:26px 32px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td align="left"><img src="${logo}" alt="Jarz Digital" width="150" style="display:block;width:150px;height:auto;border:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.01em"></td>
+      <td align="right" style="font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#7fdde2">${esc(copy.tag)}</td>
+    </tr></table>
+  </td></tr>
+
+  <!-- Body -->
+  <tr><td style="background:#ffffff;padding:36px 32px 8px">
+    <h1 style="margin:0 0 14px;font-size:24px;line-height:1.25;font-weight:700;letter-spacing:-0.02em;color:#060b13">${esc(copy.heading)}</h1>
+    <p style="margin:0 0 6px;font-size:15px;line-height:1.65;color:#3a4654">${first ? `Hi ${esc(first)},` : "Hi there,"}</p>
+    <p style="margin:0;font-size:15px;line-height:1.65;color:#3a4654">${esc(copy.intro)}</p>
+  </td></tr>
+
+  <!-- Code -->
+  <tr><td style="background:#ffffff;padding:24px 32px 8px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f0fbfb;border:2px solid #00afb9;border-radius:16px">
+      <tr><td align="center" style="padding:22px 16px 6px;font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:#00848c">Your ${isReset ? "reset" : "verification"} code</td></tr>
+      <tr><td align="center" style="padding:4px 16px 8px;font-family:${mono};font-size:40px;line-height:1.2;font-weight:700;letter-spacing:12px;color:#060b13">${esc(code)}</td></tr>
+      <tr><td align="center" style="padding:0 16px 22px">
+        <span style="display:inline-block;background:#ffffff;border:1px solid #bfeef0;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;color:#3a4654">Expires in ${minutes} minutes</span>
+      </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- Security -->
+  <tr><td style="background:#ffffff;padding:20px 32px 8px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f6f8fa;border-radius:12px">
+      <tr><td style="padding:16px 18px;font-size:13px;line-height:1.6;color:#3a4654">
+        <strong style="color:#060b13">Keep this code private.</strong> Jarz Digital will never ask you for it by phone, email or chat. The code works once and can only be used for ${esc(to)}.
+      </td></tr>
+    </table>
+  </td></tr>
+
+  <tr><td style="background:#ffffff;padding:16px 32px 32px;border-radius:0 0 18px 18px">
+    <p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:#677787">${esc(copy.notYou)}</p>
+    <p style="margin:0;font-size:13px;line-height:1.6;color:#677787">Need help? Email <a href="mailto:info@jarzdigital.com" style="color:#00848c;text-decoration:none;font-weight:600">info@jarzdigital.com</a> or call <a href="tel:+12677669055" style="color:#00848c;text-decoration:none;font-weight:600;white-space:nowrap">+1 267-766-9055</a>.</p>
+  </td></tr>
+
+  <!-- Footer -->
+  <tr><td align="center" style="padding:24px 16px 8px;font-size:12px;line-height:1.7;color:#8494a3">
+    <a href="${url("/")}" style="color:#3a4654;text-decoration:none;font-weight:600">Jarz Digital</a> · Dallas · Denver · Calgary · Dhaka<br>
+    You’re receiving this because a ${isReset ? "password reset" : "sign-up"} was requested for ${esc(to)} on jarzdigital.com.<br>
+    <a href="${url("/privacy-policy")}" style="color:#8494a3">Privacy Policy</a> · © ${year} Jarz Digital
+  </td></tr>
+
+</table>
+</td></tr></table>
+</body></html>`;
+
+  const text = [
+    `${copy.heading} — Jarz Digital`,
+    "",
+    first ? `Hi ${first},` : "Hi there,",
+    "",
+    copy.intro,
+    "",
+    `Your ${isReset ? "reset" : "verification"} code: ${code}`,
+    `It expires in ${minutes} minutes.`,
+    "",
+    "Keep this code private. Jarz Digital will never ask you for it.",
+    copy.notYou,
+    "",
+    "Need help? info@jarzdigital.com · +1 267-766-9055",
+  ].join("\n");
+
+  return { subject: copy.subject, html, text };
 }
 
 export function leadConfirmationEmail(name: string) {

@@ -5,10 +5,10 @@ import { logActivity, notify } from "@/lib/activity";
 import { hashPassword, verifyPassword, getDummyHash } from "@/lib/auth/password";
 import { isStaff } from "@/lib/auth/permissions";
 import { createSession, destroySession, getRequestMeta, revokeUserSessions } from "@/lib/auth/session";
-import { OTP_TTL_MINUTES, consumeOtp, hasOtpRecord, issueOtp, verifyOtp } from "@/lib/auth/otp";
+import { OTP_TTL_MINUTES, consumeOtp, findOtpRecord, issueOtp, verifyOtp } from "@/lib/auth/otp";
 import { getSiteSettings } from "@/lib/data/public";
 import { connectDB, isDbConfigured } from "@/lib/db/connect";
-import { sendEmail } from "@/lib/email";
+import { canDeliverEmail, sendEmail } from "@/lib/email";
 import { otpEmail, welcomeEmail } from "@/lib/email/templates";
 import { env } from "@/lib/env";
 import { rateLimit } from "@/lib/security/rate-limit";
@@ -62,6 +62,7 @@ async function registrationOpen() {
 
 const CLOSED: ActionResult<never> = { ok: false, error: "New registrations are currently closed. Please contact us instead." };
 const SEND_FAILED: ActionResult<never> = { ok: false, error: "We couldn’t send the email right now. Please try again in a few minutes." };
+const EMAIL_OFF: ActionResult<never> = { ok: false, error: "We can’t send email codes right now. Please try again later or contact info@jarzdigital.com." };
 const wait = (seconds: number): ActionResult<never> => ({ ok: false, error: `A code was just sent. You can request a new one in ${seconds} seconds.` });
 
 /** Step 1 of sign-up: validate the details and email a 6-digit code. No account exists until the code is confirmed. */
@@ -82,9 +83,10 @@ export async function registerAction(_prev: ActionResult<{ email: string }>, for
     return { ok: false, error: "An account with this email already exists.", fieldErrors: { email: "Try signing in or resetting your password." } };
   }
 
+  if (!canDeliverEmail()) return EMAIL_OFF;
   const issued = await issueOtp(email, "register", { name, company, passwordHash: await hashPassword(password) });
   if (!issued.ok) return { ok: true, message: `We already sent a code to ${email}. Enter it below.`, data: { email } };
-  if (!(await sendEmail({ to: email, ...otpEmail(issued.code, "register", OTP_TTL_MINUTES, name) }))) return SEND_FAILED;
+  if (!(await sendEmail({ to: email, ...otpEmail({ code: issued.code, purpose: "register", minutes: OTP_TTL_MINUTES, to: email, name }) }))) return SEND_FAILED;
 
   return { ok: true, message: `We sent a 6-digit code to ${email}.`, data: { email } };
 }
@@ -141,6 +143,7 @@ export async function resendCodeAction(_prev: ActionResult, formData: FormData):
   const parsed = resendCodeSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, error: "Something went wrong. Please start again." };
   const { email, purpose } = parsed.data;
+  if (!canDeliverEmail()) return EMAIL_OFF;
 
   const { ip } = await getRequestMeta();
   const [byIp, byEmail] = await Promise.all([rateLimit("otpSend", ip), rateLimit("otpSend", `email:${email}`)]);
@@ -150,10 +153,12 @@ export async function resendCodeAction(_prev: ActionResult, formData: FormData):
   const sent: ActionResult = { ok: true, message: `A new code is on its way to ${email}.` };
 
   if (purpose === "register") {
-    if (!(await hasOtpRecord(email, "register"))) return { ok: false, error: "Your sign-up has expired. Please fill in the form again." };
+    const record = await findOtpRecord(email, "register");
+    if (!record) return { ok: false, error: "Your sign-up has expired. Please fill in the form again." };
     const issued = await issueOtp(email, "register");
     if (!issued.ok) return wait(issued.retryAfterSeconds);
-    return (await sendEmail({ to: email, ...otpEmail(issued.code, "register", OTP_TTL_MINUTES) })) ? sent : SEND_FAILED;
+    const message = otpEmail({ code: issued.code, purpose: "register", minutes: OTP_TTL_MINUTES, to: email, name: record.pending?.name ?? undefined });
+    return (await sendEmail({ to: email, ...message })) ? sent : SEND_FAILED;
   }
 
   // Password reset: same answer whether or not the account exists.
@@ -161,7 +166,7 @@ export async function resendCodeAction(_prev: ActionResult, formData: FormData):
   if (!user) return sent;
   const issued = await issueOtp(email, "reset");
   if (!issued.ok) return wait(issued.retryAfterSeconds);
-  await sendEmail({ to: email, ...otpEmail(issued.code, "reset", OTP_TTL_MINUTES, user.name) });
+  await sendEmail({ to: email, ...otpEmail({ code: issued.code, purpose: "reset", minutes: OTP_TTL_MINUTES, to: email, name: user.name }) });
   return sent;
 }
 
@@ -175,6 +180,7 @@ export async function forgotPasswordAction(_prev: ActionResult<{ email: string }
   const parsed = forgotPasswordSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { ok: false, error: "Enter a valid email address.", fieldErrors: fieldErrors(parsed.error) };
   if (!isDbConfigured) return DB_DOWN;
+  if (!canDeliverEmail()) return EMAIL_OFF;
   const { email } = parsed.data;
 
   const { ip } = await getRequestMeta();
@@ -192,7 +198,7 @@ export async function forgotPasswordAction(_prev: ActionResult<{ email: string }
 
   const issued = await issueOtp(email, "reset");
   // Within the resend cooldown the earlier code is still valid, so just continue.
-  if (issued.ok) await sendEmail({ to: email, ...otpEmail(issued.code, "reset", OTP_TTL_MINUTES, user.name) });
+  if (issued.ok) await sendEmail({ to: email, ...otpEmail({ code: issued.code, purpose: "reset", minutes: OTP_TTL_MINUTES, to: email, name: user.name }) });
   return generic;
 }
 

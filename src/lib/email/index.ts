@@ -94,3 +94,14 @@ export async function sendEmail(message: EmailMessage): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * False when emails can't reach real inboxes: the console provider on a
+ * deployed (Vercel) site. Features that depend on delivery — sign-up and
+ * reset codes — check this instead of silently "sending" to the log.
+ */
+export function canDeliverEmail(): boolean {
+  if (env.EMAIL_PROVIDER !== "console" || !process.env.VERCEL) return true;
+  console.error("[email] EMAIL_PROVIDER is \"console\" on this deployment — codes can't be delivered. Set EMAIL_PROVIDER and SMTP_* in Vercel, then redeploy.");
+  return false;
+}
