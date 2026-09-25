@@ -87,7 +87,23 @@ const s3Driver: StorageDriver = {
   },
 };
 
+/**
+ * Serverless disks (Vercel) are read-only and wiped on every deploy, so local
+ * uploads would be lost: there, Cloudinary is used when its keys are set, and
+ * uploads otherwise fail with a message that says how to fix it.
+ */
+const serverlessGuard: StorageDriver = {
+  ...localDriver,
+  async put() {
+    throw new Error("Uploads need shared storage on Vercel: set STORAGE_DRIVER=cloudinary and the CLOUDINARY_* variables, then redeploy.");
+  },
+};
+
 export function getStorage(): StorageDriver {
+  if (env.STORAGE_DRIVER === "local" && process.env.VERCEL) {
+    const cloudinaryReady = Boolean(env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET);
+    return cloudinaryReady ? cloudinaryDriver : serverlessGuard;
+  }
   switch (env.STORAGE_DRIVER) {
     case "cloudinary":
       return cloudinaryDriver;

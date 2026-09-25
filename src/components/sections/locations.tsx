@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
-import { Stagger, StaggerItem } from "@/components/animations";
+import { Stagger, StaggerItem } from "@/components/animations/reveal";
 import { officePath } from "@/lib/seo/locations";
 import type { Office } from "@/types/content";
 

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import { MotionProvider } from "@/components/animations";
+import { RevealObserver } from "@/components/animations/reveal-observer";
 import { ToastProvider } from "@/components/ui/toast";
 import { getSiteSettings } from "@/lib/data/public";
 import { SITE_URL } from "@/lib/seo";
@@ -18,21 +19,20 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: seo.defaultTitle, template: seo.titleTemplate },
     description: seo.defaultDescription,
     applicationName: general.siteName,
-    keywords: seo.keywords,
     authors: [{ name: general.siteName, url: SITE_URL }],
     creator: general.siteName,
     publisher: general.siteName,
     formatDetection: { telephone: false },
+    // No site-wide canonical or og:url: each page sets its own (see buildMetadata),
+    // so a page that forgets one can't be canonicalised to the homepage.
     openGraph: {
       type: "website",
       siteName: general.siteName,
       locale: "en_US",
-      url: SITE_URL,
       title: seo.defaultTitle,
       description: seo.defaultDescription,
     },
     twitter: { card: "summary_large_image", title: seo.defaultTitle, description: seo.defaultDescription },
-    alternates: { canonical: SITE_URL },
     verification: {
       ...(seo.googleVerification ? { google: seo.googleVerification } : {}),
       ...(seo.bingVerification ? { other: { "msvalidate.01": seo.bingVerification } } : {}),
@@ -56,6 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <MotionProvider>
           <ToastProvider>{children}</ToastProvider>
         </MotionProvider>
+        <RevealObserver />
       </body>
     </html>
   );

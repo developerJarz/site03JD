@@ -19,7 +19,8 @@ export default async function PricingPage() {
   return (
     <>
       <PageHero
-        eyebrow="Pricing"
+        eyebrow="Pricing & plans"
+        eyebrowInTitle
         title="Transparent plans. No surprises."
         titleLines={["Transparent plans.", "No surprises."]}
         description="Every plan includes free graphics and SEO-optimized content. Monthly plans have no long-term contract — cancel with 30 days’ notice."

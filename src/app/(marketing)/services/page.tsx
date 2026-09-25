@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Stagger, StaggerItem } from "@/components/animations";
+import { Stagger, StaggerItem } from "@/components/animations/reveal";
 import { ServiceCard } from "@/components/marketing/cards";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { PageHero } from "@/components/marketing/page-hero";
@@ -22,7 +22,8 @@ export default async function ServicesPage() {
   return (
     <>
       <PageHero
-        eyebrow="Services"
+        eyebrow="Web design, SEO & marketing services"
+        eyebrowInTitle
         title="Everything your business needs to grow online."
         titleLines={["Everything your business", "needs to grow online."]}
         description="A 360° solution for developing businesses — design, development, search, social and advertising, delivered by one team. Every service includes free graphics and SEO-optimized content."

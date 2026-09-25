@@ -17,7 +17,7 @@ export function Breadcrumbs({ items, className }: { items: Crumb[]; className?: 
     <>
       <JsonLd data={breadcrumbSchema(all)} />
       <nav aria-label="Breadcrumb" className={className}>
-        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-white/45">
+        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-white/60">
           {all.map((c, i) => (
             <li key={c.path} className="flex items-center gap-1.5">
               {i > 0 && <ChevronRight className="size-3.5" aria-hidden />}
@@ -41,9 +41,12 @@ export function Breadcrumbs({ items, className }: { items: Crumb[]; className?: 
 /**
  * Dark hero used by every inner marketing page. Titles can be split into
  * lines for the mask reveal; `aside` renders on the right on large screens.
+ * With `eyebrowInTitle`, the eyebrow is part of the H1 (same look), so a
+ * slogan-style title still names the page topic — "Local SEO Services: …".
  */
 export function PageHero({
   eyebrow,
+  eyebrowInTitle,
   title,
   titleLines,
   description,
@@ -54,6 +57,7 @@ export function PageHero({
   className,
 }: {
   eyebrow?: string;
+  eyebrowInTitle?: boolean;
   title: string;
   titleLines?: ReactNode[];
   description?: ReactNode;
@@ -73,7 +77,7 @@ export function PageHero({
         <Breadcrumbs items={crumbs} className="mb-10" />
         <div className={cn("grid gap-12", aside && "lg:grid-cols-12 lg:items-end")}>
           <div className={cn(aside && "lg:col-span-7")}>
-            {eyebrow && (
+            {eyebrow && !eyebrowInTitle && (
               <FadeIn>
                 <p className="eyebrow mb-6 flex items-center gap-3 text-brand-300">
                   <span aria-hidden className="h-px w-6 bg-current opacity-60" />
@@ -85,6 +89,15 @@ export function PageHero({
               lines={titleLines ?? [title]}
               className="max-w-5xl font-display text-display-md font-semibold tracking-display text-white"
               delay={0.05}
+              prefix={
+                eyebrow && eyebrowInTitle ? (
+                  <span className="eyebrow mb-6 flex animate-fade-up items-center gap-3 text-brand-300 motion-reduce:animate-none">
+                    <span aria-hidden className="h-px w-6 bg-current opacity-60" />
+                    {eyebrow}
+                    <span className="sr-only">:</span>
+                  </span>
+                ) : undefined
+              }
             />
             {description && (
               <FadeIn delay={0.3}>

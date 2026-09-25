@@ -133,7 +133,7 @@ export function WorkExplorer({ projects, industries }: { projects: Project[]; in
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.5, delay: Math.min(i, 6) * 0.04 }}
               >
-                <ProjectCard project={p} priority={i < 2} />
+                <ProjectCard project={p} />
               </motion.li>
             ))}
           </AnimatePresence>

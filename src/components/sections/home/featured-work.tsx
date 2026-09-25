@@ -23,7 +23,6 @@ function WorkCard({ project, index, className, pinned }: { project: Project; ind
           fill
           sizes="(min-width: 1024px) 46vw, 88vw"
           className="object-cover transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
-          priority={index < 2}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink-950/50 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         <span className="absolute right-5 top-5 flex size-12 scale-75 items-center justify-center rounded-full bg-white text-ink-900 opacity-0 transition-all duration-500 ease-[var(--ease-out-expo)] group-hover:scale-100 group-hover:opacity-100">
@@ -62,7 +61,7 @@ const COVER_RATIO = 1137 / 798;
  * Card size is the smaller of the width-based size and what fits the height
  * left under the navbar and heading, so nothing is cropped at any zoom level.
  */
-export function FeaturedWork({ projects }: { projects: Project[] }) {
+export function FeaturedWork({ projects, index }: { projects: Project[]; index?: string }) {
   const target = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
@@ -106,7 +105,7 @@ export function FeaturedWork({ projects }: { projects: Project[] }) {
   const header = (
     <div className="container-page flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
       <div className="max-w-2xl">
-        <Eyebrow index="04" className="mb-5">
+        <Eyebrow index={index} className="mb-5">
           Selected work
         </Eyebrow>
         <h2 className="font-display text-display-sm font-semibold tracking-display text-ink-900">Recent projects in web design, local SEO & growth.</h2>

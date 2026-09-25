@@ -68,6 +68,13 @@ export const RESOURCES: Record<ResourceKey, ResourceDef> = {
           { name: "publishedAt", label: "Publish date", type: "date", help: "Set a future date to schedule." },
           { name: "featured", label: "Featured article", type: "boolean" },
           { name: "authorName", label: "Author display name", type: "text", max: 120 },
+          {
+            name: "authorMember",
+            label: "Author (team member)",
+            type: "relation",
+            resource: "team",
+            help: "Credits a real team member: shows their name, role and bio on the post and marks them as the author for Google.",
+          },
         ],
       },
       {

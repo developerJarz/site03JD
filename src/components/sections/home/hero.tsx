@@ -33,8 +33,8 @@ function NodeCard({ node, mx, my, index }: { node: (typeof NODES)[number]; mx: M
     <motion.div
       className="absolute"
       style={{ left: `${node.x}%`, top: `${node.y}%`, x, y }}
-      initial={{ opacity: 0, scale: 0.85, filter: "blur(6px)" }}
-      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      initial={{ opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.6 + index * 0.1, duration: 1, ease: EASE }}
     >
       <div className="animate-float" style={{ animationDelay: `${index * -1.3}s` }}>
@@ -137,11 +137,7 @@ export function HomeHero({ trust, children }: { trust: string[]; children?: Reac
       {/* Background */}
       <div aria-hidden className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-grid opacity-80 [mask-image:radial-gradient(ellipse_70%_60%_at_60%_40%,black,transparent)]" />
-        <motion.div
-          className="absolute right-[-10%] top-[-20%] h-[900px] w-[900px] rounded-full bg-[radial-gradient(closest-side,rgb(0_175_185/0.28),rgb(47_123_255/0.1)_60%,transparent)] blur-3xl"
-          animate={{ scale: [1, 1.08, 1], opacity: [0.85, 1, 0.85] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
+        <div className="absolute right-[-10%] top-[-20%] h-[900px] w-[900px] animate-glow rounded-full bg-[radial-gradient(closest-side,rgb(0_175_185/0.28),rgb(47_123_255/0.1)_60%,transparent)] blur-3xl motion-reduce:animate-none" />
         <div className="absolute bottom-0 left-[-10%] h-[500px] w-[700px] rounded-full bg-[radial-gradient(closest-side,rgb(47_123_255/0.14),transparent)] blur-3xl" />
         <div className="absolute inset-0 bg-noise opacity-[0.05] mix-blend-overlay" />
       </div>
@@ -160,10 +156,10 @@ export function HomeHero({ trust, children }: { trust: string[]; children?: Reac
             className="mt-8 font-display text-display-lg font-semibold tracking-display text-white"
             delay={0.1}
             lines={[
-              "We build digital",
-              "experiences that",
+              "Web design &",
+              "Local SEO that",
               <>
-                <span className="text-gradient-brand">grow</span> businesses.
+                <span className="text-gradient-brand">grows</span> businesses.
               </>,
             ]}
           />

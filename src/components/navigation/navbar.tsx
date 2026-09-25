@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -10,9 +11,13 @@ import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
-import { MobileMenu } from "./mobile-menu";
-import { SearchOverlay } from "./search-overlay";
 import { PRIMARY_LINKS, type NavData } from "./types";
+
+// Loaded on first use (they render nothing while closed), prefetched when the trigger is hovered or focused.
+const loadMobileMenu = () => import("./mobile-menu");
+const loadSearch = () => import("./search-overlay");
+const MobileMenu = dynamic(() => loadMobileMenu().then((m) => m.MobileMenu), { ssr: false });
+const SearchOverlay = dynamic(() => loadSearch().then((m) => m.SearchOverlay), { ssr: false });
 
 type MenuKey = "services" | "industries";
 
@@ -37,6 +42,8 @@ export function Navbar({ data }: { data: NavData }) {
   const [open, setOpen] = useState<MenuKey | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mounted, setMounted] = useState({ mobile: false, search: false });
+  if ((mobileOpen && !mounted.mobile) || (searchOpen && !mounted.search)) setMounted({ mobile: mounted.mobile || mobileOpen, search: mounted.search || searchOpen });
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const account = useAccount();
 
@@ -130,15 +137,19 @@ export function Navbar({ data }: { data: NavData }) {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
+              onPointerEnter={loadSearch}
+              onFocus={loadSearch}
               className="flex h-10 items-center gap-2 rounded-full px-3 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-              aria-label="Search the site (Ctrl+K)"
+              aria-label="Search the site"
+              aria-keyshortcuts="Control+K Meta+K"
             >
               <Search className="size-[18px]" aria-hidden />
-              <kbd className="hidden rounded border border-white/15 px-1.5 font-mono text-[10px] text-white/50 xl:inline">⌘K</kbd>
+              <kbd aria-hidden className="hidden rounded border border-white/15 px-1.5 font-mono text-[10px] text-white/60 xl:inline">⌘K</kbd>
             </button>
             <Link
               href={account ? (account.staff ? "/admin" : "/dashboard") : "/login"}
               className="hidden h-10 items-center gap-2 rounded-full px-3 text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white md:flex"
+              aria-label={account ? "Dashboard" : "Sign in"}
             >
               <UserRound className="size-[18px]" aria-hidden />
               <span className="hidden xl:inline">{account ? "Dashboard" : "Sign in"}</span>
@@ -154,6 +165,8 @@ export function Navbar({ data }: { data: NavData }) {
               aria-label="Open menu"
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen(true)}
+              onPointerEnter={loadMobileMenu}
+              onFocus={loadMobileMenu}
             >
               <Menu className="size-5" aria-hidden />
             </button>
@@ -213,7 +226,7 @@ export function Navbar({ data }: { data: NavData }) {
                 ) : (
                   <div>
                     <div className="mb-6 flex items-end justify-between">
-                      <p className="eyebrow text-white/40">Web design & growth by industry</p>
+                      <p className="eyebrow text-white/55">Web design & growth by industry</p>
                       <Link href="/industries" className="link-underline text-sm text-white/70 hover:text-white">
                         Explore all industries →
                       </Link>
@@ -236,8 +249,8 @@ export function Navbar({ data }: { data: NavData }) {
         </AnimatePresence>
       </header>
 
-      <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} data={data} account={account} onSearch={() => setSearchOpen(true)} />
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+      {mounted.mobile && <MobileMenu open={mobileOpen} onClose={() => setMobileOpen(false)} data={data} account={account} onSearch={() => setSearchOpen(true)} />}
+      {mounted.search && <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />}
     </>
   );
 }

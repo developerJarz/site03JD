@@ -111,7 +111,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search services, work, industries and insights…"
-                className="h-16 flex-1 bg-transparent text-base text-ink-900 outline-none placeholder:text-mist-400"
+                className="h-16 flex-1 bg-transparent text-base text-ink-900 outline-none placeholder:text-mist-500"
                 aria-label="Search query"
                 role="combobox"
                 aria-expanded="true"
@@ -127,10 +127,10 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
               {remote && !loading && results.length === 0 && (
                 <p className="px-4 py-10 text-center text-sm text-mist-500">No results for “{query}”. Try “SEO”, “website” or “Dallas”.</p>
               )}
-              {!remote && <p className="px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-wider text-mist-400">Quick links</p>}
+              {!remote && <p className="px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-wider text-mist-500">Quick links</p>}
               {grouped.map(([type, items]) => (
                 <div key={type} className="py-1">
-                  {remote && <p className="px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-wider text-mist-400">{TYPE_META[type].label}</p>}
+                  {remote && <p className="px-3 pb-1 pt-2 text-xs font-medium uppercase tracking-wider text-mist-500">{TYPE_META[type].label}</p>}
                   {items.map((r) => {
                     index += 1;
                     const i = index;
@@ -159,7 +159,7 @@ export function SearchOverlay({ open, onClose }: { open: boolean; onClose: () =>
                 </div>
               ))}
             </div>
-            <div className="flex items-center justify-between border-t border-mist-100 px-5 py-3 text-xs text-mist-400">
+            <div className="flex items-center justify-between border-t border-mist-100 px-5 py-3 text-xs text-mist-500">
               <span>
                 <kbd className="rounded border border-mist-200 px-1.5 font-mono">↑</kbd> <kbd className="rounded border border-mist-200 px-1.5 font-mono">↓</kbd> to navigate ·{" "}
                 <kbd className="rounded border border-mist-200 px-1.5 font-mono">↵</kbd> to open

@@ -78,8 +78,9 @@ export function GlobalSeoForm({ initial }: { initial: SiteSettings["seo"] }) {
         <img src={seo.ogImage || "/opengraph-image"} alt="Social share preview" className="aspect-[1200/630] w-full bg-mist-50 object-cover" />
       </div>
       <label className="block">
-        <span className="mb-1.5 block text-sm font-medium text-ink-800">Keywords</span>
+        <span className="mb-1.5 block text-sm font-medium text-ink-800">Target keywords (internal)</span>
         <input value={keywords} onChange={(e) => setKeywords(e.target.value)} placeholder="comma, separated" className={controlClass(false, "h-11")} />
+        <span className="mt-1.5 block text-xs text-mist-600">For your own planning only — they are not published in the page code (Google ignores the keywords tag, and it shows competitors your targets).</span>
       </label>
       <div className="flex justify-end">
         <Button type="submit" variant="dark" size="sm" loading={pending}>

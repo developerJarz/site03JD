@@ -1,14 +1,44 @@
 import "server-only";
+import { connectDB, isDbConfigured } from "@/lib/db/connect";
 
 /**
  * Fixed-window rate limiter.
  *
- * The default store is in-process memory, which is correct for a single
- * Node.js server. For multi-instance deployments, implement `RateLimitStore`
- * with Redis/Upstash and pass it to `setRateLimitStore()` at startup.
+ * With a database configured, counters live in MongoDB so every serverless
+ * instance (Vercel) shares them; a window's document expires on its own via a
+ * TTL index. Without a database — or if it is briefly unreachable — the
+ * in-process memory store is used, which is correct for a single server.
  */
 export interface RateLimitStore {
   hit(key: string, windowMs: number): Promise<{ count: number; resetAt: number }>;
+}
+
+type Bucket = { _id: string; count: number; expiresAt: Date };
+
+class MongoStore implements RateLimitStore {
+  private indexed: Promise<unknown> | null = null;
+
+  constructor(private fallback: RateLimitStore) {}
+
+  async hit(key: string, windowMs: number) {
+    const now = Date.now();
+    const start = Math.floor(now / windowMs) * windowMs;
+    const resetAt = start + windowMs;
+    try {
+      const db = (await connectDB()).connection.db!;
+      const buckets = db.collection<Bucket>("ratelimits");
+      this.indexed ??= buckets.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }).catch(() => (this.indexed = null));
+      const doc = await buckets.findOneAndUpdate(
+        { _id: `${key}:${start}` },
+        { $inc: { count: 1 }, $setOnInsert: { expiresAt: new Date(resetAt) } },
+        { upsert: true, returnDocument: "after" },
+      );
+      return { count: doc?.count ?? 1, resetAt };
+    } catch (err) {
+      console.error("[rate-limit] database store unavailable, using memory", err instanceof Error ? err.message : err);
+      return this.fallback.hit(key, windowMs);
+    }
+  }
 }
 
 class MemoryStore implements RateLimitStore {
@@ -33,7 +63,7 @@ class MemoryStore implements RateLimitStore {
 }
 
 const globalStore = globalThis as unknown as { __rateLimitStore?: RateLimitStore };
-let store: RateLimitStore = globalStore.__rateLimitStore ?? new MemoryStore();
+let store: RateLimitStore = globalStore.__rateLimitStore ?? (isDbConfigured ? new MongoStore(new MemoryStore()) : new MemoryStore());
 globalStore.__rateLimitStore = store;
 
 export function setRateLimitStore(next: RateLimitStore) {

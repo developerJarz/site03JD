@@ -203,8 +203,12 @@ const PostSchema = new Schema(
     tags: [{ type: Schema.Types.ObjectId, ref: "Tag", index: true }],
     author: { type: Schema.Types.ObjectId, ref: "User" },
     authorName: { type: String, trim: true, default: "Jarz Digital Team" },
+    /** Team member credited as the author (byline, author box and BlogPosting.author as a Person). */
+    authorMember: { type: Schema.Types.ObjectId, ref: "TeamMember" },
     status: { type: String, enum: ["draft", "published"], default: "draft", index: true },
     publishedAt: { type: Date, index: true },
+    /** Set only when an editor changes the article body — drives "Updated" dates and sitemap lastmod. */
+    contentUpdatedAt: Date,
     featured: { type: Boolean, default: false },
     views: { type: Number, default: 0 },
     readingTime: { type: Number, default: 1 },

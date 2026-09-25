@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
-import { Reveal, Stagger, StaggerItem } from "@/components/animations";
+import { Reveal, Stagger, StaggerItem } from "@/components/animations/reveal";
 import { PricingPlans, ProjectCard } from "@/components/marketing/cards";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { JsonLd } from "@/components/marketing/json-ld";
@@ -57,7 +57,8 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
       <JsonLd data={[serviceSchema(service, officeCountries(settings)), faqSchema(service.faqs)]} />
 
       <PageHero
-        eyebrow={service.title}
+        eyebrow={/services?$/i.test(service.title) ? service.title : `${service.title} Services`}
+        eyebrowInTitle
         title={service.heroTitle}
         description={service.heroSubtitle}
         crumbs={[
@@ -80,7 +81,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
           <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-ink-900">
             {service.image && (
               <div className="relative aspect-[4/3]">
-                <Image src={service.image.src} alt={service.image.alt} fill priority sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover opacity-80" />
+                <Image src={service.image.src} alt={service.image.alt} fill loading="eager" fetchPriority="high" sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover opacity-80" />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink-900 via-transparent to-transparent" />
               </div>
             )}
@@ -117,7 +118,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
               <Stagger className="space-y-4">
                 {service.problems.map((p, i) => (
                   <StaggerItem key={p.title} className="flex gap-5 rounded-3xl border border-mist-200 p-6">
-                    <span className="font-mono text-sm text-brand-600">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="font-mono text-sm text-brand-700">{String(i + 1).padStart(2, "0")}</span>
                     <div>
                       <h3 className="font-display text-lg font-semibold tracking-tight text-ink-900">{p.title}</h3>
                       <p className="mt-1.5 leading-relaxed text-mist-600">{p.description}</p>
@@ -160,7 +161,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
           <Stagger as="ol" className={`grid gap-px overflow-hidden rounded-[28px] bg-white/10 md:grid-cols-2 ${service.process.length > 4 ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
             {service.process.map((step, i) => (
               <StaggerItem as="li" key={step.title} className="relative bg-ink-900 p-8">
-                <span className="font-display text-5xl font-semibold tracking-tight text-white/10">{String(i + 1).padStart(2, "0")}</span>
+                <span aria-hidden className="font-display text-5xl font-semibold tracking-tight text-white/10">{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="mt-8 font-display text-lg font-semibold text-white">{step.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-white/60">{step.description}</p>
               </StaggerItem>

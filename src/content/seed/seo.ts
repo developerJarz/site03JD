@@ -4,7 +4,7 @@
  * descriptions stay within ~160 characters. Applied to the seed data and
  * written to the CMS’s SEO fields, where editors can change them.
  */
-type Seo = { title?: string; description?: string };
+type Seo = { title?: string; description?: string; noindex?: boolean };
 
 export const seoOverrides: Record<"services" | "posts" | "projects" | "industries", Record<string, Seo>> = {
   services: {
@@ -14,7 +14,7 @@ export const seoOverrides: Record<"services" | "posts" | "projects" | "industrie
     },
     seo: {
       title: "SEO Services — Rank Higher on Google",
-      description: "Keyword research, technical SEO, on-page optimization, content and link building. SEO plans from $40/month for businesses in the USA, Canada and Bangladesh.",
+      description: "Keyword research, technical SEO, on-page optimization, content and link building. SEO plans from $40/month for businesses in the USA and Canada.",
     },
     "local-seo": { title: "Local SEO Services — Rank on Google Maps" },
     "social-media-marketing": { title: "Social Media Marketing Services" },
@@ -61,6 +61,11 @@ export const seoOverrides: Record<"services" | "posts" | "projects" | "industrie
     "commercial-roofing-seo": { description: "Search engine optimization and local search work for a commercial roofing contractor. See the project and more SEO work by Jarz Digital." },
   },
   industries: {
+    // No client work in these verticals yet (audit, Sept 2026): kept for visitors, out of search until there is.
+    banking: { noindex: true },
+    "venture-capital": { noindex: true },
+    manufacturing: { noindex: true },
+    corporate: { noindex: true },
     healthcare: { description: "Clinics and healthcare providers need patients to find them locally and book with confidence. We combine local search, clear websites and social content." },
   },
 };

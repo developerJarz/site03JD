@@ -16,7 +16,7 @@ export function ProjectCard({ project, priority, className }: { project: Project
           src={project.coverImage.src}
           alt={project.coverImage.alt}
           fill
-          priority={priority}
+          {...(priority ? { loading: "eager" as const, fetchPriority: "high" as const } : {})}
           sizes="(min-width: 1024px) 40vw, (min-width: 640px) 50vw, 100vw"
           className="object-cover transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
         />
@@ -43,7 +43,7 @@ export function ServiceCard({ service, index }: { service: Service; index?: numb
         <span className="flex size-12 items-center justify-center rounded-2xl bg-ink-900 text-brand-300 transition-colors duration-500 group-hover:bg-brand-500 group-hover:text-ink-950">
           <Icon name={service.icon} className="size-5" />
         </span>
-        {index !== undefined && <span className="font-mono text-xs text-mist-400">{String(index + 1).padStart(2, "0")}</span>}
+        {index !== undefined && <span className="font-mono text-xs text-mist-500">{String(index + 1).padStart(2, "0")}</span>}
       </div>
       <h3 className="mt-10 font-display text-2xl font-semibold tracking-tight text-ink-900">{service.title}</h3>
       <p className="mt-3 flex-1 leading-relaxed text-mist-600">{service.tagline}</p>

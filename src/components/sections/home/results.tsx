@@ -1,9 +1,10 @@
-import { Counter, Reveal } from "@/components/animations";
+import { Counter } from "@/components/animations";
+import { Reveal } from "@/components/animations/reveal";
 import { Eyebrow } from "@/components/ui/section";
 import type { Stat } from "@/types/content";
 
 /** Results & reach — figures published on the original site, animated on entry. */
-export function Results({ stats, regions, rankedRegions }: { stats: Stat[]; regions: string; rankedRegions: string }) {
+export function Results({ stats, regions, rankedRegions, index }: { stats: Stat[]; regions: string; rankedRegions: string; index?: string }) {
   return (
     <section className="theme-dark relative overflow-hidden bg-ink-950 py-24 md:py-36" aria-labelledby="results-heading">
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
@@ -11,7 +12,7 @@ export function Results({ stats, regions, rankedRegions }: { stats: Stat[]; regi
       <div className="container-page relative">
         <div className="grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <Eyebrow index="09" className="mb-6">
+            <Eyebrow index={index} className="mb-6">
               Results & reach
             </Eyebrow>
             <h2 id="results-heading" className="font-display text-display-sm font-semibold tracking-display text-white">
@@ -20,7 +21,7 @@ export function Results({ stats, regions, rankedRegions }: { stats: Stat[]; regi
           </div>
           <Reveal className="lg:col-span-6 lg:col-start-7" delay={0.1}>
             <p className="text-lg leading-relaxed text-white/65">{regions}</p>
-            <p className="mt-4 text-lg leading-relaxed text-white/45">{rankedRegions}</p>
+            <p className="mt-4 text-lg leading-relaxed text-white/60">{rankedRegions}</p>
           </Reveal>
         </div>
 

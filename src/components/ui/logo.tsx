@@ -21,11 +21,11 @@ export function Logo({
   const content =
     tone === "dark" ? (
       <span className="flex items-center gap-2.5">
-        <Image src="/images/brand/mark.png" alt="" width={270} height={270} priority className="size-8" />
+        <Image src="/images/brand/mark.png" alt="" width={270} height={270} className="size-8" />
         {!compact && <span className="font-display text-[1.2rem] font-semibold tracking-tight text-white">Jarz Digital</span>}
       </span>
     ) : (
-      <Image src="/images/brand/logo.png" alt="" width={1000} height={300} priority className={cn("h-8 w-auto", compact && "h-7")} />
+      <Image src="/images/brand/logo.png" alt="" width={1000} height={300} className={cn("h-8 w-auto", compact && "h-7")} />
     );
 
   if (href === null) return <span className={cn("inline-flex items-center", className)}>{content}<span className="sr-only">Jarz Digital</span></span>;

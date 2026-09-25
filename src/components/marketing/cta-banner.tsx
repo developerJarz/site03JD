@@ -1,4 +1,5 @@
-import { Magnetic, Reveal } from "@/components/animations";
+import { Magnetic } from "@/components/animations";
+import { Reveal } from "@/components/animations/reveal";
 import { ButtonLink } from "@/components/ui/button";
 
 /** The strong closing call-to-action that sits above the footer on every marketing page. */

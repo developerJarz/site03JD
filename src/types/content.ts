@@ -203,8 +203,12 @@ export interface Post {
   category?: { _id: ID; slug: string; name: string } | null;
   tags: { _id: ID; slug: string; name: string }[];
   authorName: string;
+  /** Team member credited as the author, when one is assigned. */
+  authorMember?: Pick<TeamMember, "slug" | "name" | "role" | "bio" | "photo" | "socials"> | null;
   status: PostStatus;
   publishedAt?: string | null;
+  /** Last change to the article body (not to metadata). */
+  contentUpdatedAt?: string | null;
   featured: boolean;
   views: number;
   readingTime: number;

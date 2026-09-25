@@ -21,7 +21,8 @@ export default async function LocationsPage() {
   return (
     <>
       <PageHero
-        eyebrow="Our offices"
+        eyebrow="Jarz Digital locations"
+        eyebrowInTitle
         title={`${settings.offices.length} offices. One team.`}
         description={`Jarz Digital works from ${list(settings.offices.map((o) => o.city))} — serving businesses in ${list(countries)} and clients worldwide.`}
         crumbs={[{ name: "Locations", path: "/locations" }]}

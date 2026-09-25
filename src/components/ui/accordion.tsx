@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import { Plus } from "lucide-react";
 import { useId, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -10,7 +9,12 @@ export interface AccordionItem {
   answer: string;
 }
 
-/** Accessible accordion (button + region pattern) with smooth height animation. */
+/**
+ * Accessible accordion (button + region pattern). Every answer is always in
+ * the HTML — closed panels are collapsed with CSS and made inert — so search
+ * engines see the same answers as the FAQPage schema, and aria-controls always
+ * points at an element that exists.
+ */
 export function Accordion({ items, tone = "light", defaultOpen = 0 }: { items: AccordionItem[]; tone?: "light" | "dark"; defaultOpen?: number | null }) {
   const [open, setOpen] = useState<number | null>(defaultOpen);
   const base = useId();
@@ -49,22 +53,20 @@ export function Accordion({ items, tone = "light", defaultOpen = 0 }: { items: A
                 </span>
               </button>
             </h3>
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={btnId}
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
-                >
-                  <p className={cn("max-w-3xl pb-7 pr-12 leading-relaxed", dark ? "text-white/65" : "text-mist-600")}>{item.answer}</p>
-                </motion.div>
+            <div
+              id={panelId}
+              role="region"
+              aria-labelledby={btnId}
+              inert={!isOpen}
+              className={cn(
+                "grid transition-[grid-template-rows,opacity] duration-500 ease-[var(--ease-out-expo)] motion-reduce:transition-none",
+                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
               )}
-            </AnimatePresence>
+            >
+              <div className="overflow-hidden">
+                <p className={cn("max-w-3xl pb-7 pr-12 leading-relaxed", dark ? "text-white/65" : "text-mist-600")}>{item.answer}</p>
+              </div>
+            </div>
           </div>
         );
       })}

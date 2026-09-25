@@ -20,12 +20,12 @@ export function TrustStrip({ stats, clients }: { stats: Stat[]; clients: string[
         ))}
       </div>
       <div className="border-t border-white/[0.07] py-7">
-        <p className="sr-only">Clients include: {clients.join(", ")}</p>
-        <Marquee duration={45} className="text-white/35" pauseOnHover={false}>
+        {/* The marquee renders the list once for everyone plus one aria-hidden copy for the loop. */}
+        <Marquee duration={45} className="text-white/35" pauseOnHover={false} label="Clients include">
           {clients.map((c) => (
-            <span key={c} aria-hidden className="mx-8 flex items-center gap-8 whitespace-nowrap font-display text-2xl font-medium tracking-tight md:text-3xl">
+            <span key={c} className="mx-8 flex items-center gap-8 whitespace-nowrap font-display text-2xl font-medium tracking-tight md:text-3xl">
               {c}
-              <span className="size-1.5 rounded-full bg-brand-500/60" />
+              <span aria-hidden className="size-1.5 rounded-full bg-brand-500/60" />
             </span>
           ))}
         </Marquee>

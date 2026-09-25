@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
-import { Counter, Reveal, Stagger, StaggerItem } from "@/components/animations";
+import { Counter } from "@/components/animations";
+import { Reveal, Stagger, StaggerItem } from "@/components/animations/reveal";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { PageHero } from "@/components/marketing/page-hero";
 import { Locations } from "@/components/sections/locations";
@@ -26,6 +27,7 @@ export default async function AboutPage() {
     <>
       <PageHero
         eyebrow="About Jarz Digital"
+        eyebrowInTitle
         title="Empowering businesses through digital excellence."
         titleLines={["Empowering businesses", "through digital excellence."]}
         description="We are a passionate team of digital marketing experts dedicated to helping businesses thrive in the digital landscape. With years of experience and a commitment to innovation, we deliver results that matter."

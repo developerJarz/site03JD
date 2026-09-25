@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { Stagger, StaggerItem } from "@/components/animations";
+import { Stagger, StaggerItem } from "@/components/animations/reveal";
 import { Icon } from "@/components/ui/icon";
 import type { Industry } from "@/types/content";
 import { cn } from "@/lib/utils";

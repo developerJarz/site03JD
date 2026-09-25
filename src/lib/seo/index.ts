@@ -1,7 +1,7 @@
 import "server-only";
 import type { Metadata } from "next";
 import { env } from "@/lib/env";
-import type { FaqItem, Office, Post, Project, SeoFields, Service, SiteSettings } from "@/types/content";
+import type { FaqItem, Office, Post, Project, SeoFields, Service, SiteSettings, TeamMember } from "@/types/content";
 import { countryCode, officeCountries, officePath } from "./locations";
 
 export const SITE_URL = env.SITE_URL.replace(/\/$/, "");
@@ -71,8 +71,30 @@ export function buildMetadata({
 
 type Json = Record<string, unknown>;
 
-export function organizationSchema(s: SiteSettings): Json {
+/**
+ * Parses addresses written the usual way — "Street, City, ST 12345[, Country]"
+ * (US) or "Street, City, AB T1A 1A1[, Country]" (Canada). Returns null for
+ * anything else so callers never publish a guessed breakdown.
+ */
+export function parsePostalAddress(text: string): Json | null {
+  const m = text.trim().match(/^(.+?),\s*([^,]+?),\s*([A-Z]{2})\s+(\d{5}(?:-\d{4})?|[A-Z]\d[A-Z]\s?\d[A-Z]\d)(?:,\s*(.+))?$/i);
+  if (!m) return null;
+  const [, street, city, region, postal, country] = m;
+  const canadian = /^[A-Z]\d[A-Z]/i.test(postal);
+  return {
+    "@type": "PostalAddress",
+    streetAddress: street,
+    addressLocality: city,
+    addressRegion: region.toUpperCase(),
+    postalCode: postal.toUpperCase(),
+    addressCountry: country ? countryCode(country) : canadian ? "CA" : "US",
+  };
+}
+
+/** Site-wide Organization. Contact details come from Settings; the founder from the team list. */
+export function organizationSchema(s: SiteSettings, founder?: Pick<TeamMember, "slug" | "name" | "role" | "socials"> | null): Json {
   const sameAs = Object.values(s.socials).filter(Boolean);
+  const address = s.contact.mailingAddress ? parsePostalAddress(s.contact.mailingAddress) ?? s.contact.mailingAddress : null;
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -84,18 +106,41 @@ export function organizationSchema(s: SiteSettings): Json {
     foundingDate: String(s.general.foundedYear),
     email: s.contact.email,
     telephone: s.contact.phone,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "1024 Alyssa Ln",
-      addressLocality: "Carrollton",
-      addressRegion: "TX",
-      postalCode: "75006",
-      addressCountry: "US",
-    },
+    ...(address ? { address } : {}),
     areaServed: [...officeCountries(s), "Europe"],
     contactPoint: contactPoints(s),
-    department: s.offices.map((o) => ({ "@id": officeId(o) })),
+    ...(founder ? { founder: personRef(founder) } : {}),
     ...(sameAs.length ? { sameAs } : {}),
+  };
+}
+
+const personId = (slug: string) => `${SITE_URL}/team/${slug}#person`;
+
+/** Compact Person reference (used for founder and article authors). */
+function personRef(m: Pick<TeamMember, "slug" | "name" | "role" | "socials">): Json {
+  const sameAs = [m.socials.linkedin, m.socials.twitter, m.socials.website].filter(Boolean);
+  return { "@type": "Person", "@id": personId(m.slug), name: m.name, jobTitle: m.role, url: abs(`/team/${m.slug}`), ...(sameAs.length ? { sameAs } : {}) };
+}
+
+export const isFounder = (m: Pick<TeamMember, "role">) => /founder/i.test(m.role);
+
+/**
+ * Short profiles are thin pages: they stay visible but out of search until the
+ * bio reaches ~200 words. The founder’s page is always indexable.
+ */
+export function teamProfileIndexable(m: Pick<TeamMember, "role" | "bio" | "highlights">): boolean {
+  const words = `${m.bio} ${m.highlights.join(" ")}`.split(/\s+/).filter(Boolean).length;
+  return isFounder(m) || words >= 200;
+}
+
+/** Full Person for a team member’s own page. */
+export function personSchema(m: TeamMember): Json {
+  return {
+    "@context": "https://schema.org",
+    ...personRef(m),
+    description: m.bio,
+    worksFor: { "@id": `${SITE_URL}/#organization` },
+    ...(m.photo ? { image: abs(m.photo.src) } : {}),
   };
 }
 
@@ -125,41 +170,50 @@ export function websiteSchema(s: SiteSettings): Json {
   };
 }
 
+/** Offices listed as "online only" are service areas, not places a customer can visit. */
+export const isPhysicalOffice = (o: Office) => !/online only/i.test(o.address);
+
+/** Street part of an office address that isn't in "Street, City, ST 12345" form (e.g. Dhaka). */
+function officeStreet(o: Office): string {
+  const tail = new RegExp(`(,\\s*${escapeRe(o.city)})?(,\\s*${escapeRe(o.country)})?\\s*$`, "i");
+  return o.address.replace(tail, "").trim();
+}
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 /**
- * One ProfessionalService per office, linked to its location page. Only
- * offices with a physical address (Dhaka) publish a street address; the US
- * branches are service-based.
+ * ProfessionalService for one office — output only on that office’s own
+ * location page, and only for offices with a real address. Service-area
+ * offices ("online only") get no LocalBusiness markup.
  */
-export function localBusinessSchemas(s: SiteSettings): Json[] {
-  return s.offices.map((o) => {
-    const physical = !/online only/i.test(o.address);
-    return {
-      "@context": "https://schema.org",
-      "@type": "ProfessionalService",
-      "@id": officeId(o),
-      name: `Jarz Digital ${o.city}`,
-      description: o.description,
-      parentOrganization: { "@id": `${SITE_URL}/#organization` },
-      url: o.hidePage ? SITE_URL : abs(officePath(o)),
-      image: abs(o.image?.src ?? s.branding.logo),
-      logo: abs(s.branding.logo),
-      telephone: o.phone,
-      ...(o.email ? { email: o.email } : {}),
-      hasMap: mapUrl(o),
-      areaServed: [
-        { "@type": "City", name: o.city },
-        { "@type": "Country", name: o.country },
-      ],
-      address: {
-        "@type": "PostalAddress",
-        ...(physical && o.country === "Bangladesh" ? { streetAddress: o.address.replace(/,\s*Dhaka,\s*Bangladesh$/i, "") } : {}),
-        addressLocality: o.city,
-        addressRegion: o.region,
-        addressCountry: countryCode(o.country),
-      },
-      priceRange: "$$",
-    };
-  });
+export function localBusinessSchema(o: Office, s: SiteSettings): Json | null {
+  if (!isPhysicalOffice(o)) return null;
+  const parsed = parsePostalAddress(o.address);
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": officeId(o),
+    name: `Jarz Digital ${o.city}`,
+    description: o.description,
+    parentOrganization: { "@id": `${SITE_URL}/#organization` },
+    url: abs(officePath(o)),
+    image: abs(o.image?.src ?? s.branding.logo),
+    logo: abs(s.branding.logo),
+    telephone: o.phone,
+    ...(o.email ? { email: o.email } : {}),
+    hasMap: mapUrl(o),
+    areaServed: [
+      { "@type": "City", name: o.city },
+      { "@type": "Country", name: o.country },
+    ],
+    address: parsed ?? {
+      "@type": "PostalAddress",
+      streetAddress: officeStreet(o),
+      addressLocality: o.city,
+      addressRegion: o.region,
+      addressCountry: countryCode(o.country),
+    },
+    priceRange: "$$",
+  };
 }
 
 export function breadcrumbSchema(items: { name: string; path: string }[]): Json {
@@ -203,6 +257,9 @@ export function faqSchema(faqs: FaqItem[]): Json | null {
   };
 }
 
+/** Date the article body last changed; falls back to the publish date (never a migration/seed timestamp). */
+export const postModifiedAt = (post: Post) => post.contentUpdatedAt ?? post.publishedAt ?? null;
+
 export function articleSchema(post: Post): Json {
   return {
     "@context": "https://schema.org",
@@ -212,9 +269,10 @@ export function articleSchema(post: Post): Json {
     url: abs(`/blog/${post.slug}`),
     mainEntityOfPage: abs(`/blog/${post.slug}`),
     datePublished: post.publishedAt,
-    dateModified: post.updatedAt ?? post.publishedAt,
+    dateModified: postModifiedAt(post),
     ...(post.coverImage ? { image: [abs(post.coverImage.src)] } : {}),
-    author: { "@type": "Organization", name: post.authorName, url: SITE_URL },
+    // A Person only when a real team member is credited; otherwise the company.
+    author: post.authorMember ? personRef(post.authorMember) : { "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: post.authorName, url: SITE_URL },
     publisher: { "@id": `${SITE_URL}/#organization` },
     articleSection: post.category?.name,
     keywords: post.tags.map((t) => t.name).join(", "),

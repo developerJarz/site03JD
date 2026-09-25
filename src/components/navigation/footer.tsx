@@ -4,6 +4,8 @@ import { SOCIAL_ICONS, WhatsappIcon } from "@/components/ui/brand-icons";
 import { Logo } from "@/components/ui/logo";
 import { officePath } from "@/lib/seo/locations";
 import type { Industry, Service, SiteSettings } from "@/types/content";
+import { CookieSettingsButton } from "@/components/analytics/analytics";
+import { analyticsEnabled } from "@/lib/analytics";
 import { NewsletterForm } from "./newsletter-form";
 
 export function Footer({ settings, services, industries }: { settings: SiteSettings; services: Service[]; industries: Industry[] }) {
@@ -85,7 +87,7 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
           <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-4 lg:col-span-8">
             {columns.map((col) => (
               <div key={col.title}>
-                <p className="eyebrow text-white/40">{col.title}</p>
+                <p className="eyebrow text-white/55">{col.title}</p>
                 <ul className="mt-5 space-y-3">
                   {col.links.map((l) => (
                     <li key={l.href + l.label}>
@@ -107,12 +109,12 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
                 {o.hidePage ? (
                   o.code
                 ) : (
-                  <Link href={officePath(o)} className="transition-colors hover:text-brand-300" aria-label={`${o.city} office`}>
+                  <Link href={officePath(o)} className="transition-colors hover:text-brand-300" aria-label={`${o.code} — ${o.city} office`}>
                     {o.code}
                   </Link>
                 )}
               </p>
-              <p className="mt-2 flex items-start gap-2 text-sm text-white/55">
+              <p className="mt-2 flex items-start gap-2 text-sm text-white/60">
                 <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden />
                 {o.address}
               </p>
@@ -146,11 +148,11 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
             >
               <WhatsappIcon className="size-3.5" /> WhatsApp {contact.whatsapp}
             </a>
-            <p className="text-white/45">{contact.mailingAddress}</p>
+            <p className="text-white/55">{contact.mailingAddress}</p>
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col-reverse gap-4 border-t border-white/[0.08] pt-8 text-sm text-white/45 md:flex-row md:items-center md:justify-between">
+        <div className="mt-14 flex flex-col-reverse gap-4 border-t border-white/[0.08] pt-8 text-sm text-white/55 md:flex-row md:items-center md:justify-between">
           <p>
             © {year} {general.siteName}. All rights reserved.
           </p>
@@ -170,6 +172,11 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
                 Sitemap
               </Link>
             </li>
+            {analyticsEnabled && (
+              <li>
+                <CookieSettingsButton className="hover:text-white" />
+              </li>
+            )}
           </ul>
         </div>
       </div>

@@ -4,33 +4,30 @@ import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useFormAction } from "@/hooks/use-form-action";
 import { submitLead } from "@/lib/actions/leads";
+import { track } from "@/lib/analytics";
 import { BUDGET_OPTIONS, PROJECT_TYPE_OPTIONS, TIMELINE_OPTIONS } from "@/config/forms";
-import { contactSchema, fieldErrors as toFieldErrors } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Field, Honeypot, Input, Select, Textarea } from "@/components/ui/form";
 
 export function ContactForm({ services }: { services: { slug: string; title: string }[] }) {
   const params = useSearchParams();
-  const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
   // Spam time-trap: measured from the visitor's first interaction (the page itself is static).
   const startedAt = useRef<number | null>(null);
+  const submitted = useRef<{ service?: string; source?: string }>({});
+  // Validation happens on the server (contactSchema); its field errors are shown and focused below.
+  // Not bundling zod here keeps ~85 KB of JavaScript off every page that links to /contact.
   const { state, action: formAction, onSubmit, pending } = useFormAction(submitLead, {
     validate: (fd) => {
       fd.set("startedAt", String(startedAt.current ?? Date.now()));
-      const parsed = contactSchema.safeParse(Object.fromEntries(fd.entries()));
-      if (parsed.success) {
-        setClientErrors({});
-        return true;
-      }
-      const errs = toFieldErrors(parsed.error);
-      setClientErrors(errs);
-      formRef.current?.querySelector<HTMLElement>(`[name="${Object.keys(errs)[0]}"]`)?.focus();
-      return false;
+      submitted.current = { service: String(fd.get("service") ?? ""), source: String(fd.get("source") ?? "") };
+      return true;
     },
+    // Fired only after the server has stored the lead (consent-gated in track()).
+    onSuccess: () => track("generate_lead", { form: submitted.current.source, service: submitted.current.service, plan: plan ?? undefined }),
   });
   const presetService = params.get("service") ?? "";
   const plan = params.get("plan");
@@ -42,7 +39,7 @@ export function ContactForm({ services }: { services: { slug: string; title: str
       ? `We're a ${industry.replace(/-/g, " ")} business and would like to discuss our website and online growth.`
       : "";
 
-  const errors = { ...(state.ok ? {} : state.fieldErrors), ...clientErrors };
+  const errors = (!state.ok && state.fieldErrors) || {};
 
   useEffect(() => {
     if (!state.ok && state.fieldErrors) {

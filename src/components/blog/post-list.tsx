@@ -67,9 +67,9 @@ export function PostList({ posts, categories, activeCategory }: { posts: Post[];
         </p>
       ) : (
         <ul className="mt-12 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.slice(0, visible).map((p, i) => (
+          {filtered.slice(0, visible).map((p) => (
             <li key={p.slug}>
-              <PostCard post={p} priority={i < 3} />
+              <PostCard post={p} />
             </li>
           ))}
         </ul>

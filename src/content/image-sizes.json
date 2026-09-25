@@ -79,13 +79,25 @@
   "w": 1359,
   "h": 772
  },
+ "/images/locations/calgary.webp": {
+  "w": 1359,
+  "h": 772
+ },
  "/images/locations/dallas.jpg": {
   "w": 2000,
   "h": 1499
  },
+ "/images/locations/dallas.webp": {
+  "w": 1600,
+  "h": 1199
+ },
  "/images/locations/denver.jpeg": {
   "w": 7360,
   "h": 4140
+ },
+ "/images/locations/denver.webp": {
+  "w": 1600,
+  "h": 900
  },
  "/images/misc/agency.webp": {
   "w": 2000,

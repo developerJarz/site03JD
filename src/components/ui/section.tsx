@@ -28,7 +28,7 @@ export function Section({
 export function Eyebrow({ children, className, index }: { children: ReactNode; className?: string; index?: string }) {
   return (
     <p className={cn("eyebrow flex items-center gap-3 text-brand-700 [.theme-dark_&]:text-brand-300", className)}>
-      {index && <span className="text-mist-400 [.theme-dark_&]:text-white/35">{index}</span>}
+      {index && <span className="text-mist-500 [.theme-dark_&]:text-white/55">{index}</span>}
       <span aria-hidden className="h-px w-6 bg-current opacity-60" />
       {children}
     </p>

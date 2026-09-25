@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Check } from "lucide-react";
-import { Reveal } from "@/components/animations";
+import { Reveal } from "@/components/animations/reveal";
 import { Eyebrow } from "@/components/ui/section";
 
 export interface ProcessStep {
@@ -12,13 +12,13 @@ export interface ProcessStep {
 }
 
 /** Sticky heading on the left; the six stages scroll past on the right. */
-export function GrowthProcess({ steps }: { steps: ProcessStep[] }) {
+export function GrowthProcess({ steps, index }: { steps: ProcessStep[]; index?: string }) {
   return (
     <section className="relative bg-white py-24 md:py-36" aria-labelledby="process-heading">
       <div className="container-page grid gap-16 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <div className="lg:sticky lg:top-32">
-            <Eyebrow index="07" className="mb-6">
+            <Eyebrow index={index} className="mb-6">
               How we work
             </Eyebrow>
             <h2 id="process-heading" className="font-display text-display-sm font-semibold tracking-display text-ink-900">
@@ -30,7 +30,7 @@ export function GrowthProcess({ steps }: { steps: ProcessStep[] }) {
             <ol className="mt-10 hidden space-y-2 text-sm lg:block" aria-label="Process stages">
               {steps.map((s, i) => (
                 <li key={s.title} className="flex items-center gap-3 text-mist-500">
-                  <span className="font-mono text-xs text-brand-600">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="font-mono text-xs text-brand-700">{String(i + 1).padStart(2, "0")}</span>
                   {s.title}
                 </li>
               ))}
@@ -49,7 +49,7 @@ export function GrowthProcess({ steps }: { steps: ProcessStep[] }) {
                   <span className="flex size-16 items-center justify-center rounded-2xl bg-ink-900 shadow-[inset_0_1px_0_rgb(255_255_255/0.1)] transition-colors duration-500 group-hover:bg-brand-700">
                     <Image src={s.icon} alt="" width={36} height={36} className="size-9" />
                   </span>
-                  <span className="font-display text-5xl font-semibold tracking-tight text-mist-200 md:text-6xl">{String(i + 1).padStart(2, "0")}</span>
+                  <span aria-hidden className="font-display text-5xl font-semibold tracking-tight text-mist-200 md:text-6xl">{String(i + 1).padStart(2, "0")}</span>
                 </div>
                 <div>
                   <p className="eyebrow text-brand-700">{s.subtitle}</p>

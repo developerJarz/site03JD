@@ -12,10 +12,13 @@ import { Breadcrumbs } from "@/components/marketing/page-hero";
 import { ViewTracker } from "@/components/marketing/view-tracker";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { ServiceCallout } from "@/components/marketing/service-callout";
-import { serviceForPost } from "@/lib/content/links";
-import { getPostBySlug, getPosts, getRelatedPosts, getServices } from "@/lib/data/public";
+import { officeForPost, serviceForPost } from "@/lib/content/links";
+import { getPostBySlug, getPosts, getRelatedPosts, getServices, getSiteSettings } from "@/lib/data/public";
+import { locationOffices, officePath } from "@/lib/seo/locations";
 import { sanitizeRichText, withHeadingAnchors } from "@/lib/security/sanitize";
-import { abs, articleSchema, buildMetadata } from "@/lib/seo";
+import { abs, articleSchema, buildMetadata, postModifiedAt } from "@/lib/seo";
+import { formatDate } from "@/lib/utils";
+import { TeamAvatar } from "@/components/sections/team-grid";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -36,7 +39,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
     seo: post.seo,
     type: "article",
     publishedTime: post.publishedAt,
-    modifiedTime: post.updatedAt,
+    modifiedTime: postModifiedAt(post),
   });
 }
 
@@ -44,10 +47,14 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) notFound();
-  const [related, services] = await Promise.all([getRelatedPosts(post), getServices()]);
+  const [related, services, settings] = await Promise.all([getRelatedPosts(post), getServices(), getSiteSettings()]);
   const service = serviceForPost(post, services);
+  const office = officeForPost(post, locationOffices(settings));
   const { html, toc } = withHeadingAnchors(sanitizeRichText(post.content));
   const url = abs(`/blog/${post.slug}`);
+  const author = post.authorMember;
+  // Show "Updated" only for real edits made at least a day after publishing.
+  const edited = post.contentUpdatedAt && post.publishedAt && Date.parse(post.contentUpdatedAt) - Date.parse(post.publishedAt) > 86_400_000 ? post.contentUpdatedAt : null;
 
   return (
     <>
@@ -71,12 +78,30 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
           <FadeIn delay={0.25}>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-white/65">{post.excerpt}</p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <span className="flex size-10 items-center justify-center rounded-full bg-brand-500 font-display text-sm font-bold text-ink-950" aria-hidden>
-                JD
-              </span>
+              {author ? (
+                <TeamAvatar member={author} size={40} />
+              ) : (
+                <span className="flex size-10 items-center justify-center rounded-full bg-brand-500 font-display text-sm font-bold text-ink-950" aria-hidden>
+                  JD
+                </span>
+              )}
               <div>
-                <p className="text-sm font-medium text-white">{post.authorName}</p>
-                <PostMeta post={post} className="text-white/50" />
+                <p className="text-sm font-medium text-white">
+                  {author ? (
+                    <Link href={`/team/${author.slug}`} rel="author" className="hover:text-brand-300">
+                      {author.name}
+                    </Link>
+                  ) : (
+                    post.authorName
+                  )}
+                  {author?.role && <span className="font-normal text-white/55"> · {author.role}</span>}
+                </p>
+                <PostMeta post={post} className="text-white/60" />
+                {edited && (
+                  <p className="mt-1 text-sm text-white/60">
+                    Updated <time dateTime={edited}>{formatDate(edited)}</time>
+                  </p>
+                )}
               </div>
             </div>
           </FadeIn>
@@ -87,7 +112,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
         <div className="bg-gradient-to-b from-ink-950 from-50% to-white to-50%">
           <div className="container-page">
             <div className="relative aspect-[3/2] overflow-hidden rounded-[28px] bg-mist-100 md:aspect-[2/1]">
-              <Image src={post.coverImage.src} alt={post.coverImage.alt} fill priority sizes="(min-width: 1320px) 1240px, 100vw" className="object-cover" />
+              <Image src={post.coverImage.src} alt={post.coverImage.alt} fill loading="eager" fetchPriority="high" sizes="(min-width: 1320px) 1240px, 100vw" className="object-cover" />
             </div>
           </div>
         </div>
@@ -133,7 +158,22 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
                 ))}
               </ul>
             )}
-            {service && <ServiceCallout service={service} />}
+            {author && (
+              <aside aria-label="About the author" className="mt-12 flex gap-5 rounded-3xl border border-mist-200 p-6 md:p-8">
+                <TeamAvatar member={author} size={64} />
+                <div>
+                  <p className="eyebrow text-mist-600">Written by</p>
+                  <p className="mt-2 font-display text-lg font-semibold tracking-tight text-ink-900">
+                    <Link href={`/team/${author.slug}`} rel="author" className="hover:text-brand-700">
+                      {author.name}
+                    </Link>
+                  </p>
+                  {author.role && <p className="text-sm text-mist-600">{author.role}</p>}
+                  {author.bio && <p className="mt-3 leading-relaxed text-mist-700">{author.bio}</p>}
+                </div>
+              </aside>
+            )}
+            {service && <ServiceCallout service={service} office={office && { city: office.city, href: officePath(office) }} />}
           </article>
         </div>
       </div>

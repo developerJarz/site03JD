@@ -1,5 +1,5 @@
 import { Award, FileBarChart, Hand, Palette } from "lucide-react";
-import { Reveal, Stagger, StaggerItem } from "@/components/animations";
+import { Reveal, Stagger, StaggerItem } from "@/components/animations/reveal";
 import { Eyebrow } from "@/components/ui/section";
 
 const ICONS = [Award, Palette, Hand, FileBarChart];
@@ -8,7 +8,9 @@ export function WhyJarz({
   text,
   differentiators,
   founderRecognition,
+  index,
 }: {
+  index?: string;
   text: string;
   differentiators: { title: string; description: string }[];
   founderRecognition: string;
@@ -20,7 +22,7 @@ export function WhyJarz({
 
       <div className="container-page relative grid gap-16 lg:grid-cols-12">
         <div className="lg:col-span-6">
-          <Eyebrow index="06" className="mb-6">
+          <Eyebrow index={index} className="mb-6">
             Why Jarz Digital
           </Eyebrow>
           <Reveal>

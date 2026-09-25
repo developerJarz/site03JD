@@ -1,14 +1,15 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import { resolveSiteUrl } from "@/config/site-url";
 
 /**
  * Server environment, validated once at startup.
  * Never import this module from client components.
  *
- * Only MONGODB_URI is needed to run in production. Every other variable is
- * optional: empty or invalid values fall back to a safe default and log a
- * warning instead of failing the build.
+ * MONGODB_URI and (on Vercel production) SITE_URL are required. Every other
+ * variable is optional: empty or invalid values fall back to a safe default
+ * and log a warning instead of failing the build.
  */
 
 /** Treats "", whitespace and accidentally quoted values as unset. */
@@ -16,20 +17,6 @@ function clean(value: string | undefined): string | undefined {
   if (value === undefined) return undefined;
   const v = value.trim().replace(/^(['"])(.*)\1$/, "$2").trim();
   return v === "" ? undefined : v;
-}
-
-function resolveSiteUrl(): string {
-  const candidates = [clean(process.env.SITE_URL), clean(process.env.VERCEL_PROJECT_PRODUCTION_URL), clean(process.env.VERCEL_URL)];
-  for (const c of candidates) {
-    if (!c) continue;
-    const withProtocol = /^https?:\/\//i.test(c) ? c : `https://${c}`;
-    try {
-      return new URL(withProtocol).origin;
-    } catch {
-      console.warn(`[env] Ignoring invalid SITE_URL value "${c}".`);
-    }
-  }
-  return "http://localhost:3000";
 }
 
 const schema = z.object({

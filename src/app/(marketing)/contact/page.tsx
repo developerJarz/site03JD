@@ -35,7 +35,8 @@ export default async function ContactPage() {
     <>
       <JsonLd data={faqSchema(faqs)} />
       <PageHero
-        eyebrow="Get in touch"
+        eyebrow="Contact Jarz Digital"
+        eyebrowInTitle
         title="Let’s start your digital journey."
         titleLines={["Let’s start your", "digital journey."]}
         description="Ready to transform your business with expert digital marketing? Get in touch for a free consultation and discover how we can drive your success."

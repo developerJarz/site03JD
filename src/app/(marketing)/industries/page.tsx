@@ -18,7 +18,8 @@ export default async function IndustriesPage() {
   return (
     <>
       <PageHero
-        eyebrow="Industries"
+        eyebrow="Industries we serve"
+        eyebrowInTitle
         title="Web design and growth, tailored to your industry."
         titleLines={["Web design and growth,", "tailored to your industry."]}
         description="Every market buys differently. We shape websites, local search and campaigns around how customers in your industry actually search, compare and decide."

@@ -159,7 +159,7 @@ export const serviceSeed: SeedService[] = [
         price: "$150",
         period: "/month",
         description: "Businesses that need ongoing SEO work to rank higher and attract more organic traffic.",
-        features: ["Keyword Research & SEO Strategy (10 Keywords)", "Full On-Page Optimization (Title Tags, Meta Descriptions, Headers, Images, etc.)", "Technical SEO Fixes (Speed, Mobile Optimization, Indexing Issues)", "3 SEO-Optimized Blog Posts (750+ Words Each)", "Internal Linking Strategy & URL Optimization", "Local SEO Optimization (Google My Business Setup & Citations)", "Monthly SEO Performance Report & Growth Plan"],
+        features: ["Keyword Research & SEO Strategy (10 Keywords)", "Full On-Page Optimization (Title Tags, Meta Descriptions, Headers, Images, etc.)", "Technical SEO Fixes (Speed, Mobile Optimization, Indexing Issues)", "3 SEO-Optimized Blog Posts (750+ Words Each)", "Internal Linking Strategy & URL Optimization", "Local SEO Optimization (Google Business Profile Setup & Citations)", "Monthly SEO Performance Report & Growth Plan"],
         highlighted: true,
       },
       {
@@ -211,7 +211,7 @@ export const serviceSeed: SeedService[] = [
       { title: "Competitors own the map pack", description: "Outrank your competitors in local search results and Google Maps to capture more market share." },
     ],
     included: [
-      { title: "Google Business Profile", items: ["Google Business Profile optimization & regular updates", "GMB optimization", "Review management setup"] },
+      { title: "Google Business Profile", items: ["Google Business Profile optimization & regular updates", "GBP optimization", "Review management setup"] },
       { title: "Citations & Listings", items: ["Map citations & local listings", "Map directions and map backlinks", "Build local citations and geo-targeted backlinks"] },
       { title: "Local Content", items: ["Location-specific SEO content", "Professional graphics for posts, maps and promotions", "Local schema markup"] },
       { title: "Reporting", items: ["100% manual work with detailed reporting", "Monthly, bi-weekly or weekly progress reports", "Competitor monitoring"] },
@@ -220,7 +220,7 @@ export const serviceSeed: SeedService[] = [
       "Higher local search rankings",
       "Increased website traffic",
       "More phone calls and inquiries",
-      "Better GMB visibility",
+      "Better GBP visibility",
       "Improved online reputation",
       "Higher conversion rates",
     ],
@@ -241,7 +241,7 @@ export const serviceSeed: SeedService[] = [
         price: "$150",
         period: "/month",
         description: "Designed for growing businesses looking to increase local visibility and improve rankings.",
-        features: ["Everything in Basic", "Keyword research & targeting", "1000 Map Citations", "20 Map Directions", "20 Map Backlinks", "GMB Optimization", "Review Management Setup", "Bi-weekly Progress Reports", "Priority Email Support"],
+        features: ["Everything in Basic", "Keyword research & targeting", "1000 Map Citations", "20 Map Directions", "20 Map Backlinks", "GBP Optimization", "Review Management Setup", "Bi-weekly Progress Reports", "Priority Email Support"],
         highlighted: true,
       },
       {
@@ -259,7 +259,7 @@ export const serviceSeed: SeedService[] = [
       { question: "How long does it take to see Local SEO results?", answer: "Most businesses start seeing improvements in local rankings within 2-4 weeks, with significant results typically visible within 2-3 months. Local SEO is faster than traditional SEO because it targets a smaller geographic area." },
       { question: "What's the difference between the pricing plans?", answer: "The Basic plan is perfect for small businesses just starting with Local SEO. The Standard plan includes keyword research and more citations for growing businesses. The Premium plan adds comprehensive citation building for businesses serious about dominating their local market." },
       { question: "Do you work with businesses in all industries?", answer: "Yes, our Local SEO services work for businesses in all industries. We customize our approach based on your specific market, competition, and target audience to ensure maximum effectiveness." },
-      { question: "What's included in the monthly reports?", answer: "Our reports include local ranking improvements, Google My Business insights, citation status updates, and recommendations for continued growth. You'll see exactly how your investment is performing." },
+      { question: "What's included in the monthly reports?", answer: "Our reports include local ranking improvements, Google Business Profile insights, citation status updates, and recommendations for continued growth. You'll see exactly how your investment is performing." },
       { question: "Can I cancel anytime?", answer: "Yes, there are no long-term contracts. You can cancel your service at any time with 30 days' notice. We're confident in our results and believe you'll see the value in continuing our partnership." },
     ],
     relatedSlugs: ["seo", "business-management", "google-ads"],
@@ -441,7 +441,7 @@ export const serviceSeed: SeedService[] = [
       { title: "Disconnected channels", description: "A unified strategy managed by one expert team ensures consistency and better results across every channel." },
     ],
     included: [
-      { title: "Local SEO", description: "Get found by customers in your area.", items: ["Google My Business optimization", "Local citation building", "Review management", "Local keyword targeting", "Map pack optimization"] },
+      { title: "Local SEO", description: "Get found by customers in your area.", items: ["Google Business Profile optimization", "Local citation building", "Review management", "Local keyword targeting", "Map pack optimization"] },
       { title: "Website SEO", description: "Improve rankings and drive organic traffic.", items: ["On-page SEO optimization", "Technical SEO audit & fixes", "Content optimization", "Link building strategy", "Keyword research & targeting"] },
       { title: "Social Media Management", description: "Build your brand presence and engage your audience.", items: ["Content creation & posting", "Community management", "Social media strategy", "Brand consistency", "Performance analytics"] },
       { title: "Google Ads Campaigns", description: "Expertly managed campaigns tailored to your business.", items: ["Campaign setup & management", "Keyword targeting", "Ad copywriting", "Bid & budget optimization", "Performance tracking"] },

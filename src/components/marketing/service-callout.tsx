@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import type { Service } from "@/types/content";
 
-/** “Need help with this?” box linking an article to the service it’s about. */
-export function ServiceCallout({ service }: { service: Service }) {
+/** “Need help with this?” box linking an article to the service it’s about (and the local office page, when it has one). */
+export function ServiceCallout({ service, office }: { service: Service; office?: { city: string; href: string } }) {
   return (
     <aside aria-labelledby="service-callout" className="theme-dark mt-14 rounded-[28px] bg-ink-900 p-6 md:p-8">
       <div className="flex flex-col gap-6 md:flex-row md:items-center">
@@ -26,6 +27,15 @@ export function ServiceCallout({ service }: { service: Service }) {
           Get a free consultation
         </ButtonLink>
       </div>
+      {office && (
+        <p className="mt-5 border-t border-white/10 pt-5 text-sm text-white/65">
+          Based in {office.city}?{" "}
+          <Link href={office.href} className="font-medium text-brand-300 underline underline-offset-4 hover:text-white">
+            {service.shortTitle} in {office.city}
+          </Link>{" "}
+          with our local team.
+        </p>
+      )}
     </aside>
   );
 }

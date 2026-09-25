@@ -36,7 +36,7 @@ export const siteSeed: SiteSettings = {
       email: "usa@jarzdigital.com",
       description:
         "Founded in Dallas, Jarz Digital helps Texas-based businesses scale faster with local SEO, custom web design, and business management solutions. Our Dallas team works closely with local clients to boost rankings, improve digital visibility, and increase leads.",
-      image: { src: "/images/locations/dallas.jpg", alt: "Dallas skyline reflected in water at dusk", width: 2000, height: 1499 },
+      image: { src: "/images/locations/dallas.webp", alt: "Dallas skyline reflected in water at dusk", width: 1600, height: 1199 },
       mapQuery: "Dallas, TX",
     },
     {
@@ -49,7 +49,7 @@ export const siteSeed: SiteSettings = {
       email: "usa@jarzdigital.com",
       description:
         "From the heart of Colorado, our Denver branch specializes in helping small to mid-size businesses thrive online. With expertise in local SEO and ad campaign management, we ensure your brand gets noticed in the Denver market and beyond.",
-      image: { src: "/images/locations/denver.jpeg", alt: "Denver skyline with the Rocky Mountains", width: 7360, height: 4140 },
+      image: { src: "/images/locations/denver.webp", alt: "Denver skyline with the Rocky Mountains", width: 1600, height: 900 },
       mapQuery: "Cherry Creek, Denver, CO",
     },
     {
@@ -57,13 +57,14 @@ export const siteSeed: SiteSettings = {
       code: "YYC",
       region: "Alberta",
       country: "Canada",
-      address: "3730108 Ave NE #2138, Calgary, AB T3N IV9",
+      // Corrected from the old site's "3730108 Ave NE … T3N IV9" (missing space; letter I in the postcode). Unit number as published.
+      address: "3730 108 Ave NE #2138, Calgary, AB T3N 1V9",
       phone: "+1 267-766-9055",
       email: "canada@jarzdigital.com",
       description:
         "Jarz Digital serves Canadian businesses from our Calgary location with a focus on Shopify, WordPress, and Laravel website development. We help companies rank higher, grow faster, and convert better with targeted marketing strategies.",
-      image: { src: "/images/locations/calgary.jpg", alt: "Calgary skyline at dusk", width: 1359, height: 772 },
-      mapQuery: "Downtown Calgary, AB",
+      image: { src: "/images/locations/calgary.webp", alt: "Calgary skyline at dusk", width: 1359, height: 772 },
+      mapQuery: "3730 108 Ave NE, Calgary, AB T3N 1V9",
     },
     {
       city: "Dhaka",
@@ -226,7 +227,7 @@ export const growthProcess = [
       "Pinterest & TikTok — visual branding and viral content",
       "Quora & Medium — authority building and content marketing",
       "Tumblr — creative expression and niche targeting",
-      "Google My Business — local visibility and customer interaction",
+      "Google Business Profile — local visibility and customer interaction",
     ],
   },
   {

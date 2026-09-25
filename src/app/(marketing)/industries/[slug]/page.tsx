@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
-import { Stagger, StaggerItem } from "@/components/animations";
+import { Stagger, StaggerItem } from "@/components/animations/reveal";
 import { ProjectCard } from "@/components/marketing/cards";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { PageHero } from "@/components/marketing/page-hero";

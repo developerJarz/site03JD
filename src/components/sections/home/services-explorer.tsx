@@ -41,12 +41,12 @@ export function ServicesExplorer({ services }: { services: ServiceSummary[] }) {
                 className="group flex items-baseline gap-5 py-6 md:gap-8 md:py-7"
                 aria-describedby={`svc-tag-${s.slug}`}
               >
-                <span className={cn("font-mono text-sm transition-colors duration-300", isActive ? "text-brand-600" : "text-mist-400")}>{String(i + 1).padStart(2, "0")}</span>
+                <span className={cn("font-mono text-sm transition-colors duration-300", isActive ? "text-brand-700" : "text-mist-500")}>{String(i + 1).padStart(2, "0")}</span>
                 <span className="min-w-0 flex-1">
                   <span
                     className={cn(
                       "block font-display text-[clamp(1.6rem,1.1rem+2vw,2.6rem)] font-semibold leading-tight tracking-[-0.03em] transition-[color,transform] duration-500 ease-[var(--ease-out-expo)]",
-                      isActive ? "translate-x-1 text-ink-900" : "text-mist-400 group-hover:text-ink-900",
+                      isActive ? "translate-x-1 text-ink-900" : "text-mist-500 group-hover:text-ink-900",
                     )}
                   >
                     {s.title}

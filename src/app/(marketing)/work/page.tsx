@@ -31,7 +31,8 @@ export default async function WorkPage() {
   return (
     <>
       <PageHero
-        eyebrow="Our work"
+        eyebrow="Portfolio & case studies"
+        eyebrowInTitle
         title="Websites and growth systems for real businesses."
         titleLines={["Websites and growth", "systems for real businesses."]}
         description="Our recent projects in web design & development, Local SEO, business management and social media marketing — for clients across all business categories."

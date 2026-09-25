@@ -9,15 +9,26 @@ const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 function layout(opts: { preheader: string; heading: string; body: string; cta?: { label: string; href: string } }) {
-  const logo = new URL("/images/brand/logo.png", env.SITE_URL).toString();
+  const font = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
   const cta = opts.cta
     ? `<tr><td style="padding:8px 0 24px"><a href="${esc(opts.cta.href)}" style="display:inline-block;background:#00afb9;color:#03060b;text-decoration:none;font-weight:600;padding:14px 22px;border-radius:10px">${esc(opts.cta.label)} &rarr;</a></td></tr>`
     : "";
-  return `<!doctype html><html><body style="margin:0;background:#f4f7f9;font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#060b13">
+  return `<!doctype html><html><body style="margin:0;background:#f4f7f9;font-family:${font};color:#060b13">
 <span style="display:none;max-height:0;overflow:hidden">${esc(opts.preheader)}</span>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7f9;padding:32px 12px"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;border:1px solid #d9e1e8">
-<tr><td style="padding:28px 32px;border-bottom:1px solid #eaeff3"><img src="${logo}" alt="Jarz Digital" width="140" style="display:block;height:auto"></td></tr>
+<tr><td style="padding:24px 32px;border-bottom:1px solid #eaeff3">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td style="vertical-align:middle;padding-right:10px">
+        <div style="background:#00afb9;color:#06121a;font-weight:900;font-size:15px;width:32px;height:32px;line-height:32px;text-align:center;border-radius:8px;display:inline-block;font-family:${font}">JD</div>
+      </td>
+      <td style="vertical-align:middle">
+        <span style="font-size:19px;font-weight:700;letter-spacing:-0.02em;color:#060b13;font-family:${font};text-decoration:none">Jarz Digital</span>
+      </td>
+    </tr>
+  </table>
+</td></tr>
 <tr><td style="padding:32px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 <tr><td style="font-size:22px;font-weight:700;letter-spacing:-0.02em;padding-bottom:16px">${esc(opts.heading)}</td></tr>
 <tr><td style="font-size:15px;line-height:1.65;color:#3a4654;padding-bottom:16px">${opts.body}</td></tr>
@@ -51,7 +62,6 @@ export function otpEmail(opts: { code: string; purpose: "register" | "reset"; mi
   const { code, purpose, minutes, to, name } = opts;
   const isReset = purpose === "reset";
   const first = name?.trim().split(/\s+/)[0];
-  const logo = url("/images/brand/logo.png");
   const year = new Date().getFullYear();
 
   const copy = isReset
@@ -86,9 +96,20 @@ export function otpEmail(opts: { code: string; purpose: "register" | "reset"; mi
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px">
 
   <!-- Header -->
-  <tr><td style="background:#06121a;border-radius:18px 18px 0 0;border-top:4px solid #00afb9;padding:26px 32px">
+  <tr><td style="background:#06121a;border-radius:18px 18px 0 0;border-top:4px solid #00afb9;padding:24px 32px">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td align="left"><img src="${logo}" alt="Jarz Digital" width="150" style="display:block;width:150px;height:auto;border:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.01em"></td>
+      <td align="left">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="vertical-align:middle;padding-right:10px">
+              <div style="background:#00afb9;color:#06121a;font-weight:900;font-size:15px;width:32px;height:32px;line-height:32px;text-align:center;border-radius:8px;display:inline-block;font-family:${font}">JD</div>
+            </td>
+            <td style="vertical-align:middle">
+              <span style="font-size:20px;font-weight:700;letter-spacing:-0.02em;color:#ffffff;font-family:${font};text-decoration:none">Jarz Digital</span>
+            </td>
+          </tr>
+        </table>
+      </td>
       <td align="right" style="font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:#7fdde2">${esc(copy.tag)}</td>
     </tr></table>
   </td></tr>

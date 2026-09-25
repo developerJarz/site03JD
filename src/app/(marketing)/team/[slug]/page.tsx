@@ -9,7 +9,7 @@ import { TeamAvatar } from "@/components/sections/team-grid";
 import { SOCIAL_ICONS } from "@/components/ui/brand-icons";
 import { Section } from "@/components/ui/section";
 import { getTeam, getTeamMemberBySlug } from "@/lib/data/public";
-import { SITE_URL, buildMetadata } from "@/lib/seo";
+import { buildMetadata, personSchema, teamProfileIndexable } from "@/lib/seo";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -22,7 +22,8 @@ export async function generateMetadata({ params }: PageProps<"/team/[slug]">): P
   const { slug } = await params;
   const member = await getTeamMemberBySlug(slug);
   if (!member) return {};
-  return buildMetadata({ title: `${member.name} — ${member.role}`, description: member.bio, path: `/team/${member.slug}`, image: member.photo?.src });
+  // Short profiles stay reachable but out of search until the bio is expanded (see teamProfileIndexable).
+  return buildMetadata({ title: `${member.name} — ${member.role}`, description: member.bio, path: `/team/${member.slug}`, image: member.photo?.src, noindex: !teamProfileIndexable(member) });
 }
 
 export default async function TeamMemberPage({ params }: PageProps<"/team/[slug]">) {
@@ -34,16 +35,7 @@ export default async function TeamMemberPage({ params }: PageProps<"/team/[slug]
 
   return (
     <>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Person",
-          name: member.name,
-          jobTitle: member.role,
-          worksFor: { "@id": `${SITE_URL}/#organization` },
-          ...(member.photo ? { image: `${SITE_URL}${member.photo.src}` } : {}),
-        }}
-      />
+      <JsonLd data={personSchema(member)} />
       <section className="theme-dark relative overflow-hidden bg-ink-950 pb-20 pt-36 md:pt-44">
         <div aria-hidden className="absolute inset-0 bg-grid opacity-60 mask-fade-b" />
         <div className="container-page relative">

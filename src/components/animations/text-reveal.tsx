@@ -13,6 +13,7 @@ export function TextReveal({
   delay = 0,
   stagger = 0.09,
   as: Tag = "h1",
+  prefix,
 }: {
   lines: ReactNode[];
   className?: string;
@@ -20,9 +21,13 @@ export function TextReveal({
   delay?: number;
   stagger?: number;
   as?: "h1" | "h2" | "p";
+  /** Rendered inside the heading before the lines (e.g. a kicker that names the page topic). */
+  prefix?: ReactNode;
 }) {
   return (
     <Tag className={className}>
+      {prefix}
+      {prefix && " "}
       {lines.map((line, i) => (
         <Fragment key={i}>
           {/* The space keeps words apart in the text search engines and screen readers get. */}

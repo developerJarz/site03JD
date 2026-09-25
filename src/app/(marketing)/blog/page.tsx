@@ -23,7 +23,8 @@ export default async function BlogPage() {
   return (
     <>
       <PageHero
-        eyebrow="Insights"
+        eyebrow="The Jarz Digital blog"
+        eyebrowInTitle
         title="Guides for growing your business online."
         titleLines={["Guides for growing", "your business online."]}
         description="Local SEO, Google Maps, Google Business Profile and business management — explained by the team that does it every day."

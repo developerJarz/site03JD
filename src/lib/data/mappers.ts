@@ -152,9 +152,13 @@ export function mapPost(d: Doc): Post {
     coverImage: image(d.coverImage),
     category: d.category && d.category.slug ? { _id: str(d.category._id), slug: d.category.slug, name: d.category.name } : null,
     tags: (d.tags ?? []).filter((t: Doc) => t && t.slug).map((t: Doc) => ({ _id: str(t._id), slug: t.slug, name: t.name })),
-    authorName: d.author?.name || d.authorName || "Jarz Digital Team",
+    authorName: d.authorMember?.name || d.author?.name || d.authorName || "Jarz Digital Team",
+    authorMember: d.authorMember?.slug
+      ? { slug: d.authorMember.slug, name: d.authorMember.name, role: d.authorMember.role ?? "", bio: d.authorMember.bio ?? "", photo: image(d.authorMember.photo), socials: d.authorMember.socials ?? {} }
+      : null,
     status: d.status,
     publishedAt: iso(d.publishedAt) ?? null,
+    contentUpdatedAt: iso(d.contentUpdatedAt) ?? null,
     featured: Boolean(d.featured),
     views: d.views ?? 0,
     readingTime: d.readingTime ?? 1,

@@ -1,6 +1,6 @@
 "use client";
 
-import { MotionConfig, motion, useInView, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform, type Variants } from "motion/react";
+import { MotionConfig, motion, useInView, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -16,94 +16,54 @@ export function MotionProvider({ children }: { children: ReactNode }) {
 
 /* ------------------------------------------------------------------ */
 
-export function Reveal({
-  children,
-  className,
-  delay = 0,
-  y = 28,
-  as = "div",
-}: {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-  y?: number;
-  as?: "div" | "li" | "section" | "article" | "span";
-}) {
-  const Cmp = motion[as];
-  return (
-    <Cmp
-      className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "0px 0px -12% 0px" }}
-      transition={{ duration: 0.9, delay, ease: EASE }}
-    >
-      {children}
-    </Cmp>
-  );
-}
-
-const staggerParent: Variants = {
-  hidden: {},
-  show: (stagger: number = 0.08) => ({ transition: { staggerChildren: stagger } }),
-};
-
-const staggerChild: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } },
-};
-
-export function Stagger({ children, className, stagger = 0.08, as = "div" }: { children: ReactNode; className?: string; stagger?: number; as?: "div" | "ul" | "ol" }) {
-  const Cmp = motion[as];
-  return (
-    <Cmp className={className} variants={staggerParent} custom={stagger} initial="hidden" whileInView="show" viewport={{ once: true, margin: "0px 0px -10% 0px" }}>
-      {children}
-    </Cmp>
-  );
-}
-
-export function StaggerItem({ children, className, as = "div" }: { children: ReactNode; className?: string; as?: "div" | "li" | "article" }) {
-  const Cmp = motion[as];
-  return (
-    <Cmp className={className} variants={staggerChild}>
-      {children}
-    </Cmp>
-  );
-}
-
 /* ------------------------------------------------------------------ */
 
 /* ------------------------------------------------------------------ */
 
-/** Counts up to the numeric part of values like "500+", "1,000+" or "100%". */
+/**
+ * Counts up to the numeric part of values like "500+", "1,000+" or "100%".
+ * The real value is what the server renders (search engines, link previews
+ * and no-JS visitors never see "0"); after hydration, counters that start
+ * below the fold reset to zero and count up when scrolled into view.
+ */
 export function Counter({ value, className, duration = 1.8 }: { value: string; className?: string; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "0px 0px -10% 0px" });
   const reduce = useReducedMotion();
   const match = value.match(/^(\D*)([\d,.]+)(.*)$/);
-  const isYear = /^(19|20)\d{2}$/.test(value);
-  const target = match ? Number(match[2].replace(/,/g, "")) : 0;
-  const [display, setDisplay] = useState(match && !isYear ? `${match[1]}0${match[3]}` : value);
+  const animatable = Boolean(match) && !/^(19|20)\d{2}$/.test(value);
+  const [display, setDisplay] = useState(value);
+  const armed = useRef(false);
+
+  // Arm the count-up only for counters the visitor hasn’t seen yet.
+  useEffect(() => {
+    const el = ref.current;
+    if (!animatable || reduce || !el || el.getBoundingClientRect().top < window.innerHeight) return;
+    armed.current = true;
+    setDisplay(`${match![1]}0${match![3]}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    if (!match || isYear || !inView || reduce) return;
+    if (!armed.current || !inView) return;
     let frame = 0;
     const start = performance.now();
+    const target = Number(match![2].replace(/,/g, ""));
     const fmt = new Intl.NumberFormat("en-US");
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / (duration * 1000));
       const eased = 1 - Math.pow(1 - t, 4);
-      setDisplay(`${match[1]}${fmt.format(Math.round(target * eased))}${match[3]}`);
+      setDisplay(t < 1 ? `${match![1]}${fmt.format(Math.round(target * eased))}${match![3]}` : value);
       if (t < 1) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inView, reduce]);
+  }, [inView]);
 
   return (
-    <span ref={ref} className={cn("tabular-nums", className)} aria-label={value}>
-      <span aria-hidden>{reduce ? value : display}</span>
+    <span ref={ref} className={cn("tabular-nums", className)}>
+      {display}
     </span>
   );
 }
@@ -154,24 +114,7 @@ export function Parallax({ children, className, offset = 60 }: { children: React
   );
 }
 
-/** Image mask reveal — the frame wipes open when scrolled into view. */
-export function ImageReveal({ children, className, delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
-  return (
-    <motion.div
-      className={cn("overflow-hidden", className)}
-      initial={{ clipPath: "inset(12% 12% 12% 12% round 24px)", opacity: 0.4 }}
-      whileInView={{ clipPath: "inset(0% 0% 0% 0% round 24px)", opacity: 1 }}
-      viewport={{ once: true, margin: "0px 0px -15% 0px" }}
-      transition={{ duration: 1.3, delay, ease: EASE }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-/** Thin progress bar showing reading/scroll progress (used on articles). */
+/** Thin reading-progress bar (articles). Pure CSS scroll timeline — no scroll listener; hidden where unsupported. */
 export function ScrollProgress({ className }: { className?: string }) {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 140, damping: 24, mass: 0.3 });
-  return <motion.div aria-hidden style={{ scaleX }} className={cn("fixed inset-x-0 top-0 z-[60] h-[2px] origin-left bg-brand-400", className)} />;
+  return <div aria-hidden className={cn("scroll-progress fixed inset-x-0 top-0 z-[60] h-[2px] bg-brand-400", className)} />;
 }

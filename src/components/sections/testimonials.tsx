@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Star } from "lucide-react";
-import { Stagger, StaggerItem } from "@/components/animations";
+import { Stagger, StaggerItem } from "@/components/animations/reveal";
 import { initials } from "@/lib/utils";
 import type { Testimonial } from "@/types/content";
 

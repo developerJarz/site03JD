@@ -76,7 +76,8 @@ All configuration is via environment variables — nothing secret is committed. 
 
 | Variable | Required | Notes |
 |---|---|---|
-| `SITE_URL` | yes (prod) | Public origin, e.g. `https://jarzdigital.com`. Used for canonical URLs, sitemap, OG images and email links. |
+| `SITE_URL` | yes (prod) | Public origin — `https://www.jarzdigital.com` in production. Used for canonical URLs, sitemap, robots.txt, OG images and email links. A Vercel production build fails if it is missing or set to a `*.vercel.app` host. |
+| `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_GTM_ID` | no | GA4 measurement ID or GTM container ID. Loaded only after cookie consent; fires `generate_lead`, `click_call` and `click_whatsapp`. |
 | `MONGODB_URI` | yes (prod) | MongoDB connection string (Atlas recommended). |
 | `MONGODB_DB` | no | Database name (default `jarzdigital`). |
 | `AUTH_SECRET` | **yes (prod)** | Long random string — keys the HMAC used to store session and reset tokens. Generate: `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` |
@@ -143,7 +144,9 @@ npm start          # listens on $PORT (default 3000)
 
 **Recommended:** a Node host with persistent disk (Railway, Render, Fly.io, a VPS with PM2/systemd, or Docker) + MongoDB Atlas. Put it behind HTTPS.
 
-**Vercel** also works if you use `STORAGE_DRIVER=cloudinary` (serverless file systems are ephemeral) and replace the in-memory rate limiter with a shared store (see `setRateLimitStore` in `src/lib/security/rate-limit.ts`, e.g. Upstash Redis).
+**Vercel** works with `STORAGE_DRIVER=cloudinary` (serverless file systems are ephemeral — on Vercel, local uploads switch to Cloudinary automatically when its keys are set, and are refused otherwise). Rate limits are stored in MongoDB (`ratelimits` collection, TTL-expired) whenever a database is configured, so all serverless instances share them.
+
+**Domains and redirects.** Production answers only on `SITE_URL`'s host: `*.vercel.app` and the bare/`www` twin are 301-redirected to the same path on it in one hop (legacy WordPress URLs go straight to their new page). Old WordPress URLs are mapped in `src/config/redirects.ts` (pages, dated posts, categories, tags, authors, shop pages, sitemaps) and `src/config/legacy-uploads.json` (migrated `/wp-content/uploads/` images); other `/wp-content/*` files return 410. Next's automatic trailing-slash redirect is off so every old URL is exactly one 301.
 
 Deployment checklist:
 1. Set `SITE_URL`, `MONGODB_URI`, `AUTH_SECRET`, email and storage variables.

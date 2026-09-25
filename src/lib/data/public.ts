@@ -133,7 +133,9 @@ export const getFaqs = cached("faqs", [TAGS.faqs], async (group: string = "gener
 
 /* ----------------------------------- Blog ---------------------------------- */
 
-export const getPosts = cached("posts", [TAGS.posts, TAGS.taxonomy], async (): Promise<Post[]> => {
+const AUTHOR_FIELDS = "slug name role bio photo socials";
+
+export const getPosts = cached("posts", [TAGS.posts, TAGS.taxonomy, TAGS.team], async (): Promise<Post[]> => {
   if (!isDbConfigured) return seedStore.posts;
   await connectDB();
   const docs = await PostModel.find({ status: "published", publishedAt: { $lte: new Date() } })
@@ -142,17 +144,19 @@ export const getPosts = cached("posts", [TAGS.posts, TAGS.taxonomy], async (): P
     .select("-content")
     .populate("category", "slug name")
     .populate("tags", "slug name")
+    .populate("authorMember", AUTHOR_FIELDS)
     .lean();
   return docs.map(mapPost).sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""));
 });
 
-export const getPostBySlug = cached("post", [TAGS.posts, TAGS.taxonomy], async (slug: string): Promise<Post | null> => {
+export const getPostBySlug = cached("post", [TAGS.posts, TAGS.taxonomy, TAGS.team], async (slug: string): Promise<Post | null> => {
   if (!isDbConfigured) return seedStore.posts.find((p) => p.slug === slug) ?? null;
   await connectDB();
   const doc = await PostModel.findOne({ slug, status: "published", publishedAt: { $lte: new Date() } })
     .populate("category", "slug name")
     .populate("tags", "slug name")
     .populate("author", "name")
+    .populate("authorMember", AUTHOR_FIELDS)
     .lean();
   return doc ? mapPost(doc) : null;
 });
@@ -198,6 +202,14 @@ export const getPublishedPageSlugs = cached("page-slugs", [TAGS.pages], async ()
   if (!isDbConfigured) return seedStore.pages.filter((p) => p.status === "published").map((p) => p.slug);
   await connectDB();
   const docs = await Page.find({ status: "published" }).select("slug").lean();
+  return docs.map((d) => d.slug);
+});
+
+/** Published CMS pages search engines may index — the sitemap leaves noindex pages out. */
+export const getIndexablePageSlugs = cached("page-slugs-indexable", [TAGS.pages], async (): Promise<string[]> => {
+  if (!isDbConfigured) return seedStore.pages.filter((p) => p.status === "published" && !p.seo?.noindex).map((p) => p.slug);
+  await connectDB();
+  const docs = await Page.find({ status: "published", "seo.noindex": { $ne: true } }).select("slug").lean();
   return docs.map((d) => d.slug);
 });
 

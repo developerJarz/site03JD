@@ -11,12 +11,15 @@ export function Marquee({
   duration = 40,
   reverse,
   pauseOnHover = true,
+  label,
 }: {
   children: ReactNode;
   className?: string;
   duration?: number;
   reverse?: boolean;
   pauseOnHover?: boolean;
+  /** Screen-reader lead-in for the first copy, e.g. "Clients include". */
+  label?: string;
 }) {
   return (
     <div className={cn("group/marquee flex overflow-hidden mask-fade-x", className)}>
@@ -28,7 +31,10 @@ export function Marquee({
         )}
         style={{ "--marquee-duration": `${duration}s` } as CSSProperties}
       >
-        <div className="flex shrink-0 items-center">{children}</div>
+        <div className="flex shrink-0 items-center">
+          {label && <span className="sr-only">{label}: </span>}
+          {children}
+        </div>
         <div className="flex shrink-0 items-center" aria-hidden>
           {children}
         </div>

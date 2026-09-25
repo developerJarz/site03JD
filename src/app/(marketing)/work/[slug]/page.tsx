@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
-import { ImageReveal, Reveal } from "@/components/animations";
+import { ImageReveal, Reveal } from "@/components/animations/reveal";
 import { ProjectCard, categoryLabel } from "@/components/marketing/cards";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { JsonLd } from "@/components/marketing/json-ld";
@@ -72,7 +72,7 @@ export default async function ProjectPage({ params }: PageProps<"/work/[slug]">)
         <dl className="mt-14 grid grid-cols-2 gap-6 border-t border-white/10 pt-8 md:grid-cols-4">
           {facts.map((f) => (
             <div key={f.label}>
-              <dt className="eyebrow text-white/40">{f.label}</dt>
+              <dt className="eyebrow text-white/55">{f.label}</dt>
               <dd className="mt-2 text-white/85">{f.value}</dd>
             </div>
           ))}
@@ -82,7 +82,7 @@ export default async function ProjectPage({ params }: PageProps<"/work/[slug]">)
       <section className="bg-ink-950 pb-16" aria-label="Project cover">
         <div className="container-page">
           <ImageReveal className="relative aspect-[1137/798] rounded-[28px] bg-ink-900">
-            <Image src={project.coverImage.src} alt={project.coverImage.alt} fill priority sizes="(min-width: 1320px) 1240px, 100vw" className="object-cover" />
+            <Image src={project.coverImage.src} alt={project.coverImage.alt} fill loading="eager" fetchPriority="high" sizes="(min-width: 1320px) 1240px, 100vw" className="object-cover" />
           </ImageReveal>
         </div>
       </section>

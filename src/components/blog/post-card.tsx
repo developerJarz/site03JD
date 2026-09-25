@@ -25,7 +25,7 @@ export function PostCard({ post, priority }: { post: Post; priority?: boolean })
             src={post.coverImage.src}
             alt={post.coverImage.alt}
             fill
-            priority={priority}
+            {...(priority ? { loading: "eager" as const, fetchPriority: "high" as const } : {})}
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.04]"
           />
@@ -47,7 +47,7 @@ export function FeaturedPost({ post }: { post: Post }) {
     <article className="group relative grid overflow-hidden rounded-[32px] border border-mist-200 bg-white lg:grid-cols-2">
       <div className="relative aspect-[3/2] lg:aspect-auto">
         {post.coverImage && (
-          <Image src={post.coverImage.src} alt={post.coverImage.alt} fill priority sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.03]" />
+          <Image src={post.coverImage.src} alt={post.coverImage.alt} fill loading="eager" fetchPriority="high" sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.03]" />
         )}
       </div>
       <div className="flex flex-col justify-center p-8 md:p-12">

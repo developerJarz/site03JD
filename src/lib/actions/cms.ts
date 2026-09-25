@@ -57,9 +57,11 @@ export async function saveResourceAction(
     let docId = id;
     let previousSlug: string | undefined;
     if (id) {
-      const existing = await model.findById(id).select("slug").lean<{ slug?: string }>();
+      const existing = await model.findById(id).select("slug content").lean<{ slug?: string; content?: string }>();
       if (!existing) return { ok: false, error: "This item no longer exists." };
       previousSlug = existing.slug;
+      // "Updated" dates and sitemap lastmod follow real edits to the article, not metadata tweaks.
+      if (key === "posts" && typeof data.content === "string" && data.content.trim() !== (existing.content ?? "").trim()) data.contentUpdatedAt = new Date();
       await model.updateOne({ _id: id }, { $set: data }, { runValidators: true });
     } else {
       const created = await model.create({ ...unflatten(data), ...(key === "posts" ? { author: user.id } : {}) });
