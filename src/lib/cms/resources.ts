@@ -231,6 +231,7 @@ export const RESOURCES: Record<ResourceKey, ResourceDef> = {
           { name: "heroTitle", label: "Hero headline", type: "text", max: 160 },
           { name: "heroSubtitle", label: "Hero description", type: "textarea", rows: 3, max: 600 },
           { name: "overview", label: "Overview", type: "textarea", rows: 5 },
+          { name: "content", label: "In-depth guide", type: "richtext", help: "Long-form, keyword-focused copy shown in the “In depth” section of the service page. Use H3 headings." },
         ],
       },
       { title: "Problems we solve", fields: [titled("Problems")] },

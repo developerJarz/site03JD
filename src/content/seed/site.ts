@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL, CONTACT_PHONE, WHATSAPP_NUMBER } from "@/config/contact";
 import type { SiteSettings } from "@/types/content";
 
 /**
@@ -14,9 +15,9 @@ export const siteSeed: SiteSettings = {
     foundedYear: 2019,
   },
   contact: {
-    email: "info@jarzdigital.com",
-    phone: "+1 267-766-9055",
-    whatsapp: "+8801677248045",
+    email: CONTACT_EMAIL,
+    phone: CONTACT_PHONE,
+    whatsapp: WHATSAPP_NUMBER,
     mailingAddress: "1024 Alyssa Ln, Carrollton, TX 75006, United States",
     hours: [
       { days: "Monday – Friday", hours: "9:00 AM – 6:00 PM" },
@@ -25,32 +26,37 @@ export const siteSeed: SiteSettings = {
     ],
     responseTime: "We respond within 24 hours",
   },
+  // Order shown everywhere offices are listed. Google Business Profile links supplied by the owner (Sept 2026).
   offices: [
+    {
+      city: "Dhaka",
+      code: "DAC",
+      region: "Dhaka",
+      country: "Bangladesh",
+      address: "Near Ibn Sina Diagnostic & Consultation Center, Section 2, Mirpur, Dhaka, Bangladesh",
+      phone: CONTACT_PHONE,
+      email: CONTACT_EMAIL,
+      description: "Jarz Digital’s Bangladesh office in Mirpur, Dhaka — home to our development, SEO and design team serving clients in Bangladesh, the USA, Canada and Europe.",
+      // Photo: Md Arafat Ul Alam on Unsplash (Unsplash License — free to use, no attribution required).
+      image: { src: "/images/locations/dhaka.webp", alt: "Dhaka city skyline with high-rise apartment and office buildings", width: 1600, height: 936 },
+      mapQuery: "Ibn Sina Diagnostic & Consultation Center, Mirpur 2, Dhaka",
+      gbpUrl: "https://g.page/r/CTwMLdNaDKn0EBM/",
+      intro:
+        "Our Dhaka office in Mirpur, Section 2 is where much of Jarz Digital’s design, development and SEO work happens. Businesses in Dhaka and across Bangladesh can work with the team directly — by phone, email, WhatsApp or at the office — for websites, e-commerce, local SEO and digital marketing, while the same team delivers projects for clients in the USA, Canada and Europe.",
+    },
     {
       city: "Dallas",
       code: "DAL",
       region: "Texas",
       country: "United States",
-      address: "Mockingbird Lane, Dallas, TX (Service-Based, Online Only)",
-      phone: "+1 267-766-9055",
-      email: "usa@jarzdigital.com",
+      address: "1024 Alyssa Ln, Carrollton, TX 75006, United States",
+      phone: CONTACT_PHONE,
+      email: CONTACT_EMAIL,
       description:
         "Founded in Dallas, Jarz Digital helps Texas-based businesses scale faster with local SEO, custom web design, and business management solutions. Our Dallas team works closely with local clients to boost rankings, improve digital visibility, and increase leads.",
       image: { src: "/images/locations/dallas.webp", alt: "Dallas skyline reflected in water at dusk", width: 1600, height: 1199 },
-      mapQuery: "Dallas, TX",
-    },
-    {
-      city: "Denver",
-      code: "DEN",
-      region: "Colorado",
-      country: "United States",
-      address: "Cherry Creek Area, Denver, CO (Service-Based, Online Only)",
-      phone: "+1 267-766-9055",
-      email: "usa@jarzdigital.com",
-      description:
-        "From the heart of Colorado, our Denver branch specializes in helping small to mid-size businesses thrive online. With expertise in local SEO and ad campaign management, we ensure your brand gets noticed in the Denver market and beyond.",
-      image: { src: "/images/locations/denver.webp", alt: "Denver skyline with the Rocky Mountains", width: 1600, height: 900 },
-      mapQuery: "Cherry Creek, Denver, CO",
+      mapQuery: "1024 Alyssa Ln, Carrollton, TX 75006",
+      gbpUrl: "https://g.page/r/CVYjvCvZRN2mEBM/",
     },
     {
       city: "Calgary",
@@ -59,29 +65,33 @@ export const siteSeed: SiteSettings = {
       country: "Canada",
       // Corrected from the old site's "3730108 Ave NE … T3N IV9" (missing space; letter I in the postcode). Unit number as published.
       address: "3730 108 Ave NE #2138, Calgary, AB T3N 1V9",
-      phone: "+1 267-766-9055",
-      email: "canada@jarzdigital.com",
+      phone: CONTACT_PHONE,
+      email: CONTACT_EMAIL,
       description:
         "Jarz Digital serves Canadian businesses from our Calgary location with a focus on Shopify, WordPress, and Laravel website development. We help companies rank higher, grow faster, and convert better with targeted marketing strategies.",
       image: { src: "/images/locations/calgary.webp", alt: "Calgary skyline at dusk", width: 1359, height: 772 },
       mapQuery: "3730 108 Ave NE, Calgary, AB T3N 1V9",
+      gbpUrl: "https://g.page/r/CXSqvjFWInrqEBM/",
     },
     {
-      city: "Dhaka",
-      code: "DAC",
-      region: "Dhaka",
-      country: "Bangladesh",
-      address: "Near Ibn Sina Diagnostic & Consultation Center, Section 2, Mirpur, Dhaka, Bangladesh",
-      phone: "+8801677-248045",
-      email: "bd@jarzdigital.com",
-      description: "Jarz Digital’s Bangladesh office in Mirpur, Dhaka — home to our development, SEO and design team serving clients in the USA, Canada, Europe and Bangladesh.",
+      city: "Cork",
+      code: "ORK",
+      region: "County Cork",
+      country: "Ireland",
+      address: "Cork, Ireland",
+      phone: CONTACT_PHONE,
+      email: CONTACT_EMAIL,
+      description: "Our Cork location brings Jarz Digital’s local SEO and website development to businesses in Cork and across Ireland — delivered with the same team and process our clients rely on worldwide.",
       image: null,
-      mapQuery: "Ibn Sina Diagnostic & Consultation Center, Mirpur 2, Dhaka",
+      mapQuery: "Jarz-Digital Cork Local SEO & Website development Agency, Cork, Ireland",
+      gbpUrl: "https://g.page/r/CVf9OubN5c3VEBM/",
       intro:
-        "Our Dhaka office in Mirpur, Section 2 is where much of Jarz Digital’s design, development and SEO work happens. Businesses in Dhaka and across Bangladesh can work with the team directly — by phone, email, WhatsApp or at the office — for websites, e-commerce, local SEO and digital marketing, while the same team delivers projects for clients in the USA, Canada and Europe.",
+        "Jarz Digital’s Cork location helps Irish businesses get found on Google and turn visitors into customers — local SEO and Google Business Profile optimisation, fast websites on WordPress, Shopify or custom code, and ongoing marketing, handled by one team. Reach us by WhatsApp, phone or email, or find us on Google Maps.",
     },
   ],
-  socials: {},
+  socials: {
+    facebook: "https://www.facebook.com/profile.php?id=61563196033794",
+  },
   stats: [
     { value: "500+", label: "Global clients served" },
     { value: "1,000+", label: "Projects completed" },
@@ -93,7 +103,7 @@ export const siteSeed: SiteSettings = {
     titleTemplate: "%s | Jarz Digital",
     defaultTitle: "Jarz Digital — Local SEO, Web Design & Digital Marketing",
     defaultDescription:
-      "Digital agency with offices in Dallas, Denver, Calgary and Dhaka, Bangladesh. Local SEO, web development, Google Ads and social media for growing brands.",
+      "Digital agency with offices in Dhaka, Dallas, Calgary and Cork. Local SEO, web design and development, Google Ads and social media for growing brands.",
     ogImage: "/opengraph-image",
     keywords: [
       "local SEO",
@@ -101,7 +111,7 @@ export const siteSeed: SiteSettings = {
       "digital marketing agency",
       "Google Maps ranking",
       "website development",
-      "Denver SEO",
+      "Cork SEO agency",
       "Calgary web design",
       "digital marketing agency in Dhaka",
       "web development company in Bangladesh",
@@ -109,7 +119,7 @@ export const siteSeed: SiteSettings = {
       "website design Dhaka",
     ],
   },
-  email: { notifyOnLead: true, adminRecipients: ["info@jarzdigital.com"] },
+  email: { notifyOnLead: true, adminRecipients: [CONTACT_EMAIL] },
   security: { allowRegistration: true },
   branding: { logo: "/images/brand/logo.png", mark: "/images/brand/mark.png" },
 };
@@ -155,7 +165,7 @@ export const brandFacts = {
     { title: "Transparent reporting", description: "Custom strategies and transparent reporting so you grow with confidence and clarity." },
   ],
   whyText:
-    "Jarz Digital is one of the best digital agencies in the USA & Canada, trusted for expert web design, powerful Local SEO services, and smart business management solutions. We create custom websites that look great and rank higher, helping businesses stand out in Dallas, Denver, and Calgary. Our team blends creativity with strategy to deliver real, measurable results. Whether you're a startup or an established brand, we provide tailored digital services that drive growth.",
+    "Jarz Digital is one of the best digital agencies in the USA & Canada, trusted for expert web design, powerful Local SEO services, and smart business management solutions. We create custom websites that look great and rank higher, helping businesses stand out in Dhaka, Dallas, Calgary and Cork. Our team blends creativity with strategy to deliver real, measurable results. Whether you're a startup or an established brand, we provide tailored digital services that drive growth.",
 };
 
 /** "Our work strategy planning process" — the six stages from the original homepage. */
@@ -213,7 +223,7 @@ export const growthProcess = [
       "100% manual work with detailed reporting",
       "Google Business Profile optimization & regular updates",
       "Build local citations and geo-targeted backlinks",
-      "Boost visibility in Dallas, Denver, Calgary, and beyond",
+      "Boost visibility in Dhaka, Dallas, Calgary, Cork and beyond",
     ],
   },
   {

@@ -7,7 +7,7 @@ import { officePath } from "@/lib/seo/locations";
 import { cn } from "@/lib/utils";
 import type { Office } from "@/types/content";
 
-const blank: Office = { city: "", code: "", region: "", country: "", address: "", phone: "", email: "", description: "", intro: "", mapQuery: "", slug: "", image: null };
+const blank: Office = { city: "", code: "", region: "", country: "", address: "", phone: "", email: "", description: "", intro: "", mapQuery: "", gbpUrl: "", slug: "", image: null };
 
 function Text({
   label,
@@ -120,6 +120,7 @@ export function OfficesEditor({ value, onChange, errors }: { value: Office[]; on
             <Text label="Phone" value={o.phone} onChange={(v) => set(i, { phone: v })} error={e(i, "phone")} />
             <Text label="Email" value={o.email ?? ""} onChange={(v) => set(i, { email: v })} error={e(i, "email")} />
             <Text label="Google Maps search" value={o.mapQuery ?? ""} onChange={(v) => set(i, { mapQuery: v })} error={e(i, "mapQuery")} help="What to search on Google Maps for directions and the map, e.g. a landmark or business listing." />
+            <Text label="Google Business Profile link" value={o.gbpUrl ?? ""} onChange={(v) => set(i, { gbpUrl: v })} error={e(i, "gbpUrl")} help="Your g.page share link. Shown as “View on Google” and used as the directions link." />
             <Text label="Page URL" value={o.slug ?? ""} onChange={(v) => set(i, { slug: v.toLowerCase().replace(/[^a-z0-9-]/g, "-") })} error={e(i, "slug")} placeholder={o.city.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "city"} help={`/locations/${o.slug || o.city.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "…"}`} />
           </div>
           <div className="mt-4 grid gap-4">

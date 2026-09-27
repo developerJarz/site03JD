@@ -1,3 +1,4 @@
+import { whatsappDisplay } from "@/config/contact";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { SOCIAL_ICONS, WhatsappIcon } from "@/components/ui/brand-icons";
@@ -146,7 +147,7 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-white/70 hover:text-white"
             >
-              <WhatsappIcon className="size-3.5" /> WhatsApp {contact.whatsapp}
+              <WhatsappIcon className="size-3.5" /> WhatsApp {whatsappDisplay(contact)}
             </a>
             <p className="text-white/55">{contact.mailingAddress}</p>
           </div>

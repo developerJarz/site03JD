@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, Mail, Phone, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ButtonLink } from "@/components/ui/button";
+import { ButtonLink, buttonClasses } from "@/components/ui/button";
+import { WhatsappIcon } from "@/components/ui/brand-icons";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
-import { PRIMARY_LINKS, type NavData } from "./types";
+import { PRIMARY_LINKS, startProjectHref, type NavData } from "./types";
 
 export function MobileMenu({
   open,
@@ -22,6 +24,7 @@ export function MobileMenu({
   account: { name: string; staff: boolean } | null;
   onSearch: () => void;
 }) {
+  const pathname = usePathname();
   const [expanded, setExpanded] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -141,9 +144,10 @@ export function MobileMenu({
             </ul>
 
             <div className="mt-8 flex flex-col gap-3">
-              <ButtonLink href="/contact?intent=project" size="lg" arrow onClick={onClose}>
-                Start a Project
-              </ButtonLink>
+              <a href={startProjectHref(data.whatsapp, pathname)} target="_blank" rel="noopener noreferrer" onClick={onClose} className={buttonClasses({ size: "lg", className: "bg-[#25D366] hover:bg-[#1fbd59]" })}>
+                <WhatsappIcon className="size-5" />
+                Start a Project on WhatsApp
+              </a>
               <ButtonLink href={account ? (account.staff ? "/admin" : "/dashboard") : "/login"} variant="outline-light" size="lg" onClick={onClose}>
                 {account ? `Dashboard — ${account.name.split(" ")[0]}` : "Sign in"}
               </ButtonLink>

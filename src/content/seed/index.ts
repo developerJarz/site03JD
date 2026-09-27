@@ -12,6 +12,7 @@ import { pageSeed } from "./pages";
 import { categorySeed, faqSeed, tagSeed, teamSeed } from "./people";
 import { projectSeed as projects } from "./projects";
 import { withSeo } from "./seo";
+import { serviceContent } from "./service-content";
 import { serviceSeed as services } from "./services";
 import { beforeAfterShowcase, brandFacts, growthProcess, siteSeed } from "./site";
 
@@ -31,7 +32,7 @@ export interface SeedPost {
 }
 
 export const postSeed = withSeo(postsJson as SeedPost[], "posts");
-const serviceSeed = withSeo(services, "services");
+const serviceSeed = withSeo(services, "services").map((s) => ({ ...s, content: serviceContent[s.slug] ?? "" }));
 const projectSeed = withSeo(projects, "projects");
 const industrySeed = withSeo(industries, "industries");
 

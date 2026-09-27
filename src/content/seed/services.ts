@@ -110,7 +110,7 @@ export const serviceSeed: SeedService[] = [
     published: true,
     seo: {
       title: "Website Development Services — WordPress, Shopify & Laravel",
-      description: "Fast, secure, mobile-friendly websites that rank on Google and convert visitors into customers. Plans from $50/month. Dallas, Denver & Calgary.",
+      description: "Fast, secure, mobile-friendly websites that rank on Google and convert visitors into customers. Plans from $50/month. Dhaka, Dallas, Calgary & Cork.",
     },
   },
 
@@ -267,7 +267,7 @@ export const serviceSeed: SeedService[] = [
     featured: true,
     published: true,
     seo: {
-      title: "Local SEO Services — Rank on Google Maps in Dallas, Denver & Calgary",
+      title: "Local SEO Services — Rank on Google Maps in Dhaka, Dallas, Calgary & Cork",
       description: "Google Business Profile optimization, map citations, local backlinks and 100% manual work with detailed reporting. Local SEO plans from $40/month.",
     },
   },
@@ -414,7 +414,7 @@ export const serviceSeed: SeedService[] = [
     featured: true,
     published: true,
     seo: {
-      title: "Google Ads & PPC Management — Dallas, Denver & Calgary",
+      title: "Google Ads & PPC Management — Dhaka, Dallas, Calgary & Cork",
       description: "Google Ads, PPC, Meta Ads and Product Ads managed for maximum ROI. Campaign management from $200/month plus your ad budget.",
     },
   },

@@ -10,7 +10,7 @@ export const seoOverrides: Record<"services" | "posts" | "projects" | "industrie
   services: {
     "website-development": {
       title: "Website Development — WordPress & Shopify",
-      description: "Fast, secure, mobile-friendly websites that rank on Google and convert visitors into customers. Plans from $50/month — teams in the USA, Canada and Dhaka.",
+      description: "Fast, secure, mobile-friendly websites that rank on Google and convert visitors into customers. Plans from $50/month. Dhaka, Dallas, Calgary & Cork.",
     },
     seo: {
       title: "SEO Services — Rank Higher on Google",

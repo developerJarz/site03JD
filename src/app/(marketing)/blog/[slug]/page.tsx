@@ -193,7 +193,8 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
 
       <CtaBanner
         title="Want help ranking your business?"
-        primary={{ label: "Get a Free Consultation", href: service ? `/contact?service=${service.slug}` : "/contact" }}
+        whatsapp={{ intent: `I read “${post.title}” and would like help with ${service?.title ?? "my online marketing"}.`, from: "Blog article", path: `/blog/${post.slug}` }}
+        primary={{ label: "Get a Free Consultation", href: service ? `/contact?service=${service.slug}#contact-form` : "/contact#contact-form" }}
         secondary={{ label: `Explore ${service?.shortTitle ?? "Local SEO"}`, href: `/services/${service?.slug ?? "local-seo"}` }}
       />
     </>

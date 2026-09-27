@@ -20,6 +20,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { getFaqs, getIndustries, getProjects, getServices, getSiteSettings, getTeam, getTestimonials } from "@/lib/data/public";
 import { faqSchema } from "@/lib/seo";
+import { publicUrl, whatsappLink, whatsappMessage } from "@/config/contact";
 import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
@@ -50,7 +51,10 @@ export default async function HomePage() {
     <>
       <JsonLd data={faqSchema(faqs)} />
 
-      <HomeHero trust={settings.trust} />
+      <HomeHero
+        trust={settings.trust}
+        whatsappHref={whatsappLink(settings.contact.whatsapp, whatsappMessage({ intent: "I’d like to start a project.", from: `Homepage — ${publicUrl("/")}` }))}
+      />
 
       <TrustStrip
         clients={clients}
@@ -148,9 +152,9 @@ export default async function HomePage() {
           index={n("locations")}
           eyebrow="Locations"
           title={<span id="locations-heading">Local strategy. Global team.</span>}
-          description="Service-based teams in Dallas, Denver and Calgary deliver localized strategies — backed by our global delivery team."
+          description="Teams in Dhaka, Dallas, Calgary and Cork deliver localized strategies — message us on WhatsApp or find us on Google Maps."
         />
-        <Locations offices={settings.offices} />
+        <Locations offices={settings.offices} from="Homepage locations section" path="/" />
       </Section>
 
       <Section tone="mist" id="faq" aria-labelledby="faq-heading">
@@ -171,7 +175,7 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      <CtaBanner />
+      <CtaBanner whatsapp={{ intent: "I’d like to start a project.", from: "Homepage", path: "/" }} />
     </>
   );
 }

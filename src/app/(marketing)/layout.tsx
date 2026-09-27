@@ -1,4 +1,5 @@
 import { Analytics } from "@/components/analytics/analytics";
+import { WhatsAppFloat } from "@/components/marketing/whatsapp-float";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { Footer } from "@/components/navigation/footer";
 import { Navbar } from "@/components/navigation/navbar";
@@ -13,6 +14,7 @@ export default async function MarketingLayout({ children }: { children: React.Re
     industries: industries.map((i) => ({ slug: i.slug, name: i.name, icon: i.icon })),
     phone: settings.contact.phone,
     email: settings.contact.email,
+    whatsapp: settings.contact.whatsapp,
   };
 
   return (
@@ -24,6 +26,7 @@ export default async function MarketingLayout({ children }: { children: React.Re
         {children}
       </main>
       <Footer settings={settings} services={services} industries={industries} />
+      <WhatsAppFloat number={settings.contact.whatsapp} />
       <Analytics />
     </>
   );

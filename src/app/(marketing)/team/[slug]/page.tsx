@@ -105,7 +105,7 @@ export default async function TeamMemberPage({ params }: PageProps<"/team/[slug]
           </aside>
         </div>
       </Section>
-      <CtaBanner />
+      <CtaBanner whatsapp={{ intent: "I’d like to talk to your team about a project.", from: `Team page: ${member.name}`, path: `/team/${member.slug}` }} />
     </>
   );
 }

@@ -2,10 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import { Stagger, StaggerItem } from "@/components/animations/reveal";
+import { WhatsAppButton } from "@/components/marketing/whatsapp";
+import { telHref } from "@/config/contact";
 import { officePath } from "@/lib/seo/locations";
 import type { Office } from "@/types/content";
 
-export function Locations({ offices }: { offices: Office[] }) {
+/**
+ * Office cards: contact details plus direct actions — WhatsApp (message names
+ * the office), the office's Google Business Profile, and a call button for the
+ * Bangladesh office. `from` says which page the section is on.
+ */
+export function Locations({ offices, from = "Locations section", path }: { offices: Office[]; from?: string; path?: string }) {
   return (
     <Stagger className={`grid gap-5 md:grid-cols-2 ${offices.length >= 4 ? "xl:grid-cols-4" : "lg:grid-cols-3"}`} stagger={0.1}>
       {offices.map((o) => (
@@ -56,8 +63,40 @@ export function Locations({ offices }: { offices: Office[] }) {
                 </li>
               )}
             </ul>
+            <div className="relative z-10 mt-5 flex flex-col gap-2">
+              <WhatsAppButton
+                size="md"
+                intent={`I’d like to contact your ${o.city} office.`}
+                from={`${from} — ${o.city}`}
+                path={path}
+                showNumber={o.phone}
+                className="h-auto w-full flex-wrap gap-x-2 gap-y-0 whitespace-normal py-2.5 text-sm"
+              >
+                Contact now
+              </WhatsAppButton>
+              <div className="flex flex-col gap-2">
+                {o.gbpUrl && (
+                  <a
+                    href={o.gbpUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-mist-200 px-3 text-sm font-medium text-ink-900 transition-colors hover:border-ink-900"
+                  >
+                    <MapPin className="size-4 text-brand-600" aria-hidden /> Google Maps
+                  </a>
+                )}
+                {o.country === "Bangladesh" && (
+                  <a
+                    href={telHref(o.phone)}
+                    className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-ink-900 px-3 text-sm font-medium text-white transition-colors hover:bg-ink-700"
+                  >
+                    <Phone className="size-4 text-brand-300" aria-hidden /> Call {o.phone}
+                  </a>
+                )}
+              </div>
+            </div>
             {!o.hidePage && (
-              <span aria-hidden className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-ink-900">
+              <span aria-hidden className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-ink-900">
                 Office details <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </span>
             )}

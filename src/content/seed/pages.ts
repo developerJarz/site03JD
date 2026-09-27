@@ -13,7 +13,7 @@ export const pageSeed: SeedPage[] = [
     content: `${placeholderNotice}
 <h2>Information we collect</h2><p>When you contact us, request a quote or create an account, we collect the details you provide — such as your name, email address, phone number, company and project information.</p>
 <h2>How we use it</h2><p>We use this information to respond to inquiries, deliver the services you request, and send account-related emails such as password resets.</p>
-<h2>Contact</h2><p>Questions about privacy can be sent to info@jarzdigital.com.</p>`,
+<h2>Contact</h2><p>Questions about privacy can be sent to jarzdigital36@gmail.com.</p>`,
     status: "published",
     needsReview: true,
     seo: { noindex: true },

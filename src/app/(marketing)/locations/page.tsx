@@ -29,9 +29,9 @@ export default async function LocationsPage() {
       />
       <Section tone="light" aria-labelledby="offices-heading">
         <SectionHeader eyebrow="Locations" title={<span id="offices-heading">Find the office nearest you.</span>} description="Each office page lists the address, direct contacts and the services available to local businesses." />
-        <Locations offices={settings.offices} />
+        <Locations offices={settings.offices} from="Locations page" path="/locations" />
       </Section>
-      <CtaBanner />
+      <CtaBanner whatsapp={{ intent: "I’d like to start a project with one of your offices.", from: "Locations page", path: "/locations" }} />
     </>
   );
 }

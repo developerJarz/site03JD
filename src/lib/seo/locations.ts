@@ -9,7 +9,8 @@ export const officePath = (o: Office) => `/locations/${officeSlug(o)}`;
 /** Offices that have a public location page. */
 export const locationOffices = (s: Pick<SiteSettings, "offices">) => s.offices.filter((o) => !o.hidePage);
 
-export const countryCode = (country: string) => (/canada/i.test(country) ? "CA" : /bangladesh/i.test(country) ? "BD" : /united states|usa/i.test(country) ? "US" : country);
+export const countryCode = (country: string) =>
+  /canada/i.test(country) ? "CA" : /bangladesh/i.test(country) ? "BD" : /united states|usa/i.test(country) ? "US" : /ireland/i.test(country) ? "IE" : country;
 
 /** Country names from the offices, in office order, without repeats. */
 export const officeCountries = (s: Pick<SiteSettings, "offices">) => Array.from(new Set(s.offices.map((o) => o.country)));

@@ -225,6 +225,7 @@ const settingsSections = {
         description: z.string().trim().min(1, "Add a short description").max(400),
         intro: z.string().trim().max(1200).optional(),
         mapQuery: z.string().trim().max(200).optional(),
+        gbpUrl: z.union([z.literal(""), z.string().trim().url("Enter a full https:// link").max(300)]).optional(),
         slug: z
           .string()
           .trim()

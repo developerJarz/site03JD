@@ -1,3 +1,4 @@
+import { WhatsAppButton } from "@/components/marketing/whatsapp";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
@@ -6,7 +7,6 @@ import { CtaBanner } from "@/components/marketing/cta-banner";
 import { PageHero } from "@/components/marketing/page-hero";
 import { BeforeAfterShowcase } from "@/components/sections/before-after";
 import { WorkExplorer } from "@/components/sections/work-explorer";
-import { ButtonLink } from "@/components/ui/button";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { beforeAfterShowcase } from "@/content/seed";
 import { getIndustries, getProjects } from "@/lib/data/public";
@@ -38,9 +38,9 @@ export default async function WorkPage() {
         description="Our recent projects in web design & development, Local SEO, business management and social media marketing — for clients across all business categories."
         crumbs={[{ name: "Work", path: "/work" }]}
         actions={
-          <ButtonLink href="/contact?intent=project" size="lg" arrow>
+          <WhatsAppButton intent="I saw your portfolio and would like to start a project." from="Portfolio page" path="/work">
             Start a Project
-          </ButtonLink>
+          </WhatsAppButton>
         }
       />
 
@@ -64,7 +64,7 @@ export default async function WorkPage() {
         <BeforeAfterShowcase items={beforeAfterShowcase} projectSlugs={projects.map((p) => p.slug)} />
       </Section>
 
-      <CtaBanner title="Your project could be next." primary={{ label: "Start a Project", href: "/contact?intent=project" }} secondary={{ label: "Explore Our Services", href: "/services" }} />
+      <CtaBanner title="Your project could be next." whatsapp={{ intent: "I saw your portfolio and would like to start a project.", from: "Portfolio page", path: "/work" }} primary={{ label: "Send a Request", href: "/contact?intent=project#contact-form" }} secondary={{ label: "Explore Our Services", href: "/services" }} />
     </>
   );
 }

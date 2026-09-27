@@ -34,6 +34,7 @@ export function mapService(d: Doc): Service {
     heroTitle: d.heroTitle || d.title,
     heroSubtitle: d.heroSubtitle ?? "",
     overview: d.overview ?? "",
+    content: d.content ?? "",
     image: image(d.image),
     problems: d.problems ?? [],
     included: (d.included ?? []).map((g: Doc) => ({ title: g.title, description: g.description, items: g.items ?? [] })),

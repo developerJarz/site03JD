@@ -131,9 +131,9 @@ export const faqSeed: SeedFaq[] = [
     group: "general",
     order: 2,
     published: true,
-    question: "How can Local SEO help my business in Dallas, Denver, or Calgary?",
+    question: "How can Local SEO help my business in Dhaka, Dallas, Calgary or Cork?",
     answer:
-      "Local SEO helps your business appear in top search results when people near you search for services like yours. We focus on ranking your Google Business Profile, optimizing local keywords, and updating your profile regularly, helping you get more leads in Dallas, Denver, and Calgary.",
+      "Local SEO helps your business appear in top search results when people near you search for services like yours. We focus on ranking your Google Business Profile, optimizing local keywords, and updating your profile regularly, helping you get more leads in Dhaka, Dallas, Calgary and Cork.",
   },
   {
     group: "general",
@@ -171,7 +171,7 @@ export const faqSeed: SeedFaq[] = [
     group: "contact",
     order: 2,
     published: true,
-    question: "Do you work with businesses outside of Dallas, Denver, and Calgary?",
+    question: "Do you work with businesses outside of Dhaka, Dallas, Calgary and Cork?",
     answer:
       "Absolutely! While we have offices in these three cities, we work with clients across North America and internationally. Most of our services can be delivered remotely with excellent results.",
   },

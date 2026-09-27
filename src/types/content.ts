@@ -69,6 +69,8 @@ export interface Service {
   heroTitle: string;
   heroSubtitle: string;
   overview: string;
+  /** Long-form guide (rich text HTML) shown as the "In depth" section. */
+  content?: string;
   image?: ImageRef | null;
   problems: TitledItem[];
   included: FeatureGroup[];
@@ -239,6 +241,8 @@ export interface Office {
   description: string;
   image?: ImageRef | null;
   mapQuery?: string;
+  /** The office's Google Business Profile (g.page) link — used for "View on Google" and in schema. */
+  gbpUrl?: string;
   /** URL segment for /locations/[slug]; defaults to the city name. */
   slug?: string;
   /** Longer introduction shown on the location page. */

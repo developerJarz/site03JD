@@ -93,7 +93,8 @@ export function parsePostalAddress(text: string): Json | null {
 
 /** Site-wide Organization. Contact details come from Settings; the founder from the team list. */
 export function organizationSchema(s: SiteSettings, founder?: Pick<TeamMember, "slug" | "name" | "role" | "socials"> | null): Json {
-  const sameAs = Object.values(s.socials).filter(Boolean);
+  // Social profiles plus each office's Google Business Profile.
+  const sameAs = [...Object.values(s.socials), ...s.offices.map((o) => o.gbpUrl)].filter(Boolean);
   const address = s.contact.mailingAddress ? parsePostalAddress(s.contact.mailingAddress) ?? s.contact.mailingAddress : null;
   return {
     "@context": "https://schema.org",
@@ -176,7 +177,9 @@ export const isPhysicalOffice = (o: Office) => !/online only/i.test(o.address);
 /** Street part of an office address that isn't in "Street, City, ST 12345" form (e.g. Dhaka). */
 function officeStreet(o: Office): string {
   const tail = new RegExp(`(,\\s*${escapeRe(o.city)})?(,\\s*${escapeRe(o.country)})?\\s*$`, "i");
-  return o.address.replace(tail, "").trim();
+  const street = o.address.replace(tail, "").trim();
+  // "Cork, Ireland" leaves just the city — no street to publish.
+  return street.toLowerCase() === o.city.toLowerCase() ? "" : street;
 }
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -200,14 +203,15 @@ export function localBusinessSchema(o: Office, s: SiteSettings): Json | null {
     logo: abs(s.branding.logo),
     telephone: o.phone,
     ...(o.email ? { email: o.email } : {}),
-    hasMap: mapUrl(o),
+    hasMap: o.gbpUrl || mapUrl(o),
+    ...(o.gbpUrl ? { sameAs: [o.gbpUrl] } : {}),
     areaServed: [
       { "@type": "City", name: o.city },
       { "@type": "Country", name: o.country },
     ],
     address: parsed ?? {
       "@type": "PostalAddress",
-      streetAddress: officeStreet(o),
+      ...(officeStreet(o) ? { streetAddress: officeStreet(o) } : {}),
       addressLocality: o.city,
       addressRegion: o.region,
       addressCountry: countryCode(o.country),

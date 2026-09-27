@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PricingPlans } from "@/components/marketing/cards";
+import { PricingPlans } from "@/components/marketing/pricing-plans";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { PageHero } from "@/components/marketing/page-hero";
 import { Icon } from "@/components/ui/icon";
@@ -50,11 +50,11 @@ export default async function PricingPage() {
               Service details →
             </Link>
           </div>
-          <PricingPlans plans={s.plans} serviceSlug={s.slug} note={s.planNote} />
+          <PricingPlans plans={s.plans} serviceSlug={s.slug} serviceTitle={s.title} note={s.planNote} from={`Pricing page — ${s.title}`} path={`/pricing#${s.slug}`} />
         </Section>
       ))}
 
-      <CtaBanner title="Need a custom package?" description="Combine services or scale a plan to fit your goals. Tell us what you need and we’ll put together a tailored quote." primary={{ label: "Request a Quote", href: "/contact?intent=project" }} secondary={{ label: "Talk to Our Team", href: "/contact" }} />
+      <CtaBanner title="Need a custom package?" description="Combine services or scale a plan to fit your goals. Tell us what you need and we’ll put together a tailored quote." whatsapp={{ intent: "I’d like a custom package quote.", from: "Pricing page", path: "/pricing" }} primary={{ label: "Request a Quote", href: "/contact?intent=project#contact-form" }} />
     </>
   );
 }

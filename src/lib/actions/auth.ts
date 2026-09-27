@@ -1,5 +1,6 @@
 "use server";
 
+import { CONTACT_EMAIL } from "@/config/contact";
 import { redirect } from "next/navigation";
 import { logActivity, notify } from "@/lib/activity";
 import { hashPassword, verifyPassword, getDummyHash } from "@/lib/auth/password";
@@ -45,7 +46,7 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
   // Always run a hash comparison so response time doesn't reveal whether the email exists.
   const valid = await verifyPassword(password, user?.passwordHash ?? (await getDummyHash()));
   if (!user || !valid) return { ok: false, error: "Incorrect email or password." };
-  if (user.status !== "active") return { ok: false, error: "This account is suspended. Please contact support@jarzdigital.com." };
+  if (user.status !== "active") return { ok: false, error: `This account is suspended. Please contact ${CONTACT_EMAIL}.` };
 
   await createSession(String(user._id));
   user.lastLoginAt = new Date();
@@ -62,7 +63,7 @@ async function registrationOpen() {
 
 const CLOSED: ActionResult<never> = { ok: false, error: "New registrations are currently closed. Please contact us instead." };
 const SEND_FAILED: ActionResult<never> = { ok: false, error: "We couldn’t send the email right now. Please try again in a few minutes." };
-const EMAIL_OFF: ActionResult<never> = { ok: false, error: "We can’t send email codes right now. Please try again later or contact info@jarzdigital.com." };
+const EMAIL_OFF: ActionResult<never> = { ok: false, error: `We can’t send email codes right now. Please try again later or contact ${CONTACT_EMAIL}.` };
 const wait = (seconds: number): ActionResult<never> => ({ ok: false, error: `A code was just sent. You can request a new one in ${seconds} seconds.` });
 
 /** Step 1 of sign-up: validate the details and email a 6-digit code. No account exists until the code is confirmed. */

@@ -33,7 +33,7 @@ export function ProjectRequestForm({ services, defaultService }: { services: { s
   const e = errs(state);
   return (
     <form action={action} onSubmit={onSubmit} className="space-y-5" noValidate>
-      <Field label="Project title" required error={e.title} help="e.g. “New website for our Denver clinic”">
+      <Field label="Project title" required error={e.title} help="e.g. “New website for our Dallas clinic”">
         {(p) => <Input {...p} name="title" required autoFocus />}
       </Field>
       <div className="grid gap-5 sm:grid-cols-2">

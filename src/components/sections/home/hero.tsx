@@ -6,7 +6,8 @@ import { useRef, type ReactNode } from "react";
 import { EASE, Magnetic } from "@/components/animations";
 import { FadeIn, TextReveal } from "@/components/animations/text-reveal";
 import { Marquee } from "@/components/animations/marquee";
-import { ButtonLink } from "@/components/ui/button";
+import { ButtonLink, buttonClasses } from "@/components/ui/button";
+import { WhatsappIcon } from "@/components/ui/brand-icons";
 
 /**
  * Homepage hero. The visual on the right is a "growth network": service nodes
@@ -131,7 +132,7 @@ function GrowthNetwork() {
 
 const CHIPS = ["Website Development", "SEO", "Local SEO", "Social Media", "Google Ads", "Business Management", "Web Applications", "Software"];
 
-export function HomeHero({ trust, children }: { trust: string[]; children?: ReactNode }) {
+export function HomeHero({ trust, whatsappHref, children }: { trust: string[]; whatsappHref: string; children?: ReactNode }) {
   return (
     <section className="theme-dark relative isolate overflow-hidden bg-ink-950">
       {/* Background */}
@@ -165,14 +166,15 @@ export function HomeHero({ trust, children }: { trust: string[]; children?: Reac
           />
 
           <FadeIn as="p" delay={0.45} className="mt-8 max-w-xl text-lg leading-relaxed text-white/65 md:text-xl">
-            Custom web design, Local SEO, Google Ads and complete business management for growing brands across the USA and Canada — from Dallas, Denver and Calgary.
+            Custom web design, Local SEO, Google Ads and complete business management for growing brands — from our offices in Dhaka, Dallas, Calgary and Cork.
           </FadeIn>
 
           <FadeIn delay={0.6} className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Magnetic>
-              <ButtonLink href="/contact?intent=project" size="lg" arrow className="w-full sm:w-auto">
+              <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className={buttonClasses({ size: "lg", className: "w-full bg-[#25D366] hover:bg-[#1fbd59] sm:w-auto" })}>
+                <WhatsappIcon className="size-5" />
                 Start a Project
-              </ButtonLink>
+              </a>
             </Magnetic>
             <ButtonLink href="/work" size="lg" variant="outline-light">
               Explore Our Work

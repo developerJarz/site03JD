@@ -1,3 +1,4 @@
+import { WhatsAppButton } from "@/components/marketing/whatsapp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
@@ -22,6 +23,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AboutPage() {
   const [settings, team, services] = await Promise.all([getSiteSettings(), getTeam(), getServices()]);
+  const cities = settings.offices.map((o) => o.city);
+  const officeList = cities.length > 1 ? `${cities.slice(0, -1).join(", ")} and ${cities.at(-1)}` : cities.join("");
 
   return (
     <>
@@ -34,9 +37,9 @@ export default async function AboutPage() {
         crumbs={[{ name: "About", path: "/about" }]}
         actions={
           <>
-            <ButtonLink href="/contact?intent=project" size="lg" arrow>
+            <WhatsAppButton intent="I’d like to work with Jarz Digital." from="About page" path="/about">
               Work With Us
-            </ButtonLink>
+            </WhatsAppButton>
             <ButtonLink href="/contact" size="lg" variant="outline-light">
               Get In Touch
             </ButtonLink>
@@ -55,11 +58,49 @@ export default async function AboutPage() {
         </dl>
       </PageHero>
 
+      {/* Who we are — plain-language, keyword-rich summary of the agency (facts from the original site + settings) */}
+      <Section tone="light" aria-labelledby="who-heading">
+        <div className="grid gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <SectionHeader index="01" eyebrow="Who we are" title={<span id="who-heading">A web design, SEO & digital marketing agency for growing businesses.</span>} className="mb-0 md:mb-0" />
+          </div>
+          <div className="space-y-5 text-lg leading-relaxed text-mist-600 lg:col-span-7">
+            <p>
+              Jarz Digital is a <strong className="font-semibold text-ink-900">digital marketing agency founded in Dallas in {settings.general.foundedYear}</strong>. We help small and growing businesses get found on Google,
+              look professional online and turn visitors into customers — with{" "}
+              <Link href="/services/website-development" className="font-medium text-ink-900 underline underline-offset-4 hover:text-brand-700">custom website design and development</Link>,{" "}
+              <Link href="/services/local-seo" className="font-medium text-ink-900 underline underline-offset-4 hover:text-brand-700">local SEO and Google Maps ranking</Link>,{" "}
+              <Link href="/services/seo" className="font-medium text-ink-900 underline underline-offset-4 hover:text-brand-700">search engine optimization</Link>,{" "}
+              <Link href="/services/google-ads" className="font-medium text-ink-900 underline underline-offset-4 hover:text-brand-700">Google Ads</Link> and{" "}
+              <Link href="/services/social-media-marketing" className="font-medium text-ink-900 underline underline-offset-4 hover:text-brand-700">social media marketing</Link>.
+            </p>
+            <p>
+              Today our team works from offices in {officeList}, serving clients across the United States, Canada, Europe and Bangladesh. Businesses that want everything handled by one team choose our{" "}
+              <Link href="/services/business-management" className="font-medium text-ink-900 underline underline-offset-4 hover:text-brand-700">monthly business management package</Link>, and companies with bigger
+              ideas work with us on{" "}
+              <Link href="/services/web-application-development" className="font-medium text-ink-900 underline underline-offset-4 hover:text-brand-700">web applications</Link> and{" "}
+              <Link href="/services/software-development" className="font-medium text-ink-900 underline underline-offset-4 hover:text-brand-700">custom software</Link>.
+            </p>
+            <ul className="grid gap-3 pt-2 sm:grid-cols-2">
+              {brandFacts.differentiators.map((d) => (
+                <li key={d.title} className="flex items-start gap-3 rounded-2xl bg-mist-50 p-4 text-base">
+                  <Check className="mt-1 size-4 shrink-0 text-brand-600" aria-hidden />
+                  <span>
+                    <span className="block font-medium text-ink-900">{d.title}</span>
+                    <span className="text-mist-600">{d.description}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </Section>
+
       {/* Story + timeline */}
-      <Section tone="light" aria-labelledby="story-heading">
+      <Section tone="mist" aria-labelledby="story-heading">
         <div className="grid gap-16 lg:grid-cols-12">
           <div className="lg:col-span-6">
-            <SectionHeader index="01" eyebrow="Our story" title={<span id="story-heading">From vision to digital reality.</span>} className="mb-8 md:mb-10" />
+            <SectionHeader index="02" eyebrow="Our story" title={<span id="story-heading">Founded in Dallas in {settings.general.foundedYear}, built to help businesses grow.</span>} className="mb-8 md:mb-10" />
             <div className="space-y-5 text-lg leading-relaxed text-mist-600">
               {brandFacts.story.map((p) => (
                 <Reveal key={p}>
@@ -89,7 +130,7 @@ export default async function AboutPage() {
       {/* Mission & vision */}
       <Section tone="dark" aria-labelledby="mission-heading">
         <SectionHeader
-          index="02"
+          index="03"
           eyebrow="Mission & vision"
           title={<span id="mission-heading">Driven by purpose, guided by vision.</span>}
           description="We’re committed to transforming how businesses connect with their audiences in the digital world."
@@ -117,7 +158,7 @@ export default async function AboutPage() {
 
       {/* Values */}
       <Section tone="light" aria-labelledby="values-heading">
-        <SectionHeader index="03" eyebrow="Core values" title={<span id="values-heading">The principles behind every project.</span>} />
+        <SectionHeader index="04" eyebrow="Core values" title={<span id="values-heading">The principles behind every project.</span>} />
         <Stagger className="grid gap-px overflow-hidden rounded-[28px] bg-mist-200 md:grid-cols-2 lg:grid-cols-3">
           {brandFacts.values.map((v, i) => (
             <StaggerItem key={v.title} className="bg-white p-8 md:p-10">
@@ -132,9 +173,9 @@ export default async function AboutPage() {
       {/* Team */}
       <Section tone="mist" id="team" aria-labelledby="team-heading">
         <SectionHeader
-          index="04"
+          index="05"
           eyebrow="Team"
-          title={<span id="team-heading">Meet our expert team.</span>}
+          title={<span id="team-heading">Meet the web design, SEO and marketing team.</span>}
           description="Our diverse team of digital marketing professionals brings together years of experience, creativity, and technical expertise to deliver exceptional results for our clients."
         />
         <TeamGrid team={team} />
@@ -144,7 +185,8 @@ export default async function AboutPage() {
       <Section tone="light" aria-labelledby="capabilities-heading">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <SectionHeader index="05" eyebrow="Capabilities" title={<span id="capabilities-heading">A 360° solution for developing businesses.</span>} className="mb-0 md:mb-0" />
+            <SectionHeader index="06" eyebrow="Capabilities" title={<span id="capabilities-heading">Web design, SEO & digital marketing services — a 360° solution.</span>} className="mb-0 md:mb-0" />
+            <p className="mt-6 text-lg leading-relaxed text-mist-600">Every service is available on its own or combined, and each includes free graphics and SEO-optimized content.</p>
           </div>
           <ul className="grid gap-3 sm:grid-cols-2 lg:col-span-7">
             {services.map((s) => (
@@ -153,7 +195,10 @@ export default async function AboutPage() {
                   <span className="flex size-10 items-center justify-center rounded-xl bg-mist-50 text-brand-700 transition-colors group-hover:bg-ink-900 group-hover:text-brand-300">
                     <Icon name={s.icon} className="size-5" />
                   </span>
-                  <span className="font-medium text-ink-900">{s.title}</span>
+                  <span>
+                    <span className="block font-medium text-ink-900">{s.title}</span>
+                    <span className="line-clamp-2 text-sm text-mist-600">{s.tagline}</span>
+                  </span>
                 </Link>
               </li>
             ))}
@@ -164,15 +209,15 @@ export default async function AboutPage() {
       {/* Global presence */}
       <Section tone="mist" aria-labelledby="presence-heading">
         <SectionHeader
-          index="06"
+          index="07"
           eyebrow="Global presence"
-          title={<span id="presence-heading">Rooted in Dallas. Serving clients worldwide.</span>}
+          title={<span id="presence-heading">Offices in {officeList} — serving clients worldwide.</span>}
           description={`${brandFacts.regions} ${brandFacts.rankedRegions}`}
         />
-        <Locations offices={settings.offices} />
+        <Locations offices={settings.offices} from="About page locations section" path="/about" />
       </Section>
 
-      <CtaBanner title="Ready to partner with Jarz Digital?" description="Join hundreds of businesses that trust us to drive their digital growth. Let's work together to achieve your business goals." primary={{ label: "Start Your Project Today", href: "/contact?intent=project" }} secondary={{ label: "Schedule a Free Consultation", href: "/contact" }} />
+      <CtaBanner title="Ready to partner with Jarz Digital?" description="Join hundreds of businesses that trust us to drive their digital growth. Let's work together to achieve your business goals." whatsapp={{ intent: "I’d like to start a project with Jarz Digital.", from: "About page", path: "/about" }} primary={{ label: "Send a Request", href: "/contact#contact-form" }} />
     </>
   );
 }

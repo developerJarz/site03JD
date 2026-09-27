@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowUpRight, Mail, MapPin, Navigation, Phone } from "lucide-react";
+import { ArrowUpRight, Check, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import { Stagger, StaggerItem } from "@/components/animations/reveal";
 import { ProjectCard } from "@/components/marketing/cards";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { PageHero } from "@/components/marketing/page-hero";
+import { WhatsAppButton } from "@/components/marketing/whatsapp";
 import { Accordion } from "@/components/ui/accordion";
 import { WhatsappIcon } from "@/components/ui/brand-icons";
 import { ButtonLink } from "@/components/ui/button";
@@ -17,6 +18,8 @@ import { getPosts, getProjects, getServices, getSiteSettings } from "@/lib/data/
 import { postsForOffice } from "@/lib/content/links";
 import { PostCard } from "@/components/blog/post-card";
 import { faqSchema, isPhysicalOffice, localBusinessSchema } from "@/lib/seo";
+import { publicUrl, whatsappDisplay, whatsappLink, whatsappMessage } from "@/config/contact";
+import { brandFacts } from "@/content/seed";
 import { locationOffices, officeArea, officePath, officeSlug } from "@/lib/seo/locations";
 import { pageMetadata } from "@/lib/seo/page";
 import { locationPageSeo, officePlace } from "@/lib/seo/pages";
@@ -66,13 +69,42 @@ function locationFaqs(o: Office, services: Service[], settings: SiteSettings, lo
     },
     {
       question: `How can I contact Jarz Digital in ${o.city}?`,
-      answer: `Call ${o.phone}${o.email ? `, email ${o.email}` : ""} or send a message through our contact form. ${settings.contact.responseTime}.`,
+      answer: `Message us on WhatsApp or call ${o.phone}${o.email ? `, email ${o.email}` : ""}, or send a request through our contact form. ${settings.contact.responseTime}.`,
     },
     {
       question: `Which services do you offer in ${place}?`,
       answer: `${services.map((s) => s.title).join(", ")}. Every service is available to businesses in ${o.city} and across ${o.country}.`,
     },
   ];
+  const bySlug = (slug: string) => services.find((s) => s.slug === slug);
+  const web = bySlug("website-development");
+  const local_ = bySlug("local-seo");
+  if (web?.startingPrice) {
+    faqs.push({
+      question: `How much does a website cost in ${o.city}?`,
+      answer: `Website development plans start from ${web.startingPrice}. The final price depends on the number of pages, features such as online booking or e-commerce, and whether you want ongoing care. Every plan includes a mobile-friendly, SEO-ready build — see the plans on our ${web.title} page or ask for a quote on WhatsApp.`,
+    });
+  }
+  if (local_?.startingPrice) {
+    faqs.push({
+      question: `How much does local SEO cost in ${o.city}?`,
+      answer: `Local SEO plans start from ${local_.startingPrice}. They cover Google Business Profile optimization, local citations, review strategy and local keyword targeting, with regular reporting so you can see your map rankings move.`,
+    });
+  }
+  faqs.push(
+    {
+      question: `Can you help my ${o.city} business rank on Google Maps?`,
+      answer: `Yes. Ranking in the Google Map Pack comes down to a complete, active Google Business Profile, consistent business details across the web, genuine reviews and a website that matches what people in ${o.city} search for. Our local SEO work covers all four, done manually, with detailed reporting.`,
+    },
+    {
+      question: "How long does local SEO take to show results?",
+      answer: "It depends on your competition, but most clients see local ranking improvements within about three months. Website fixes and Google Business Profile updates often help sooner; strong, lasting rankings build over the following months.",
+    },
+    {
+      question: `Do you only work with businesses in ${o.city}?`,
+      answer: `No. Our ${o.city} team works with businesses across ${o.country}, and the wider Jarz Digital team serves clients worldwide from our offices in ${settings.offices.map((x) => x.city).join(", ")}.`,
+    },
+  );
   if (local.length > 0) {
     faqs.push({
       question: `Have you worked with businesses in ${officeArea(o).label}?`,
@@ -95,6 +127,12 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
   const physical = isPhysicalOffice(office);
   const others = locationOffices(settings).filter((o) => o.code !== office.code);
   const whatsapp = settings.contact.whatsapp;
+  // Light/mist alternate through the optional sections (why = light, work = mist).
+  const flip = (t: "light" | "mist"): "light" | "mist" => (t === "light" ? "mist" : "light");
+  const afterWork: "light" | "mist" = work.length > 0 ? "mist" : "light";
+  const guidesTone = flip(afterWork);
+  const faqTone = flip(guides.length > 0 ? guidesTone : afterWork);
+  const tones = { guides: guidesTone, faq: faqTone, others: flip(faqTone) };
 
   return (
     <>
@@ -110,9 +148,9 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
         ]}
         actions={
           <>
-            <ButtonLink href={`/contact?intent=project&office=${office.code}`} size="lg" arrow>
-              Get a Free Consultation
-            </ButtonLink>
+            <WhatsAppButton number={settings.contact.whatsapp} intent={`I’m a business in ${office.city} and would like a free consultation.`} from={`${office.city} location page`} path={officePath(office)}>
+              WhatsApp {office.city} team
+            </WhatsAppButton>
             <ButtonLink href={tel(office.phone)} size="lg" variant="outline-light">
               Call {office.phone}
             </ButtonLink>
@@ -167,21 +205,36 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
               )}
               {whatsapp && (
                 <li>
-                  <a href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="group flex items-start gap-3">
+                  <a
+                    href={whatsappLink(whatsapp, whatsappMessage({ intent: `I’d like to contact your ${office.city} office.`, from: `${office.city} location page — ${publicUrl(officePath(office))}` }))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-start gap-3"
+                  >
                     <WhatsappIcon className="mt-0.5 size-5 shrink-0 text-brand-600" />
                     <span>
                       <span className="block text-sm text-mist-500">WhatsApp</span>
-                      <span className="font-medium text-ink-900 group-hover:text-brand-700">{whatsapp}</span>
+                      <span className="font-medium text-ink-900 group-hover:text-brand-700">{whatsappDisplay(settings.contact)}</span>
                     </span>
                   </a>
                 </li>
               )}
             </ul>
-            {physical && (
-              <a href={mapsLink(office)} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-full border border-mist-200 px-5 py-2.5 text-sm font-medium text-ink-900 transition-colors hover:border-ink-900">
-                <Navigation className="size-4 text-brand-600" aria-hidden /> Get directions on Google Maps
-              </a>
-            )}
+            <div className="mt-8 flex flex-wrap gap-3">
+              <WhatsAppButton number={whatsapp} size="md" intent={`I’d like to contact your ${office.city} office.`} from={`${office.city} location page`} path={officePath(office)}>
+                Contact now
+              </WhatsAppButton>
+              {(physical || office.gbpUrl) && (
+                <a
+                  href={office.gbpUrl || mapsLink(office)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-11 items-center gap-2 rounded-full border border-mist-200 px-5 text-sm font-medium text-ink-900 transition-colors hover:border-ink-900"
+                >
+                  <Navigation className="size-4 text-brand-600" aria-hidden /> {office.gbpUrl ? "View on Google Maps" : "Get directions on Google Maps"}
+                </a>
+              )}
+            </div>
           </div>
           <div className="lg:col-span-7">
             {physical ? (
@@ -217,31 +270,68 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
           index="02"
           eyebrow="Services"
           title={<span id="services-heading">Digital services for businesses in {place}.</span>}
-          description={`Everything Jarz Digital offers is available to ${office.city} businesses — from a new website to ongoing SEO and ads management.`}
+          description={`Everything Jarz Digital offers is available to ${office.city} businesses — from a new website to ongoing SEO, Google Ads and social media management. Here is what each service includes.`}
         />
-        <Stagger as="ul" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {services.map((s) => (
-            <StaggerItem as="li" key={s.slug}>
-              <Link href={`/services/${s.slug}`} className="group flex h-full flex-col rounded-3xl border border-mist-200 bg-white p-6 transition-all duration-500 hover:-translate-y-1 hover:border-ink-900 hover:shadow-lift">
-                <span className="flex size-11 items-center justify-center rounded-2xl bg-ink-900 text-brand-300">
-                  <Icon name={s.icon} className="size-5" />
-                </span>
-                <span className="mt-8 font-display text-lg font-semibold tracking-tight text-ink-900">
-                  {s.title} <span className="sr-only">in {office.city}</span>
-                </span>
-                <span className="mt-1.5 flex-1 text-sm leading-relaxed text-mist-600">{s.tagline}</span>
-                <span className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-ink-900">
-                  Learn more <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
-                </span>
-              </Link>
-            </StaggerItem>
-          ))}
+        <Stagger as="ul" className="grid gap-5 md:grid-cols-2">
+          {services.map((s) => {
+            const points = (s.benefits.length ? s.benefits : s.included.flatMap((g) => g.items)).slice(0, 3);
+            return (
+              <StaggerItem as="li" key={s.slug} className="flex flex-col rounded-3xl border border-mist-200 bg-white p-7">
+                <div className="flex items-start gap-4">
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-ink-900 text-brand-300">
+                    <Icon name={s.icon} className="size-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-display text-xl font-semibold tracking-tight text-ink-900">
+                      {s.shortTitle || s.title} in {office.city}
+                    </h3>
+                    {s.startingPrice && <p className="mt-0.5 text-sm text-mist-600">Plans from {s.startingPrice}</p>}
+                  </div>
+                </div>
+                <p className="mt-5 leading-relaxed text-mist-600">{s.summary}</p>
+                {points.length > 0 && (
+                  <ul className="mt-5 space-y-2 border-t border-mist-100 pt-5 text-sm text-mist-700">
+                    {points.map((p) => (
+                      <li key={p} className="flex items-start gap-2.5">
+                        <Check className="mt-0.5 size-4 shrink-0 text-brand-600" aria-hidden />
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <Link href={`/services/${s.slug}`} className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-ink-900 underline-offset-4 hover:underline">
+                  {s.title} services <ArrowUpRight className="size-4" aria-hidden />
+                </Link>
+              </StaggerItem>
+            );
+          })}
         </Stagger>
+      </Section>
+
+      {/* Why local businesses choose us — the differentiators published on the original site */}
+      <Section tone="light" aria-labelledby="why-heading">
+        <div className="grid gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <SectionHeader eyebrow={`Why ${office.city} businesses choose us`} title={<span id="why-heading">One team for your website, search and marketing.</span>} className="mb-0 md:mb-0" />
+            <p className="mt-6 text-lg leading-relaxed text-mist-600">
+              Most {office.city} businesses we talk to are juggling a web designer, an SEO freelancer and someone for social media — and nobody owns the result. Jarz Digital puts your website, local SEO,
+              Google Business Profile, Google Ads and social media with one team, so every part works toward the same goal: more calls, messages and customers from {place}.
+            </p>
+          </div>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:col-span-7">
+            {brandFacts.differentiators.map((d) => (
+              <li key={d.title} className="rounded-3xl bg-mist-50 p-6">
+                <h3 className="font-display text-lg font-semibold tracking-tight text-ink-900">{d.title}</h3>
+                <p className="mt-2 leading-relaxed text-mist-600">{d.description}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Section>
 
       {/* Work */}
       {work.length > 0 && (
-        <Section tone="light" aria-labelledby="work-heading">
+        <Section tone="mist" aria-labelledby="work-heading">
           <SectionHeader
             index="03"
             eyebrow="Portfolio"
@@ -262,7 +352,7 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
 
       {/* Local guides */}
       {guides.length > 0 && (
-        <Section tone={work.length > 0 ? "mist" : "light"} aria-labelledby="guides-heading">
+        <Section tone={tones.guides} aria-labelledby="guides-heading">
           <SectionHeader eyebrow="Guides" title={<span id="guides-heading">Guides for {office.city} businesses.</span>} />
           <ul className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {guides.map((p) => (
@@ -275,7 +365,7 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
       )}
 
       {/* FAQ */}
-      <Section tone={(work.length > 0) !== (guides.length > 0) ? "mist" : "light"} aria-labelledby="faq-heading">
+      <Section tone={tones.faq} aria-labelledby="faq-heading">
         <div className="grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <SectionHeader eyebrow="FAQ" title={<span id="faq-heading">Jarz Digital in {office.city}.</span>} className="mb-0 md:mb-0" />
@@ -288,7 +378,7 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
 
       {/* Other offices */}
       {others.length > 0 && (
-        <Section tone="light" aria-labelledby="other-offices" className="py-20 md:py-24">
+        <Section tone={tones.others} aria-labelledby="other-offices" className="py-20 md:py-24">
           <SectionHeader eyebrow="More locations" title={<span id="other-offices">Our other offices.</span>} className="mb-10 md:mb-12" />
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {others.map((o) => (
@@ -309,7 +399,8 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
       <CtaBanner
         title={`Grow your ${office.city} business online.`}
         description={`Tell us about your goals — our ${office.city} team responds within 24 hours with a plan for your website, search and marketing.`}
-        primary={{ label: "Start a Project", href: `/contact?intent=project&office=${office.code}` }}
+        whatsapp={{ intent: `I’m a business in ${office.city} and would like to start a project.`, from: `${office.city} location page`, path: officePath(office) }}
+        primary={{ label: "Send a Request", href: `/contact?intent=project&office=${office.code}#contact-form` }}
         secondary={{ label: "Explore Services", href: "/services" }}
       />
     </>

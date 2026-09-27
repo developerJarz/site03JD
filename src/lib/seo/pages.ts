@@ -19,7 +19,7 @@ export const STATIC_PAGES: StaticPageSeo[] = [
     label: "Services",
     title: "Web Development, SEO & Marketing Services",
     description:
-      "Web development, SEO, local SEO, Google Ads, social media and business management from Jarz Digital — teams in the USA, Canada and Dhaka, Bangladesh.",
+      "Website development, SEO, local SEO, Google Ads, social media and business management from Jarz Digital — teams in Dhaka, Dallas, Calgary and Cork.",
   },
   {
     path: "/work",
@@ -38,7 +38,7 @@ export const STATIC_PAGES: StaticPageSeo[] = [
     label: "About",
     title: "About Jarz Digital — Our Team & Offices",
     description:
-      "Founded in Dallas in 2019, Jarz Digital is a digital agency with offices in Dallas, Denver, Calgary and Dhaka, Bangladesh, helping businesses grow online.",
+      "Founded in Dallas in 2019, Jarz Digital is a digital agency with offices in Dhaka, Dallas, Calgary and Cork, helping businesses grow online.",
   },
   {
     path: "/pricing",
@@ -57,13 +57,13 @@ export const STATIC_PAGES: StaticPageSeo[] = [
     label: "Contact",
     title: "Contact Us — Free Consultation",
     description:
-      "Get a free consultation from Jarz Digital. Offices in Dallas, Denver, Calgary and Dhaka, Bangladesh — we reply within 24 hours. Call +1 267-766-9055.",
+      "Get a free consultation from Jarz Digital — WhatsApp or call +8801925982536, or email us. Offices in Dhaka, Dallas, Calgary and Cork. Replies within 24 hours.",
   },
   {
     path: "/locations",
     label: "Locations",
-    title: "Our Offices — Dallas, Denver, Calgary & Dhaka",
-    description: "Jarz Digital offices in Dallas, Denver, Calgary and Dhaka, Bangladesh — addresses, phone numbers and the services each team provides to local businesses.",
+    title: "Our Offices — Dhaka, Dallas, Calgary & Cork",
+    description: "Jarz Digital offices in Dhaka, Dallas, Calgary and Cork — addresses, Google Maps, WhatsApp and the services each team provides to local businesses.",
   },
 ];
 

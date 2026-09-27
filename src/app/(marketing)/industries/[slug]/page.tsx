@@ -1,3 +1,4 @@
+import { WhatsAppButton } from "@/components/marketing/whatsapp";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -54,9 +55,9 @@ export default async function IndustryPage({ params }: PageProps<"/industries/[s
         ]}
         actions={
           <>
-            <ButtonLink href={`/contact?intent=project&industry=${industry.slug}`} size="lg" arrow>
+            <WhatsAppButton intent={`I run a ${lowerTitle(industry.name)} business and would like to start a project.`} from={`${industry.name} industry page`} path={`/industries/${industry.slug}`}>
               Start a Project
-            </ButtonLink>
+            </WhatsAppButton>
             <ButtonLink href="/work" size="lg" variant="outline-light">
               View Our Work
             </ButtonLink>
@@ -154,7 +155,7 @@ export default async function IndustryPage({ params }: PageProps<"/industries/[s
         </ul>
       </Section>
 
-      <CtaBanner title={`Grow your ${lowerTitle(industry.name)} business online.`} primary={{ label: "Get a Free Consultation", href: `/contact?industry=${industry.slug}` }} secondary={{ label: "Explore Services", href: "/services" }} />
+      <CtaBanner title={`Grow your ${lowerTitle(industry.name)} business online.`} whatsapp={{ intent: `I run a ${lowerTitle(industry.name)} business and would like help growing online.`, from: `${industry.name} industry page`, path: `/industries/${industry.slug}` }} primary={{ label: "Get a Free Consultation", href: `/contact?industry=${industry.slug}#contact-form` }} secondary={{ label: "Explore Services", href: "/services" }} />
     </>
   );
 }

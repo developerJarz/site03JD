@@ -54,6 +54,7 @@ const ServiceSchema = new Schema(
     heroTitle: { type: String, trim: true, maxlength: 160 },
     heroSubtitle: { type: String, trim: true, maxlength: 600 },
     overview: { type: String, default: "" },
+    content: { type: String, default: "" },
     image: ImageSchema,
     problems: [TitledItemSchema],
     included: [{ title: String, description: String, items: [String], _id: false }],

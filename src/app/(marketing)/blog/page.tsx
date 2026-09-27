@@ -38,7 +38,7 @@ export default async function BlogPage() {
         )}
         <PostList posts={rest} categories={usedCategories} />
       </Section>
-      <CtaBanner title="Want us to put this into practice for you?" primary={{ label: "Get a Free Consultation", href: "/contact" }} secondary={{ label: "Explore Local SEO", href: "/services/local-seo" }} />
+      <CtaBanner title="Want us to put this into practice for you?" whatsapp={{ intent: "I read your blog and would like help growing my business online.", from: "Blog", path: "/blog" }} primary={{ label: "Get a Free Consultation", href: "/contact#contact-form" }} secondary={{ label: "Explore Local SEO", href: "/services/local-seo" }} />
     </>
   );
 }

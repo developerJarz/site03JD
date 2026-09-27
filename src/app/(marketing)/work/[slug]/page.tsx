@@ -183,7 +183,7 @@ export default async function ProjectPage({ params }: PageProps<"/work/[slug]">)
         </Section>
       )}
 
-      <CtaBanner title="Want results like this for your business?" primary={{ label: "Start a Project", href: "/contact?intent=project" }} secondary={{ label: "Explore services", href: "/services" }} />
+      <CtaBanner title="Want results like this for your business?" whatsapp={{ intent: `I saw your work for ${project.client} and would like similar results for my business.`, from: `Case study: ${project.client}`, path: `/work/${project.slug}` }} primary={{ label: "Send a Request", href: "/contact?intent=project#contact-form" }} secondary={{ label: "Explore services", href: "/services" }} />
     </>
   );
 }

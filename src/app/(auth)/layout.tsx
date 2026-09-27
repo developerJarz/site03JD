@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@/config/contact";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
@@ -29,7 +30,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </ul>
         </div>
         <p className="relative text-sm text-white/40">
-          Need help? <a href="mailto:info@jarzdigital.com" className="text-white/70 underline-offset-4 hover:underline">info@jarzdigital.com</a>
+          Need help? <a href={`mailto:${CONTACT_EMAIL}`} className="text-white/70 underline-offset-4 hover:underline">{CONTACT_EMAIL}</a>
         </p>
       </aside>
       <main id="main" className="flex flex-col px-5 py-8 sm:px-10">

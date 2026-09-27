@@ -1,5 +1,8 @@
 import "server-only";
+import { CONTACT_EMAIL, CONTACT_PHONE, OFFICE_CITIES, telHref } from "@/config/contact";
 import { env } from "@/lib/env";
+
+const OFFICES_LINE = OFFICE_CITIES.join(" · ");
 
 /**
  * Branded transactional email templates. Table-based markup for broad
@@ -34,7 +37,7 @@ function layout(opts: { preheader: string; heading: string; body: string; cta?: 
 <tr><td style="font-size:15px;line-height:1.65;color:#3a4654;padding-bottom:16px">${opts.body}</td></tr>
 ${cta}
 </table></td></tr>
-<tr><td style="padding:20px 32px;border-top:1px solid #eaeff3;font-size:12px;color:#677787">Jarz Digital · Dallas · Denver · Calgary · Dhaka<br>info@jarzdigital.com · +1 267-766-9055</td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #eaeff3;font-size:12px;color:#677787">Jarz Digital · ${OFFICES_LINE}<br>${CONTACT_EMAIL} · ${CONTACT_PHONE}</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -143,12 +146,12 @@ export function otpEmail(opts: { code: string; purpose: "register" | "reset"; mi
 
   <tr><td style="background:#ffffff;padding:16px 32px 32px;border-radius:0 0 18px 18px">
     <p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:#677787">${esc(copy.notYou)}</p>
-    <p style="margin:0;font-size:13px;line-height:1.6;color:#677787">Need help? Email <a href="mailto:info@jarzdigital.com" style="color:#00848c;text-decoration:none;font-weight:600">info@jarzdigital.com</a> or call <a href="tel:+12677669055" style="color:#00848c;text-decoration:none;font-weight:600;white-space:nowrap">+1 267-766-9055</a>.</p>
+    <p style="margin:0;font-size:13px;line-height:1.6;color:#677787">Need help? Email <a href="mailto:${CONTACT_EMAIL}" style="color:#00848c;text-decoration:none;font-weight:600">${CONTACT_EMAIL}</a> or call <a href="${telHref(CONTACT_PHONE)}" style="color:#00848c;text-decoration:none;font-weight:600;white-space:nowrap">${CONTACT_PHONE}</a>.</p>
   </td></tr>
 
   <!-- Footer -->
   <tr><td align="center" style="padding:24px 16px 8px;font-size:12px;line-height:1.7;color:#8494a3">
-    <a href="${url("/")}" style="color:#3a4654;text-decoration:none;font-weight:600">Jarz Digital</a> · Dallas · Denver · Calgary · Dhaka<br>
+    <a href="${url("/")}" style="color:#3a4654;text-decoration:none;font-weight:600">Jarz Digital</a> · ${OFFICES_LINE}<br>
     You’re receiving this because a ${isReset ? "password reset" : "sign-up"} was requested for ${esc(to)} on jarzdigital.com.<br>
     <a href="${url("/privacy-policy")}" style="color:#8494a3">Privacy Policy</a> · © ${year} Jarz Digital
   </td></tr>
@@ -170,7 +173,7 @@ export function otpEmail(opts: { code: string; purpose: "register" | "reset"; mi
     "Keep this code private. Jarz Digital will never ask you for it.",
     copy.notYou,
     "",
-    "Need help? info@jarzdigital.com · +1 267-766-9055",
+    `Need help? ${CONTACT_EMAIL} · ${CONTACT_PHONE}`,
   ].join("\n");
 
   return { subject: copy.subject, html, text };

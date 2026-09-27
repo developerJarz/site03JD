@@ -1,10 +1,12 @@
+import { WhatsAppButton } from "@/components/marketing/whatsapp";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, Check } from "lucide-react";
 import { Reveal, Stagger, StaggerItem } from "@/components/animations/reveal";
-import { PricingPlans, ProjectCard } from "@/components/marketing/cards";
+import { ProjectCard } from "@/components/marketing/cards";
+import { PricingPlans } from "@/components/marketing/pricing-plans";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { PageHero } from "@/components/marketing/page-hero";
@@ -14,8 +16,9 @@ import { Icon } from "@/components/ui/icon";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { PostCard } from "@/components/blog/post-card";
 import { postsForService } from "@/lib/content/links";
-import { getPosts, getProjects, getServiceBySlug, getServices, getSiteSettings } from "@/lib/data/public";
+import { getIndustries, getPosts, getProjects, getServiceBySlug, getServices, getSiteSettings } from "@/lib/data/public";
 import { lowerTitle } from "@/lib/utils";
+import { sanitizeRichText } from "@/lib/security/sanitize";
 import { locationOffices, officeCountries, officePath } from "@/lib/seo/locations";
 import { buildMetadata, faqSchema, serviceSchema } from "@/lib/seo";
 
@@ -42,12 +45,15 @@ export async function generateMetadata({ params }: PageProps<"/services/[slug]">
 
 export default async function ServicePage({ params }: PageProps<"/services/[slug]">) {
   const { slug } = await params;
-  const [service, projects, allServices, settings, posts] = await Promise.all([getServiceBySlug(slug), getProjects(), getServices(), getSiteSettings(), getPosts()]);
+  const [service, projects, allServices, settings, posts, industries] = await Promise.all([getServiceBySlug(slug), getProjects(), getServices(), getSiteSettings(), getPosts(), getIndustries()]);
   if (!service) notFound();
 
   const examples = projects.filter((p) => p.services.some((s) => s.slug === service.slug)).slice(0, 3);
   const guides = postsForService(service, posts, allServices);
   const offices = locationOffices(settings);
+  const guideHtml = service.content?.trim() ? sanitizeRichText(service.content) : "";
+  // Indexable industry pages that list this service.
+  const forIndustries = industries.filter((i) => !i.seo?.noindex && i.services.some((r) => r.slug === service.slug));
   const related = service.related.length
     ? allServices.filter((s) => service.related.some((r) => r.slug === s.slug))
     : allServices.filter((s) => s.slug !== service.slug).slice(0, 3);
@@ -67,9 +73,9 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
         ]}
         actions={
           <>
-            <ButtonLink href={`/contact?service=${service.slug}`} size="lg" arrow>
+            <WhatsAppButton number={settings.contact.whatsapp} intent={`I’m interested in your ${service.title} service.`} from={`${service.title} service page`} path={`/services/${service.slug}`}>
               Start a Project
-            </ButtonLink>
+            </WhatsAppButton>
             {service.plans.length > 0 && (
               <ButtonLink href="#pricing" size="lg" variant="outline-light">
                 View pricing
@@ -131,6 +137,25 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
         </div>
       </Section>
 
+      {/* In-depth guide — long-form, keyword-focused copy edited in Admin → Services */}
+      {guideHtml && (
+        <Section tone="light" aria-labelledby="guide-heading" className="border-t border-mist-100">
+          <div className="grid gap-12 lg:grid-cols-12">
+            <div className="lg:col-span-4">
+              <div className="lg:sticky lg:top-28">
+                <SectionHeader eyebrow="In depth" title={<span id="guide-heading">{service.title} services, explained.</span>} className="mb-0 md:mb-0" />
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <WhatsAppButton number={settings.contact.whatsapp} size="md" intent={`I have a question about your ${service.title} service.`} from={`${service.title} service page — in depth`} path={`/services/${service.slug}`}>
+                    Ask on WhatsApp
+                  </WhatsAppButton>
+                </div>
+              </div>
+            </div>
+            <div className="prose-jarz lg:col-span-8 lg:col-start-5" dangerouslySetInnerHTML={{ __html: guideHtml }} />
+          </div>
+        </Section>
+      )}
+
       {/* What's included */}
       {service.included.length > 0 && (
         <Section tone="mist" aria-labelledby="included-heading">
@@ -157,7 +182,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
       {/* Process */}
       {service.process.length > 0 && (
         <Section tone="dark" aria-labelledby="process-heading">
-          <SectionHeader index="03" eyebrow="Process" title={<span id="process-heading">How we deliver.</span>} />
+          <SectionHeader index="03" eyebrow="Process" title={<span id="process-heading">Our {lowerTitle(service.title)} process, step by step.</span>} />
           <Stagger as="ol" className={`grid gap-px overflow-hidden rounded-[28px] bg-white/10 md:grid-cols-2 ${service.process.length > 4 ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}>
             {service.process.map((step, i) => (
               <StaggerItem as="li" key={step.title} className="relative bg-ink-900 p-8">
@@ -174,7 +199,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
       <Section tone="light" aria-labelledby="benefits-heading">
         <div className="grid gap-14 lg:grid-cols-2">
           <div>
-            <SectionHeader index="04" eyebrow="Benefits" title={<span id="benefits-heading">What you get.</span>} className="mb-10 md:mb-10" />
+            <SectionHeader index="04" eyebrow="Benefits" title={<span id="benefits-heading">Benefits of {lowerTitle(service.title)} with Jarz Digital.</span>} className="mb-10 md:mb-10" />
             <ul className="grid gap-3 sm:grid-cols-2">
               {service.benefits.map((b) => (
                 <li key={b} className="flex items-center gap-3 rounded-2xl bg-mist-50 px-5 py-4 text-[0.95rem] font-medium text-ink-800">
@@ -188,7 +213,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
           </div>
           {service.capabilities.length > 0 && (
             <div>
-              <SectionHeader index="05" eyebrow="Technology & capabilities" title="Tools and platforms we work with." className="mb-10 md:mb-10" />
+              <SectionHeader index="05" eyebrow="Technology & capabilities" title={`${service.title} tools and platforms we work with.`} className="mb-10 md:mb-10" />
               <ul className="flex flex-wrap gap-2">
                 {service.capabilities.map((c) => (
                   <li key={c} className="rounded-full border border-mist-200 px-4 py-2 text-sm text-mist-700">
@@ -204,8 +229,8 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
       {/* Pricing */}
       {service.plans.length > 0 && (
         <Section tone="mist" id="pricing" aria-labelledby="pricing-heading">
-          <SectionHeader align="center" eyebrow="Pricing" title={<span id="pricing-heading">Simple, transparent plans.</span>} description="Choose the plan that fits your stage. Every plan can be tailored after a free consultation." />
-          <PricingPlans plans={service.plans} serviceSlug={service.slug} note={service.planNote} />
+          <SectionHeader align="center" eyebrow="Pricing" title={<span id="pricing-heading">{service.title} pricing & plans.</span>} description="Choose the plan that fits your stage. Every plan can be tailored after a free consultation." />
+          <PricingPlans plans={service.plans} serviceSlug={service.slug} serviceTitle={service.title} note={service.planNote} from={`${service.title} service page — pricing`} path={`/services/${service.slug}`} />
         </Section>
       )}
 
@@ -246,7 +271,7 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
       {/* Related */}
       {related.length > 0 && (
         <Section tone="light" aria-labelledby="related-heading" className="py-20 md:py-24">
-          <SectionHeader eyebrow="Related services" title={<span id="related-heading">Pairs well with.</span>} className="mb-10 md:mb-12" />
+          <SectionHeader eyebrow="Related services" title={<span id="related-heading">Related services that pair well with {lowerTitle(service.shortTitle)}.</span>} className="mb-10 md:mb-12" />
           <ul className="grid gap-4 md:grid-cols-3">
             {related.map((r) => (
               <li key={r.slug}>
@@ -303,13 +328,30 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
               </li>
             ))}
           </ul>
+          {forIndustries.length > 0 && (
+            <div className="mt-10 border-t border-mist-200 pt-10">
+              <h2 className="font-display text-xl font-semibold tracking-tight text-ink-900">Who we do {lowerTitle(service.shortTitle)} for</h2>
+              <p className="mt-2 text-sm text-mist-600">
+                {service.shortTitle} tailored to how customers find and choose businesses in each industry.
+              </p>
+              <ul className="mt-5 flex flex-wrap gap-2">
+                {forIndustries.map((i) => (
+                  <li key={i.slug}>
+                    <Link href={`/industries/${i.slug}`} className="inline-flex items-center rounded-full border border-mist-200 bg-white px-4 py-2 text-sm text-mist-700 transition-colors hover:border-ink-900 hover:text-ink-900">
+                      {service.shortTitle} for {lowerTitle(i.name)}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </Section>
 
       <CtaBanner
         title={`Ready to start with ${lowerTitle(service.shortTitle)}?`}
-        primary={{ label: "Request a Quote", href: `/contact?service=${service.slug}` }}
-        secondary={{ label: "Talk to Our Team", href: "/contact" }}
+        whatsapp={{ intent: `I’m interested in your ${service.title} service.`, from: `${service.title} service page`, path: `/services/${service.slug}` }}
+        primary={{ label: "Request a Quote", href: `/contact?service=${service.slug}#contact-form` }}
       />
     </>
   );

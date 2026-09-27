@@ -1,3 +1,4 @@
+import { CONTACT_EMAIL } from "@/config/contact";
 import type { Metadata } from "next";
 import { PasswordForm, PreferencesForm, SignOutOthersButton } from "@/components/dashboard/forms";
 import { DashHeader, Panel } from "@/components/dashboard/ui";
@@ -41,7 +42,7 @@ export default async function SettingsPage() {
         </Panel>
         <Panel title="Delete account">
           <p className="text-sm text-mist-600">
-            To delete your account and associated data, email <a href="mailto:info@jarzdigital.com" className="font-medium text-brand-700 underline">info@jarzdigital.com</a> from your account address. We’ll confirm within 2 business days.
+            To delete your account and associated data, email <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-brand-700 underline">{CONTACT_EMAIL}</a> from your account address. We’ll confirm within 2 business days.
           </p>
         </Panel>
       </div>

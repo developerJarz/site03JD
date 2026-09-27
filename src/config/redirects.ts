@@ -51,6 +51,8 @@ export const LEGACY_PAGES: Array<[string, string]> = [
   ["/checkout", "/pricing"],
   ["/shopengine-template/shoppage", "/pricing"],
   ["/my-account", "/login"],
+  // Pages of the new site that were removed later
+  ["/locations/denver", "/locations"],
   // Feeds and Yoast/RankMath/core sitemaps
   ["/feed", "/blog/rss.xml"],
   ["/comments/feed", "/blog/rss.xml"],

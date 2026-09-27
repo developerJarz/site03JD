@@ -1,5 +1,6 @@
 "use server";
 
+import { CONTACT_EMAIL, CONTACT_PHONE } from "@/config/contact";
 import { logActivity, notify } from "@/lib/activity";
 import { getCurrentUser, getRequestMeta } from "@/lib/auth/session";
 import { getSiteSettings } from "@/lib/data/public";
@@ -36,12 +37,12 @@ export async function submitLead(_prev: ActionResult, formData: FormData): Promi
   const { ip, userAgent } = await getRequestMeta();
   const limited = await rateLimit("contact", ip);
   if (!limited.ok) {
-    return { ok: false, error: `Too many submissions. Please try again in ${Math.ceil(limited.retryAfterSeconds / 60)} minutes, or email ${"info@jarzdigital.com"}.` };
+    return { ok: false, error: `Too many submissions. Please try again in ${Math.ceil(limited.retryAfterSeconds / 60)} minutes, or email ${CONTACT_EMAIL}.` };
   }
 
   if (!isDbConfigured) {
     console.warn("[lead] Database not configured — lead not stored:", input.email);
-    return { ok: false, error: "Our form is temporarily unavailable. Please email info@jarzdigital.com or call +1 267-766-9055." };
+    return { ok: false, error: `Our form is temporarily unavailable. Please email ${CONTACT_EMAIL} or WhatsApp ${CONTACT_PHONE}.` };
   }
 
   try {
@@ -86,6 +87,6 @@ export async function submitLead(_prev: ActionResult, formData: FormData): Promi
     return { ok: true, message: "Thanks! Your message has reached our team — we respond within 24 hours." };
   } catch (err) {
     console.error("[lead] failed to save", err);
-    return { ok: false, error: "Something went wrong on our side. Please try again or email info@jarzdigital.com." };
+    return { ok: false, error: `Something went wrong on our side. Please try again or email ${CONTACT_EMAIL}.` };
   }
 }
