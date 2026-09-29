@@ -1,5 +1,6 @@
 import "server-only";
 import type { Metadata } from "next";
+import { teamMemberPath } from "@/config/team";
 import { env } from "@/lib/env";
 import type { FaqItem, Office, Post, Project, SeoFields, Service, SiteSettings, TeamMember } from "@/types/content";
 import { countryCode, officeCountries, officePath } from "./locations";
@@ -115,12 +116,12 @@ export function organizationSchema(s: SiteSettings, founder?: Pick<TeamMember, "
   };
 }
 
-const personId = (slug: string) => `${SITE_URL}/team/${slug}#person`;
+const personId = (slug: string) => `${abs(teamMemberPath(slug))}#person`;
 
 /** Compact Person reference (used for founder and article authors). */
 function personRef(m: Pick<TeamMember, "slug" | "name" | "role" | "socials">): Json {
   const sameAs = [m.socials.linkedin, m.socials.twitter, m.socials.website].filter(Boolean);
-  return { "@type": "Person", "@id": personId(m.slug), name: m.name, jobTitle: m.role, url: abs(`/team/${m.slug}`), ...(sameAs.length ? { sameAs } : {}) };
+  return { "@type": "Person", "@id": personId(m.slug), name: m.name, jobTitle: m.role, url: abs(teamMemberPath(m.slug)), ...(sameAs.length ? { sameAs } : {}) };
 }
 
 export const isFounder = (m: Pick<TeamMember, "role">) => /founder/i.test(m.role);
@@ -142,6 +143,23 @@ export function personSchema(m: TeamMember): Json {
     description: m.bio,
     worksFor: { "@id": `${SITE_URL}/#organization` },
     ...(m.photo ? { image: abs(m.photo.src) } : {}),
+  };
+}
+
+/** ProfilePage wrapping a Person with the extra facts a full profile page shows (skills, education, location). */
+export function profilePageSchema(m: TeamMember, extra: { description: string; knowsAbout: string[]; alumniOf?: string; homeLocation?: string }): Json {
+  const { "@context": context, ...person } = personSchema(m);
+  return {
+    "@context": context,
+    "@type": "ProfilePage",
+    url: abs(teamMemberPath(m.slug)),
+    mainEntity: {
+      ...person,
+      description: extra.description,
+      knowsAbout: extra.knowsAbout,
+      ...(extra.alumniOf ? { alumniOf: { "@type": "CollegeOrUniversity", name: extra.alumniOf } } : {}),
+      ...(extra.homeLocation ? { homeLocation: { "@type": "Place", name: extra.homeLocation } } : {}),
+    },
   };
 }
 

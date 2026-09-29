@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Check } from "lucide-react";
+import { FOUNDER_PROFILE, teamMemberPath } from "@/config/team";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { Breadcrumbs } from "@/components/marketing/page-hero";
@@ -15,7 +16,7 @@ export const revalidate = 3600;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return (await getTeam()).map((m) => ({ slug: m.slug }));
+  return (await getTeam()).filter((m) => m.slug !== FOUNDER_PROFILE.slug).map((m) => ({ slug: m.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/team/[slug]">): Promise<Metadata> {
@@ -28,6 +29,8 @@ export async function generateMetadata({ params }: PageProps<"/team/[slug]">): P
 
 export default async function TeamMemberPage({ params }: PageProps<"/team/[slug]">) {
   const { slug } = await params;
+  // next.config redirects this URL already; this covers any path that skips them.
+  if (slug === FOUNDER_PROFILE.slug) permanentRedirect(FOUNDER_PROFILE.path);
   const [member, team] = await Promise.all([getTeamMemberBySlug(slug), getTeam()]);
   if (!member) notFound();
   const socials = (["linkedin", "twitter"] as const).filter((k) => member.socials[k]);
@@ -92,7 +95,7 @@ export default async function TeamMemberPage({ params }: PageProps<"/team/[slug]
             <ul className="mt-6 divide-y divide-mist-100">
               {others.map((m) => (
                 <li key={m.slug}>
-                  <Link href={`/team/${m.slug}`} className="group flex items-center gap-4 py-3">
+                  <Link href={teamMemberPath(m.slug)} className="group flex items-center gap-4 py-3">
                     <TeamAvatar member={m} size={40} />
                     <span>
                       <span className="block font-medium text-ink-900 group-hover:text-brand-700">{m.name}</span>

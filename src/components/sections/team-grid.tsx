@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Stagger, StaggerItem } from "@/components/animations/reveal";
+import { teamMemberPath } from "@/config/team";
 import { initials } from "@/lib/utils";
 import type { TeamMember } from "@/types/content";
 
@@ -36,7 +37,7 @@ export function TeamGrid({ team }: { team: TeamMember[] }) {
   return (
     <div className="grid gap-4 lg:grid-cols-12">
       <Link
-        href={`/team/${lead.slug}`}
+        href={teamMemberPath(lead.slug)}
         className="theme-dark group relative flex flex-col justify-between overflow-hidden rounded-[28px] bg-ink-900 p-8 lg:col-span-5 lg:row-span-2 lg:p-10"
       >
         <div aria-hidden className="absolute -right-24 -top-24 size-72 rounded-full bg-brand-400/20 blur-3xl transition-colors duration-700 group-hover:bg-brand-400/30" />
@@ -67,7 +68,7 @@ export function TeamGrid({ team }: { team: TeamMember[] }) {
         {rest.map((m) => (
           <StaggerItem as="li" key={m.slug}>
             <Link
-              href={`/team/${m.slug}`}
+              href={teamMemberPath(m.slug)}
               className="group flex h-full items-start gap-4 rounded-3xl border border-mist-200 bg-white p-5 transition-all duration-500 hover:-translate-y-0.5 hover:border-ink-900 hover:shadow-soft"
             >
               <TeamAvatar member={m} size={56} />

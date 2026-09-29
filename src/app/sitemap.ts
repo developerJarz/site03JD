@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { FOUNDER_PROFILE, teamMemberPath } from "@/config/team";
 import { getCategories, getIndexablePageSlugs, getIndustries, getPosts, getProjects, getServices, getSiteSettings, getTeam } from "@/lib/data/public";
 import { SITE_URL, postModifiedAt, teamProfileIndexable } from "@/lib/seo";
 import { locationOffices, officePath } from "@/lib/seo/locations";
@@ -51,7 +52,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return { url: url(`/blog/${p.slug}`), ...(modified ? { lastModified: new Date(modified) } : {}), changeFrequency: "monthly" as const, priority: 0.7 };
     }),
     ...categories.map((c) => ({ url: url(`/blog/category/${c.slug}`), changeFrequency: "weekly" as const, priority: 0.4 })),
-    ...team.filter(teamProfileIndexable).map((m) => ({ url: url(`/team/${m.slug}`), changeFrequency: "yearly" as const, priority: 0.3 })),
+    ...team.filter(teamProfileIndexable).map((m) => {
+      const path = teamMemberPath(m.slug);
+      // The founder's standalone profile is a main page, not a short team bio.
+      return { url: url(path), changeFrequency: path === FOUNDER_PROFILE.path ? ("monthly" as const) : ("yearly" as const), priority: path === FOUNDER_PROFILE.path ? 0.6 : 0.3 };
+    }),
     ...pages.map((slug) => ({ url: url(`/${slug}`), changeFrequency: "yearly" as const, priority: 0.2 })),
   ];
 }

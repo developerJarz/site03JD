@@ -12,6 +12,7 @@ import { Breadcrumbs } from "@/components/marketing/page-hero";
 import { ViewTracker } from "@/components/marketing/view-tracker";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { ServiceCallout } from "@/components/marketing/service-callout";
+import { teamMemberPath } from "@/config/team";
 import { officeForPost, serviceForPost } from "@/lib/content/links";
 import { getPostBySlug, getPosts, getRelatedPosts, getServices, getSiteSettings } from "@/lib/data/public";
 import { locationOffices, officePath } from "@/lib/seo/locations";
@@ -88,7 +89,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
               <div>
                 <p className="text-sm font-medium text-white">
                   {author ? (
-                    <Link href={`/team/${author.slug}`} rel="author" className="hover:text-brand-300">
+                    <Link href={teamMemberPath(author.slug)} rel="author" className="hover:text-brand-300">
                       {author.name}
                     </Link>
                   ) : (
@@ -164,7 +165,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
                 <div>
                   <p className="eyebrow text-mist-600">Written by</p>
                   <p className="mt-2 font-display text-lg font-semibold tracking-tight text-ink-900">
-                    <Link href={`/team/${author.slug}`} rel="author" className="hover:text-brand-700">
+                    <Link href={teamMemberPath(author.slug)} rel="author" className="hover:text-brand-700">
                       {author.name}
                     </Link>
                   </p>

@@ -2,6 +2,7 @@
 
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "motion/react";
 import { BarChart3, Code2, MapPin, MousePointerClick, Search, TrendingUp } from "lucide-react";
+import Image from "next/image";
 import { useRef, type ReactNode } from "react";
 import { EASE, Magnetic } from "@/components/animations";
 import { FadeIn, TextReveal } from "@/components/animations/text-reveal";
@@ -17,7 +18,7 @@ import { WhatsappIcon } from "@/components/ui/brand-icons";
  */
 const NODES = [
   { key: "seo", label: "SEO", sub: "Organic search", Icon: Search, x: 12, y: 16, depth: 18 },
-  { key: "web", label: "Web Development", sub: "WordPress · Shopify · Laravel", Icon: Code2, x: 52, y: 6, depth: 28 },
+  { key: "web", label: "Web Development", sub: "React · WordPress · Shopify", Icon: Code2, x: 52, y: 6, depth: 28 },
   { key: "local", label: "Local SEO", sub: "Google Maps", Icon: MapPin, x: 74, y: 42, depth: 14 },
   { key: "ads", label: "Ads", sub: "Google · Meta", Icon: MousePointerClick, x: 62, y: 80, depth: 24 },
   { key: "analytics", label: "Analytics", sub: "Tracking & reporting", Icon: BarChart3, x: 8, y: 70, depth: 20 },
@@ -118,8 +119,9 @@ function GrowthNetwork() {
       >
         <span className="absolute inset-0 rounded-3xl bg-brand-400/40 animate-pulse-ring" />
         <span className="absolute inset-0 rounded-3xl bg-brand-400/25 animate-pulse-ring [animation-delay:1.2s]" />
-        <div className="relative flex size-full items-center justify-center rounded-3xl border border-brand-300/40 bg-gradient-to-br from-brand-400 to-brand-700 shadow-[0_0_60px_-10px_rgb(0_175_185/0.8)]">
-          <span className="font-display text-[clamp(1rem,2.4vw,1.6rem)] font-bold tracking-tight text-ink-950">JD</span>
+        {/* The header's teal mark needs a dark tile to read; the teal border and glow keep the core lit. */}
+        <div className="relative flex size-full items-center justify-center rounded-3xl border border-brand-300/50 bg-ink-900 shadow-[0_0_60px_-10px_rgb(0_175_185/0.8)]">
+          <Image src="/images/brand/mark.png" alt="" width={270} height={270} loading="eager" className="size-[62%]" />
         </div>
       </motion.div>
 

@@ -41,6 +41,13 @@ export const STATIC_PAGES: StaticPageSeo[] = [
       "Founded in Dallas in 2019, Jarz Digital is a digital agency with offices in Dhaka, Dallas, Calgary and Cork, helping businesses grow online.",
   },
   {
+    path: "/rokonuzzaman-jony",
+    label: "Founder profile (Rokonuzzaman Jony)",
+    title: "Md Rokonuzzaman Jony — Founder & CEO",
+    description:
+      "Founder & CEO of Jarz Digital: SEO strategist, web developer and AI automation expert with 800–1,000+ projects for businesses in the USA, Canada and UK.",
+  },
+  {
     path: "/pricing",
     label: "Pricing",
     title: "Pricing — Web, SEO, Social Media & Ads Plans",
