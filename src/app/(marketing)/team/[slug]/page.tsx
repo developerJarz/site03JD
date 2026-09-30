@@ -33,7 +33,7 @@ export default async function TeamMemberPage({ params }: PageProps<"/team/[slug]
   if (slug === FOUNDER_PROFILE.slug) permanentRedirect(FOUNDER_PROFILE.path);
   const [member, team] = await Promise.all([getTeamMemberBySlug(slug), getTeam()]);
   if (!member) notFound();
-  const socials = (["linkedin", "twitter"] as const).filter((k) => member.socials[k]);
+  const socials = (["linkedin", "youtube", "facebook", "twitter"] as const).filter((k) => member.socials[k]);
   const others = team.filter((m) => m.slug !== member.slug);
 
   return (

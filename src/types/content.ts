@@ -153,7 +153,7 @@ export interface TeamMember {
   bio: string;
   highlights: string[];
   photo?: ImageRef | null;
-  socials: { linkedin?: string; twitter?: string; website?: string };
+  socials: { linkedin?: string; twitter?: string; facebook?: string; youtube?: string; website?: string };
   order: number;
   published: boolean;
 }

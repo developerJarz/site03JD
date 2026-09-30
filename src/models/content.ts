@@ -148,7 +148,7 @@ const TeamMemberSchema = new Schema(
     bio: { type: String, trim: true, maxlength: 1200 },
     highlights: [String],
     photo: ImageSchema,
-    socials: { linkedin: String, twitter: String, website: String },
+    socials: { linkedin: String, twitter: String, facebook: String, youtube: String, website: String },
     order: { type: Number, default: 0 },
     published: { type: Boolean, default: true, index: true },
   },

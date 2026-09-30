@@ -26,6 +26,7 @@ import { JsonLd } from "@/components/marketing/json-ld";
 import { PageHero } from "@/components/marketing/page-hero";
 import { WhatsAppButton } from "@/components/marketing/whatsapp";
 import { TeamAvatar } from "@/components/sections/team-grid";
+import { SOCIAL_ICONS } from "@/components/ui/brand-icons";
 import { buttonClasses } from "@/components/ui/button";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { whatsappLink } from "@/config/contact";
@@ -67,6 +68,8 @@ export default async function FounderPage() {
     name: p.fullName,
     photo: { src: "/images/team/rokonuzzaman-jony.png", alt: `Portrait of ${p.fullName}`, width: 150, height: 150 },
   };
+  // Social links are edited in Admin → Team.
+  const socials = (["linkedin", "youtube", "facebook", "twitter"] as const).flatMap((k) => (member?.socials[k] ? [[k, member.socials[k]] as const] : []));
 
   return (
     <>
@@ -157,6 +160,26 @@ export default async function FounderPage() {
               <Star className="size-4 shrink-0 fill-brand-300 text-brand-300" aria-hidden />
               Former Fiverr Top Rated Seller, rated 5.0
             </p>
+            {socials.length > 0 && (
+              <ul className="mt-6 flex flex-wrap gap-2" aria-label={`${p.fullName} on social media`}>
+                {socials.map(([k, href]) => {
+                  const { Icon, label } = SOCIAL_ICONS[k];
+                  return (
+                    <li key={k}>
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer me"
+                        aria-label={`${p.fullName} on ${label}`}
+                        className="flex size-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/75 transition-colors hover:border-brand-300 hover:text-brand-300"
+                      >
+                        <Icon className="size-4" />
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         }
       >

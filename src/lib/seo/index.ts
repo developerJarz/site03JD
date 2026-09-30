@@ -120,7 +120,7 @@ const personId = (slug: string) => `${abs(teamMemberPath(slug))}#person`;
 
 /** Compact Person reference (used for founder and article authors). */
 function personRef(m: Pick<TeamMember, "slug" | "name" | "role" | "socials">): Json {
-  const sameAs = [m.socials.linkedin, m.socials.twitter, m.socials.website].filter(Boolean);
+  const sameAs = [m.socials.linkedin, m.socials.twitter, m.socials.facebook, m.socials.youtube, m.socials.website].filter(Boolean);
   return { "@type": "Person", "@id": personId(m.slug), name: m.name, jobTitle: m.role, url: abs(teamMemberPath(m.slug)), ...(sameAs.length ? { sameAs } : {}) };
 }
 

@@ -458,6 +458,8 @@ export const RESOURCES: Record<ResourceKey, ResourceDef> = {
         fields: [
           { name: "socials.linkedin", label: "LinkedIn URL", type: "url", width: "half" },
           { name: "socials.twitter", label: "X / Twitter URL", type: "url", width: "half" },
+          { name: "socials.facebook", label: "Facebook URL", type: "url", width: "half" },
+          { name: "socials.youtube", label: "YouTube URL", type: "url", width: "half" },
           { name: "socials.website", label: "Website", type: "url", width: "half" },
         ],
       },

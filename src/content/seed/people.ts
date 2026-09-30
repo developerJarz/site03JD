@@ -15,7 +15,12 @@ export const teamSeed: SeedTeam[] = [
     bio: "SEO strategist, web developer and AI automation expert. Since 2015 he has helped businesses across the USA, Canada and the UK rank on Google and in AI-powered search, delivering 800–1,000+ projects as a Fiverr Top Rated Seller.",
     highlights: ["2023 top-ranked Local SEO expert on Fiverr", "300+ businesses ranked & grown", "10+ years in SEO & web development"],
     photo: photo("rokonuzzaman-jony.png", "Rokonuzzaman Jony"),
-    socials: {},
+    socials: {
+      linkedin: "https://www.linkedin.com/in/rz-jony-roknuzzaman-jony",
+      youtube: "https://www.youtube.com/@Roknuzzaman-Jony-JarzDigital",
+      facebook: "https://www.facebook.com/profile.php?id=61551395890957",
+      twitter: "https://x.com/Rz_Jony",
+    },
     order: 1,
     published: true,
   },
