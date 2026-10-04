@@ -7,6 +7,7 @@ import { BeforeAfterShowcase } from "@/components/sections/before-after";
 import { FeaturedWork } from "@/components/sections/home/featured-work";
 import { GrowthProcess } from "@/components/sections/home/growth-process";
 import { HomeHero } from "@/components/sections/home/hero";
+import { ProfitCalculator } from "@/components/sections/home/profit-calculator";
 import { Results } from "@/components/sections/home/results";
 import { ServicesExplorer } from "@/components/sections/home/services-explorer";
 import { TrustStrip } from "@/components/sections/home/trust-strip";
@@ -43,7 +44,7 @@ export default async function HomePage() {
 
   const featured = projects.filter((p) => p.featured).slice(0, 6);
   // Section labels count only the sections that render, so they always run 01, 02, 03…
-  const sections = [featured.length > 0 && "work", "services", "why", "process", "industries", "results", "before-after", testimonials.length > 0 && "testimonials", "team", "locations", "faq"].filter(Boolean);
+  const sections = [featured.length > 0 && "work", "calculator", "services", "why", "process", "industries", "results", "before-after", testimonials.length > 0 && "testimonials", "team", "locations", "faq"].filter(Boolean);
   const n = (key: string) => String(sections.indexOf(key) + 1).padStart(2, "0");
   const clients = Array.from(new Set(projects.map((p) => p.client).filter((c) => !/contractor/i.test(c))));
 
@@ -67,6 +68,8 @@ export default async function HomePage() {
       />
 
       {featured.length > 0 && <FeaturedWork projects={featured} index={n("work")} />}
+
+      <ProfitCalculator index={n("calculator")} />
 
       <Section tone="light" aria-labelledby="services-heading">
         <SectionHeader

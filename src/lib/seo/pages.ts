@@ -54,6 +54,12 @@ export const STATIC_PAGES: StaticPageSeo[] = [
     description: "Transparent pricing: SEO and local SEO from $40/month, websites from $50/month, ad management from $200/month and business management at $1,000/month.",
   },
   {
+    path: "/proposal",
+    label: "Project proposal (6-month plan)",
+    title: "6-Month Growth Proposal & Ads Calculator",
+    description: "Jarz Digital’s 6-month growth plan — website, SEO, ads, social media and content in one plan — with an ads profit calculator for your monthly budget.",
+  },
+  {
     path: "/blog",
     label: "Insights (blog)",
     title: "Insights — Local SEO & Business Growth Guides",

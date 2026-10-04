@@ -1,0 +1,12 @@
+Jarz Digital — 6-Month Growth Proposal
+
+Jarz-Digital-Proposal-Page.html
+  The full one-page proposal with the profit calculator. Double-click to open,
+  or upload it to any website (WordPress, Webflow, etc.).
+
+website-component/
+  The same page as a React + TypeScript (.tsx) component for jarzdigital.com.
+  Open website-component/README.md for the 5-minute setup.
+
+Jarz-Digital-Growth-Proposal-EN.pdf / -BN.pdf
+  Print-ready PDF versions in English and Bangla.

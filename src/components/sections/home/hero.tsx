@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "motion/react";
-import { BarChart3, Code2, MapPin, MousePointerClick, Search, TrendingUp } from "lucide-react";
+import { BarChart3, Code2, FileText, MapPin, MousePointerClick, Search, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import { useRef, type ReactNode } from "react";
 import { EASE, Magnetic } from "@/components/animations";
@@ -171,7 +171,7 @@ export function HomeHero({ trust, whatsappHref, children }: { trust: string[]; w
             Custom web design, Local SEO, Google Ads and complete business management for growing brands — from our offices in Dhaka, Dallas, Calgary and Cork.
           </FadeIn>
 
-          <FadeIn delay={0.6} className="mt-10 flex flex-col gap-3 sm:flex-row">
+          <FadeIn delay={0.6} className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Magnetic>
               <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className={buttonClasses({ size: "lg", className: "w-full bg-[#25D366] hover:bg-[#1fbd59] sm:w-auto" })}>
                 <WhatsappIcon className="size-5" />
@@ -180,6 +180,10 @@ export function HomeHero({ trust, whatsappHref, children }: { trust: string[]; w
             </Magnetic>
             <ButtonLink href="/work" size="lg" variant="outline-light">
               Explore Our Work
+            </ButtonLink>
+            <ButtonLink href="/proposal" size="lg" variant="ghost-light" className="border border-white/10 bg-white/[0.04]">
+              <FileText className="size-5 text-brand-300" strokeWidth={1.8} aria-hidden />
+              Project Proposal
             </ButtonLink>
           </FadeIn>
 
