@@ -3,11 +3,12 @@
 // Rendered inside the site layout (navbar + footer). All styles are scoped under .jdp.
 // Navigation: a sticky sidebar on desktop; on smaller screens a compact section bar that opens a side drawer.
 import Link from 'next/link'
-import { useEffect, useRef, useState, useSyncExternalStore, type MouseEvent, type ReactElement } from 'react'
+import { useEffect, useRef, useState, type MouseEvent, type ReactElement } from 'react'
 import enContent from './content/en.json'
 import bnContent from './content/bn.json'
 import { STR, type Lang, type Strings } from './calc/strings'
 import Calculator from './components/Calculator'
+import { setLang, useLang } from './lang'
 import { About, Home, Market, Packages, Plan, Results, Why, type C } from './components/Pages'
 import './styles.css'
 
@@ -28,26 +29,10 @@ const ICONS: Record<Id, ReactElement> = {
   start: <path d="M5 12h14m-6-6 6 6-6 6" />,
 }
 
-// Language choice: remembered in localStorage (memory fallback), read via useSyncExternalStore so
-// the server render and hydration are always English and a saved Bangla choice applies right after.
-let memLang: Lang | null = null
-const langSubs = new Set<() => void>()
-const subscribeLang = (cb: () => void) => { langSubs.add(cb); return () => { langSubs.delete(cb) } }
-function readLang(): Lang {
-  if (memLang) return memLang
-  try { return localStorage.getItem('jd-lang') === 'bn' ? 'bn' : 'en' } catch { return 'en' }
-}
-function writeLang(l: Lang) {
-  memLang = l
-  try { localStorage.setItem('jd-lang', l) } catch { /* storage unavailable */ }
-  langSubs.forEach((cb) => cb())
-}
-
 export interface ProposalContact { whatsappHref: string; whatsappDisplay: string; email: string }
 
 export default function JarzProposalPage({ contact }: { contact: ProposalContact }) {
-  const lang = useSyncExternalStore(subscribeLang, readLang, () => 'en' as Lang)
-  const setLang = writeLang
+  const lang = useLang()
   const [active, setActive] = useState<Id>('overview')
   const [progress, setProgress] = useState(0)
   const [drawer, setDrawer] = useState(false)

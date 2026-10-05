@@ -20,6 +20,85 @@ const img = (file: string, alt: string) => ({ src: `/images/services/${file}`, a
  */
 export const serviceSeed: SeedService[] = [
   /* ------------------------------------------------------------------ */
+  // AI Automation has its own page (src/app/(marketing)/services/ai-automation); this record
+  // puts it first in the navigation and service lists and supplies its hero, FAQs and SEO.
+  {
+    slug: "ai-automation",
+    title: "AI Automation",
+    shortTitle: "AI Automation",
+    icon: "bot",
+    categorySlug: "design-development",
+    tagline: "AI workflows that answer, book, follow up and report, so your team doesn’t have to.",
+    summary:
+      "We build AI automation for small and growing businesses: assistants that answer customers on WhatsApp and your website, lead follow-up that runs on its own, and back-office workflows that move data between the tools you already use. Built with n8n, ChatGPT, Claude and Gemini, with a person in the loop wherever it matters.",
+    heroTitle: "AI automation that takes the busywork off your team.",
+    heroSubtitle:
+      "Missed messages, copy-pasting between apps, leads that go cold over a weekend. We build AI workflows that handle the repetitive parts of the day and hand the decisions that matter back to you.",
+    overview:
+      "Most businesses don’t need a robot. They need the enquiry that arrives at 9 pm answered before the customer asks someone else, the order details typed in once instead of three times, and a Monday report that writes itself. That’s what our AI automation services do. We map how work moves through your business today, find the steps that are repetitive and rule-based, and connect your tools with AI so those steps happen on their own — while your team keeps control of anything that needs judgement.",
+    image: null,
+    problems: [
+      { title: "Leads wait hours for a reply", description: "Someone asks for a price on WhatsApp after closing time. By the time you answer in the morning, they’ve booked with whoever replied first." },
+      { title: "Your team retypes the same data", description: "Orders, form entries and invoices get copied from one app into another. It’s slow, it’s dull, and it’s where most mistakes come from." },
+      { title: "Reports take half a day", description: "Sales, ads and website numbers sit in separate dashboards, so the weekly report is late and nobody trusts it." },
+    ],
+    included: [
+      { title: "AI chat assistants", description: "An assistant that knows your services, prices and policies, and answers in your tone.", items: ["Website chat, WhatsApp, Messenger and Instagram DMs", "Trained on your FAQs, price list and documents", "Hands the conversation to a person when it should"] },
+      { title: "Lead capture & follow-up", description: "Every enquiry gets a fast reply and a next step, even on weekends.", items: ["Instant replies to form, ad and DM leads", "Qualifying questions before a sales call", "Follow-up reminders until the lead answers"] },
+      { title: "Booking & reminders", description: "Customers book themselves and actually turn up.", items: ["Calendar booking from chat or WhatsApp", "Confirmation and reminder messages", "No-show and rebooking follow-up"] },
+      { title: "Back-office workflows", description: "Data moves between your apps without anyone retyping it.", items: ["Orders to invoices to accounting", "Sync between Sheets, CRM and your store", "Read data out of emails, PDFs and receipts"] },
+      { title: "Content & reputation", description: "First drafts written for you to check and approve.", items: ["Review replies drafted in your voice", "Product descriptions and social captions", "Blog and newsletter outlines from your notes"] },
+      { title: "Reporting & alerts", description: "The numbers you need, delivered where you already look.", items: ["Weekly summary of sales, ads and traffic", "Alerts when something needs attention", "Sent by email, WhatsApp or Slack"] },
+    ],
+    benefits: [
+      "Replies to customers in seconds, day or night",
+      "Hours back from copy-paste work",
+      "Fewer data-entry mistakes",
+      "Every lead followed up",
+      "One report instead of five dashboards",
+      "Workflows you own and can change",
+    ],
+    process: [
+      { title: "Map the work", description: "On a free call we walk through how enquiries, orders and admin move through your business today, and where time is lost." },
+      { title: "Pick the first workflow", description: "We start with the one automation that saves the most time or wins the most leads, not a six-month project." },
+      { title: "Build with your real data", description: "We connect your tools, write the AI instructions and test against real messages, orders and edge cases." },
+      { title: "Launch with a person in the loop", description: "Your team approves anything sensitive while the workflow proves itself. You see every run in a log." },
+      { title: "Improve and extend", description: "We watch the results, tune what needs tuning, then automate the next step." },
+    ],
+    capabilities: [
+      "n8n workflow automation",
+      "ChatGPT (OpenAI API)",
+      "Claude (Anthropic API)",
+      "Google Gemini",
+      "WhatsApp Business",
+      "Google Workspace & Sheets",
+      "CRMs such as HubSpot",
+      "Shopify & WooCommerce",
+      "Website chat widgets",
+      "Custom APIs & webhooks",
+    ],
+    plans: [],
+    faqs: [
+      { question: "What is AI automation for a small business?", answer: "It’s connecting the apps you already use — WhatsApp, email, your website, calendar, CRM, spreadsheets — and adding AI where a step needs reading or writing. For example: a customer asks a question on WhatsApp, the AI understands it, checks your price list and calendar, replies, and books the appointment. Rule-based steps run automatically; anything that needs judgement goes to a person." },
+      { question: "Will AI automation replace my staff?", answer: "No, and that isn’t the goal. Automation takes over the repetitive part of the job — answering the same questions, retyping data, chasing reminders — so your people spend their time on customers and decisions. Most of our clients use it to grow without hiring for admin work." },
+      { question: "Which AI and automation tools do you use?", answer: "We build most workflows in n8n and use ChatGPT, Claude or Gemini for the AI steps, depending on the task. We connect to tools like WhatsApp Business, Google Workspace, HubSpot, Shopify and WooCommerce, and to anything else with an API." },
+      { question: "Do I have to change the software I use?", answer: "Usually not. We work with the tools your team already knows and connect them. If a tool can’t be connected, we’ll tell you on the first call and suggest the simplest alternative." },
+      { question: "Is my customer data safe?", answer: "We only connect the data a workflow needs, keep credentials in the automation platform rather than in messages or documents, and can self-host n8n when you want data to stay on your own server. Sensitive actions — refunds, cancellations, anything financial — stay behind a human approval step." },
+      { question: "What happens if the AI gets something wrong?", answer: "Every workflow has guardrails: the AI answers only from the information you’ve approved, says when it doesn’t know, and hands the conversation to a person. Every run is logged, so you can see exactly what happened and we can fix the instruction behind it." },
+      { question: "How long does it take to set up?", answer: "A single focused workflow, like instant lead replies or appointment reminders, is the quickest place to start. Larger projects that connect several systems take longer. You get a clear timeline after the discovery call, once we know which tools are involved." },
+      { question: "How much do AI automation services cost?", answer: "It depends on how many steps and tools the workflow involves. We start with a free consultation, map the process, and quote for the first workflow before any work begins — so you know the cost and the expected time saved up front." },
+    ],
+    relatedSlugs: ["software-development", "web-application-development", "business-management"],
+    order: 0,
+    featured: true,
+    published: true,
+    seo: {
+      title: "AI Automation Services for Small Businesses",
+      description: "AI automation services that answer leads, book appointments and handle back-office work. n8n, ChatGPT, Claude and WhatsApp workflows built around your business.",
+    },
+  },
+
+  /* ------------------------------------------------------------------ */
   {
     slug: "website-development",
     title: "Website Development",

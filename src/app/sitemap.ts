@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { FOUNDER_PROFILE, teamMemberPath } from "@/config/team";
+import { COUNTRY_PAGES } from "@/content/country-sites";
 import { getCategories, getIndexablePageSlugs, getIndustries, getPosts, getProjects, getServices, getSiteSettings, getTeam } from "@/lib/data/public";
 import { SITE_URL, postModifiedAt, teamProfileIndexable } from "@/lib/seo";
 import { locationOffices, officePath } from "@/lib/seo/locations";
@@ -45,6 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...locationOffices(settings)
       .filter((o) => visible(officePath(o)))
       .map((o) => ({ url: url(officePath(o)), changeFrequency: "monthly" as const, priority: 0.8 })),
+    ...COUNTRY_PAGES.filter((p) => visible(p.path)).map((p) => ({ url: url(p.path), changeFrequency: "monthly" as const, priority: 0.8 })),
     ...services.filter((x) => !x.seo?.noindex).map((s) => ({ url: url(`/services/${s.slug}`), changeFrequency: "monthly" as const, priority: 0.9 })),
     ...projects.filter((x) => !x.seo?.noindex).map((p) => ({ url: url(`/work/${p.slug}`), changeFrequency: "monthly" as const, priority: 0.6 })),
     ...industries.filter((x) => !x.seo?.noindex).map((i) => ({ url: url(`/industries/${i.slug}`), changeFrequency: "monthly" as const, priority: 0.6 })),

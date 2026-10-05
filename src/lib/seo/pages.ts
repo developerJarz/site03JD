@@ -1,3 +1,4 @@
+import { COUNTRY_PAGES } from "@/content/country-sites";
 import type { Office } from "@/types/content";
 import { officePath } from "./locations";
 
@@ -78,6 +79,8 @@ export const STATIC_PAGES: StaticPageSeo[] = [
     title: "Our Offices — Dhaka, Dallas, Calgary & Cork",
     description: "Jarz Digital offices in Dhaka, Dallas, Calgary and Cork — addresses, Google Maps, WhatsApp and the services each team provides to local businesses.",
   },
+  // /usa, /canada and their city pages (src/content/country-sites).
+  ...COUNTRY_PAGES,
 ];
 
 export const staticPageSeo = (path: string) => STATIC_PAGES.find((p) => p.path === path);

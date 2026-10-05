@@ -1,0 +1,7 @@
+/* Homepage placement of the proposal's calculator (.jdp styles from src/components/proposal/styles.css).
+   No proposal sidebar or section bar here: the section's dark band is the ground, sticky bars sit below
+   the site navbar only, and the calculator's own "Calculator" eyebrow gives way to the homepage's numbered one. */
+.jdp.home-calc { --mbar-h: 0px; background: transparent; }
+.jdp.home-calc .calc-head .eyebrow { display: none; }
+.jdp.home-calc .lang-sw { width: 168px; }
+.jdp.home-calc .home-calc-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }

@@ -12,6 +12,13 @@ type State = { inputs: Inputs; preset: PresetId }
 const INITIAL: State = { inputs: DEFAULT_INPUTS, preset: 'fashion' }
 const noop = () => () => {}
 
+// Input groups: on phones and tablets (one column) the secondary groups start folded; on desktop, where
+// the inputs sit beside the results, every group starts open so the column is complete at a glance.
+const FOLDED: Record<string, boolean> = { budget: true, product: true, ads: false, costs: false, repeat: true, growth: false }
+const ALL_OPEN: Record<string, boolean> = { budget: true, product: true, ads: true, costs: true, repeat: true, growth: true }
+const TWO_COLUMNS = '(min-width: 1240px)' // matches the .calc-grid breakpoint in styles.css
+const onWidth = (cb: () => void) => { const mq = window.matchMedia(TWO_COLUMNS); mq.addEventListener('change', cb); return () => mq.removeEventListener('change', cb) }
+
 /** Saved inputs, then any ?preset=&budget= from a link (e.g. the homepage calculator) on top. */
 function load(): State {
   let st = INITIAL
@@ -47,7 +54,9 @@ export default function Calculator({ s, lang }: { s: Strings; lang: Lang }) {
   const [edited, setEdited] = useState<State | null>(null)
   const { inputs, preset } = edited ?? saved
   const setState = (next: State | ((st: State) => State)) => setEdited((e) => (typeof next === 'function' ? next(e ?? saved) : next))
-  const [open, setOpen] = useState<Record<string, boolean>>({ budget: true, product: true, ads: false, costs: false, repeat: true, growth: false })
+  const desktop = useSyncExternalStore(onWidth, () => window.matchMedia(TWO_COLUMNS).matches, () => false)
+  const [toggled, setToggled] = useState<Record<string, boolean>>({})
+  const open = { ...(desktop ? ALL_OPEN : FOLDED), ...toggled }
   const [howOpen, setHowOpen] = useState(false)
 
   useEffect(() => {
@@ -99,7 +108,7 @@ export default function Calculator({ s, lang }: { s: Strings; lang: Lang }) {
         <aside className="inputs">
           {GROUPS.map((g) => (
             <section key={g.id} className={`grp ${open[g.id] ? 'open' : ''}`}>
-              <button className="grp-h" aria-expanded={!!open[g.id]} onClick={() => setOpen((o) => ({ ...o, [g.id]: !o[g.id] }))}>
+              <button className="grp-h" aria-expanded={!!open[g.id]} onClick={() => setToggled((o) => ({ ...o, [g.id]: !open[g.id] }))}>
                 <span>{s.groups[g.id]}</span><i aria-hidden>⌄</i>
               </button>
               {open[g.id] && (

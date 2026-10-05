@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "db:dev": "tsx scripts/dev-db.ts",
     "db:seed": "tsx --conditions=react-server scripts/seed.ts",
+    "db:service": "tsx --conditions=react-server scripts/upsert-service.ts",
     "create-admin": "tsx --conditions=react-server scripts/create-admin.ts",
     "migrate:assets": "node scripts/migrate-assets.mjs --fetch-missing",
     "migrate:blog": "node scripts/extract-blog.mjs"

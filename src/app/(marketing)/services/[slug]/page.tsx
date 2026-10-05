@@ -27,7 +27,8 @@ export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const services = await getServices();
-  return services.map((s) => ({ slug: s.slug }));
+  // ai-automation has its own route (services/ai-automation), which takes precedence.
+  return services.filter((s) => s.slug !== "ai-automation").map((s) => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/services/[slug]">): Promise<Metadata> {

@@ -19,6 +19,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".data/**",
     "uploads/**",
+    // Raw external site builds (see site-imports/README.md); ported code lives in src/.
+    "site-imports/**",
   ]),
 ]);
 

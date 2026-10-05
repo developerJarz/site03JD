@@ -128,6 +128,6 @@ const CHOOSER = [
 
 function groupTitle(group: string) {
   if (/growth|marketing/i.test(group)) return "Search, social, ads & ongoing management.";
-  if (/design|development/i.test(group)) return "Websites, web applications & custom software.";
+  if (/design|development/i.test(group)) return "AI automation, websites, web applications & custom software.";
   return group;
 }

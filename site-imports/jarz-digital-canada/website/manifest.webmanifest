@@ -1,0 +1,14 @@
+{
+  "name": "Jarz Digital — Local SEO, Google Ads & Web Design",
+  "short_name": "Jarz Digital",
+  "description": "Local SEO, Google Ads, web design and AI for US local businesses.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#060B13",
+  "theme_color": "#060B13",
+  "icons": [
+    { "src": "/img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

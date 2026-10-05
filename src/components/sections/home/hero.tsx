@@ -3,12 +3,14 @@
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "motion/react";
 import { BarChart3, Code2, FileText, MapPin, MousePointerClick, Search, TrendingUp } from "lucide-react";
 import Image from "next/image";
-import { useRef, type ReactNode } from "react";
+import Link from "next/link";
+import { useRef, type CSSProperties, type ReactNode } from "react";
 import { EASE, Magnetic } from "@/components/animations";
 import { FadeIn, TextReveal } from "@/components/animations/text-reveal";
 import { Marquee } from "@/components/animations/marquee";
 import { ButtonLink, buttonClasses } from "@/components/ui/button";
 import { WhatsappIcon } from "@/components/ui/brand-icons";
+import { FLAG_COLORS, Flag, type FlagCode } from "@/components/ui/flags";
 
 /**
  * Homepage hero. The visual on the right is a "growth network": service nodes
@@ -132,6 +134,65 @@ function GrowthNetwork() {
   );
 }
 
+/** Market pages under the hero buttons. A market without an href is shown as coming soon. */
+const LOCATIONS: { code: FlagCode; name: string; sub: string; href?: string }[] = [
+  { code: "bd", name: "Bangladesh", sub: "Dhaka", href: "/bangladesh" },
+  { code: "us", name: "USA", sub: "4 cities", href: "/usa" },
+  { code: "ca", name: "Canada", sub: "5 cities", href: "/canada" },
+  { code: "uk", name: "UK", sub: "London, soon" },
+];
+
+/**
+ * Each card is washed in its own flag's colours: faint at rest, full on hover or keyboard focus,
+ * when the border also takes the flag's lead colour and the flag lifts.
+ */
+function LocationRow() {
+  return (
+    <nav aria-label="Choose your market">
+      <p className="mb-3 text-sm text-white/55">Choose your market</p>
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {LOCATIONS.map((l) => {
+          const [c1, c2] = FLAG_COLORS[l.code];
+          const inner = (
+            <>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-55 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+                style={{ background: `radial-gradient(120% 150% at 0% 0%, ${c1}66, transparent 60%), radial-gradient(110% 140% at 100% 100%, ${c2}40, transparent 62%)` }}
+              />
+              <span className="relative block h-[30px] w-11 shrink-0 overflow-hidden rounded-[5px] shadow-[0_6px_14px_-6px_rgb(0_0_0/0.8)] ring-1 ring-inset ring-white/20 transition-transform duration-300 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:scale-105">
+                <Flag code={l.code} className="size-full" />
+              </span>
+              <span className="relative min-w-0 leading-tight">
+                <span className="block text-[0.95rem] font-medium text-white">{l.name}</span>
+                <span className="mt-1 block truncate text-[0.78rem] text-white/55">{l.sub}</span>
+              </span>
+            </>
+          );
+          const card = "group relative isolate flex h-full min-h-[72px] items-center gap-3 overflow-hidden rounded-2xl border px-3.5 py-3";
+          return (
+            <li key={l.code}>
+              {l.href ? (
+                <Link
+                  href={l.href}
+                  className={`${card} border-white/10 bg-white/[0.03] transition-colors duration-300 hover:border-[var(--flag)] focus-visible:border-[var(--flag)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-300`}
+                  style={{ "--flag": c1 } as CSSProperties}
+                >
+                  {inner}
+                </Link>
+              ) : (
+                <span aria-disabled="true" className={`${card} border-dashed border-white/15 [&_svg]:opacity-60 [&_svg]:grayscale-[40%]`}>
+                  {inner}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
 const CHIPS = ["Website Development", "SEO", "Local SEO", "Social Media", "Google Ads", "Business Management", "Web Applications", "Software"];
 
 export function HomeHero({ trust, whatsappHref, children }: { trust: string[]; whatsappHref: string; children?: ReactNode }) {
@@ -187,7 +248,11 @@ export function HomeHero({ trust, whatsappHref, children }: { trust: string[]; w
             </ButtonLink>
           </FadeIn>
 
-          <FadeIn as="ul" delay={0.75} className="mt-12 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/55">
+          <FadeIn delay={0.7} className="mt-8 max-w-3xl">
+            <LocationRow />
+          </FadeIn>
+
+          <FadeIn as="ul" delay={0.8} className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/55">
             {trust.map((t) => (
               <li key={t} className="flex items-center gap-2">
                 <svg viewBox="0 0 16 16" className="size-4 text-brand-400" aria-hidden>

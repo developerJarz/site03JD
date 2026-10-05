@@ -1,5 +1,6 @@
 import {
   AppWindow,
+  Bot,
   BriefcaseBusiness,
   Building2,
   ChartLine,
@@ -57,6 +58,7 @@ export const ICONS: Record<string, LucideIcon> = {
   house: House,
   rocket: Rocket,
   sparkles: Sparkles,
+  bot: Bot,
 };
 
 export const ICON_OPTIONS = Object.keys(ICONS).map((value) => ({ value, label: value.replace(/-/g, " ") }));

@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { Hind_Siliguri } from "next/font/google";
 import Link from "next/link";
 import { beforeAfterShowcase, brandFacts, growthProcess } from "@/content/seed";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { BeforeAfterShowcase } from "@/components/sections/before-after";
+import { AdsCalculator } from "@/components/sections/home/ads-calculator";
 import { FeaturedWork } from "@/components/sections/home/featured-work";
 import { GrowthProcess } from "@/components/sections/home/growth-process";
 import { HomeHero } from "@/components/sections/home/hero";
-import { ProfitCalculator } from "@/components/sections/home/profit-calculator";
 import { Results } from "@/components/sections/home/results";
 import { ServicesExplorer } from "@/components/sections/home/services-explorer";
 import { TrustStrip } from "@/components/sections/home/trust-strip";
@@ -25,6 +26,9 @@ import { publicUrl, whatsappLink, whatsappMessage } from "@/config/contact";
 import { pageMetadata } from "@/lib/seo/page";
 
 export const revalidate = 3600;
+
+// Bangla copy in the calculator only; not preloaded so English readers don't download it.
+const hind = Hind_Siliguri({ variable: "--font-hind", subsets: ["bengali", "latin"], weight: ["400", "500", "600", "700"], display: "swap", preload: false });
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
@@ -69,7 +73,12 @@ export default async function HomePage() {
 
       {featured.length > 0 && <FeaturedWork projects={featured} index={n("work")} />}
 
-      <ProfitCalculator index={n("calculator")} />
+      <div className={hind.variable}>
+        <AdsCalculator
+          index={n("calculator")}
+          whatsappHref={whatsappLink(settings.contact.whatsapp, whatsappMessage({ intent: "I used the ads calculator and want to talk about my budget.", from: `Homepage calculator — ${publicUrl("/")}` }))}
+        />
+      </div>
 
       <Section tone="light" aria-labelledby="services-heading">
         <SectionHeader
