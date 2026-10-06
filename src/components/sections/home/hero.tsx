@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "motion/react";
-import { BarChart3, Code2, FileText, MapPin, MousePointerClick, Search, TrendingUp } from "lucide-react";
+import { BarChart3, Code2, MapPin, MousePointerClick, Search, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, type CSSProperties, type ReactNode } from "react";
@@ -241,10 +241,6 @@ export function HomeHero({ trust, whatsappHref, children }: { trust: string[]; w
             </Magnetic>
             <ButtonLink href="/work" size="lg" variant="outline-light">
               Explore Our Work
-            </ButtonLink>
-            <ButtonLink href="/proposal" size="lg" variant="ghost-light" className="border border-white/10 bg-white/[0.04]">
-              <FileText className="size-5 text-brand-300" strokeWidth={1.8} aria-hidden />
-              Project Proposal
             </ButtonLink>
           </FadeIn>
 

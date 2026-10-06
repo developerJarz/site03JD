@@ -114,7 +114,7 @@ function HomePage({ site, c }: { site: CountrySite; c: Contact }) {
       <Stats />
       <CityNav site={site} />
       <ServicesOverview data={D} />
-      <CountryCalculator market={D.market === "ca" ? "ca" : "us"} defaultCat={D.calcDefault} title={D.home.calcTitle} lead={D.home.calcLead} />
+      <CountryCalculator market={D.market === "ca" ? "ca" : "us"} defaultCat={D.calcDefault} title={D.home.calcTitle} lead={D.home.calcLead} eyebrow={`${D.regional?.countryName ?? site.name} Ad Revenue and Profit Calculator`} showVideo={D.video} />
       <ServiceDetailsSection data={D} c={undefined} />
       <Long s={L.opportunity()} />
       <Results data={D} />
@@ -214,6 +214,8 @@ function CityPage({ site, city, c }: { site: CountrySite; city: City; c: Contact
         defaultCat={city.calcCat}
         title={`Google Ads calculator for ${city.name} businesses`}
         lead={D.calcCityLead(city.name)}
+        eyebrow={`${D.regional?.countryName ?? site.name} Ad Revenue and Profit Calculator`}
+        showVideo={D.video}
       />
       <ServiceDetailsSection data={D} c={cw} />
       <CasesSection data={D} id="results" place={city.name} />

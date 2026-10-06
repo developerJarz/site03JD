@@ -1,61 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
-import { CA_MARKET, US_MARKET, caCityMarket } from "@/content/country-sites/us/market";
-import { setMoney } from "@/content/country-sites/us/money";
-import { CalculatorSection, useUsCalc } from "./calculator";
-import Growth360 from "./growth-360";
-import PlanSection from "./plan-section";
+import { useCallback, useRef, useState } from "react";
 
-/**
- * The interactive part of a country page: Google Ads calculator, growth-plan comparison
- * and 360° growth dashboard, sharing one state. Only the market id and city are passed
- * in, so the long-form copy never ships to the browser. Renders inside <CountryShell> (styles: country.css).
- */
-export function CountryCalculator({
-  market: marketId,
-  city,
-  defaultCat,
-  title,
-  lead,
-  eyebrow,
-  showVideo,
-}: {
-  market: "us" | "ca";
-  city?: { id: string; name: string };
-  defaultCat: string;
-  title: string;
-  lead: string;
-  eyebrow?: string;
-  showVideo?: boolean;
-}) {
-  const cityId = city?.id;
-  const cityName = city?.name;
-  // Canadian city pages adjust click and lead costs for local competition.
-  const market = useMemo(
-    () => (marketId === "ca" ? (cityId && cityName ? caCityMarket(cityId, cityName) : CA_MARKET) : US_MARKET),
-    [marketId, cityId, cityName],
-  );
-  setMoney(market.symbol, market.locale);
-  const calc = useUsCalc(defaultCat, `jd-site-calc-${cityId ?? marketId}`, market);
-
-  return (
-    <>
-      <section id="calculator" className="anchor">
-        {showVideo && <CalcVideoGuide />}
-        <CalculatorSection calc={calc} title={title} lead={lead} eyebrow={eyebrow} />
-      </section>
-      <PlanSection calc={calc} place={cityName} />
-      <Growth360 inp={calc.inp} catName={calc.cat.name} avg={market.avg} place={cityName} />
-    </>
-  );
-}
-
-/* ---------- YouTube video guide (privacy-enhanced, no branding) ---------- */
 const YT_ID = "Ui89g6mua0o";
 const YT_THUMB = `https://img.youtube.com/vi/${YT_ID}/maxresdefault.jpg`;
 
-function CalcVideoGuide() {
+export function CalcVideoGuide({ label = "Calculator budget guide" }: { label?: string }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [playing, setPlaying] = useState(false);
   const [fs, setFs] = useState(false);
@@ -86,18 +36,18 @@ function CalcVideoGuide() {
             <path d="M23 7l-7 5 7 5V7z" />
             <rect x="1" y="5" width="15" height="14" rx="2" />
           </svg>
-          <span>Calculator budget guide</span>
+          <span>{label}</span>
         </div>
         <div className="calc-video-frame">
           {playing ? (
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${YT_ID}?autoplay=1&rel=0&modestbranding=1&showinfo=0&controls=1&iv_load_policy=3&disablekb=0&fs=0`}
-              title="Calculator budget guide"
+              title={label}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
               allowFullScreen
             />
           ) : (
-            <button type="button" className="calc-video-poster" onClick={play} aria-label="Play video">
+            <button type="button" className="calc-video-poster" onClick={play} aria-label={label ? `Play ${label}` : "Play video"}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={YT_THUMB} alt="" loading="lazy" />
               <span className="calc-video-play" aria-hidden>
@@ -123,4 +73,3 @@ function CalcVideoGuide() {
     </div>
   );
 }
-

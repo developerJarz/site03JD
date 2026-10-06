@@ -29,7 +29,7 @@ const csp = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data: https://fonts.gstatic.com",
   "connect-src 'self'" + (isDev ? " ws:" : "") + gaConnect,
-  `frame-src https://www.google.com https://maps.google.com${gaFrame}`,
+  `frame-src https://www.google.com https://maps.google.com https://www.youtube-nocookie.com${gaFrame}`,
   "media-src 'self' https:",
   "object-src 'none'",
   "base-uri 'self'",

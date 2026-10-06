@@ -15,7 +15,6 @@ import './styles.css'
 const SECTIONS = ['overview', 'about', 'results', 'market', 'why', 'plan', 'calculator', 'packages', 'start'] as const
 type Id = (typeof SECTIONS)[number]
 
-const PDF: Record<Lang, string> = { en: '/proposal/jarz-digital-growth-proposal-en.pdf', bn: '/proposal/jarz-digital-growth-proposal-bn.pdf' }
 
 const ICONS: Record<Id, ReactElement> = {
   overview: <path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z" />,
@@ -97,7 +96,7 @@ export default function JarzProposalPage({ contact }: { contact: ProposalContact
           <SideHead s={s} />
           <LangSwitch lang={lang} setLang={setLang} />
           <SideNav {...nav} />
-          <SideFoot s={s} lang={lang} contact={contact} />
+          <SideFoot s={s} contact={contact} />
         </aside>
 
         <div className="content">
@@ -119,7 +118,7 @@ export default function JarzProposalPage({ contact }: { contact: ProposalContact
             <section id="jdp-market" className="anchor"><Market {...props} /></section>
             <section id="jdp-why" className="anchor"><Why {...props} /></section>
             <section id="jdp-plan" className="anchor"><Plan {...props} /></section>
-            <section id="jdp-calculator" className="anchor block calc-block"><Calculator s={s} lang={lang} /></section>
+            <section id="jdp-calculator" className="anchor block calc-block"><Calculator s={s} lang={lang} showVideo={true} /></section>
             <section id="jdp-packages" className="anchor"><Packages {...props} /></section>
             <section id="jdp-start" className="anchor cta-final">
               <h2>{s.ctaTitle}</h2>
@@ -141,7 +140,7 @@ export default function JarzProposalPage({ contact }: { contact: ProposalContact
           <button className="drawer-x" onClick={() => setDrawer(false)} aria-label={s.side.close}>×</button>
         </div>
         <SideNav {...nav} />
-        <SideFoot s={s} lang={lang} contact={contact} />
+        <SideFoot s={s} contact={contact} />
       </div>
     </div>
   )
@@ -183,12 +182,9 @@ function SideNav({ s, active, go, progress }: { s: Strings; active: Id; go: (id:
   )
 }
 
-function SideFoot({ s, lang, contact }: { s: Strings; lang: Lang; contact: ProposalContact }) {
+function SideFoot({ s, contact }: { s: Strings; contact: ProposalContact }) {
   return (
     <div className="side-foot">
-      <a className="side-link" href={PDF[lang]} target="_blank" rel="noopener noreferrer" download>
-        <svg viewBox="0 0 24 24" aria-hidden><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4 19h16" /></svg>{s.side.pdf}
-      </a>
       <a className="btn primary side-cta" href={contact.whatsappHref} target="_blank" rel="noopener noreferrer">{s.side.talk}</a>
     </div>
   )

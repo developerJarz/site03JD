@@ -4,6 +4,7 @@ import { BUDGET_STEPS, LEARNING_EVENTS_PER_WEEK, breakEven, breakEvenCvr, budget
 import { DEFAULT_INPUTS, PRESETS, type PresetId } from '../calc/presets'
 import type { Lang, Strings } from '../calc/strings'
 import { dec, int, pct, tk, usd } from '../format'
+import { CalcVideoGuide } from './CalcVideoGuide'
 import { ForecastChart } from './charts'
 
 const KEY = 'jd-calc-v2'
@@ -47,7 +48,7 @@ const GROUPS: { id: keyof Strings['groups']; fields: FieldSpec[] }[] = [
   { id: 'growth', fields: [{ k: 'seoVisitors', min: 0, max: 30000, step: 100 }, { k: 'agencyFee', min: 0, max: 300000, step: 1000, unit: 'tk' }, { k: 'scalePct', min: 5, max: 50, step: 5, unit: '%' }, { k: 'fx', min: 100, max: 150, step: 0.01 }] },
 ]
 
-export default function Calculator({ s, lang }: { s: Strings; lang: Lang }) {
+export default function Calculator({ s, lang, showVideo = false }: { s: Strings; lang: Lang; showVideo?: boolean }) {
   // Server render and hydration use the defaults; saved/linked values take over on the client.
   const isClient = useSyncExternalStore(noop, () => true, () => false)
   const saved = useMemo(() => (isClient ? load() : INITIAL), [isClient])
@@ -83,8 +84,10 @@ export default function Calculator({ s, lang }: { s: Strings; lang: Lang }) {
 
   return (
     <div className="calc">
+      {showVideo && <CalcVideoGuide label={s.calcVideoLabel} />}
+
       <header className="calc-head">
-        <div className="eyebrow">{s.tabs.calc}</div>
+        <div className="eyebrow">{s.calcEyebrow ?? s.tabs.calc}</div>
         <h2>{s.calcTitle}</h2>
         <p className="lead">{s.calcSub}</p>
       </header>

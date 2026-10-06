@@ -8,7 +8,7 @@ import type { SiteData } from './sitedata'
 import type { CityId } from './longform'
 
 export const US_DATA: SiteData = {
-  market: 'us', homeId: 'home', lang: 'en-US', ogLocale: 'en_US', geoCountry: 'US', crumbHome: 'Home',
+  market: 'us', homeId: 'home', lang: 'en-US', ogLocale: 'en_US', geoCountry: 'US', crumbHome: 'Home', video: true,
   root: '/', country: 'USA', inCountry: 'across the USA',
   calc: US_MARKET, calcDefault: 'plumbing',
   services: [...SERVICES.slice(0, 6), ...NEW_SERVICES, ...SERVICES.slice(6)],

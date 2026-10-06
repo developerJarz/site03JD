@@ -46,7 +46,7 @@ export function useUsCalc(defaultCat = 'plumbing', storageKey = KEY, market: Cal
 }
 export type UsCalc = ReturnType<typeof useUsCalc>
 
-export function CalculatorSection({ calc, title = 'Google Ads revenue calculator', lead = 'Starting values are US averages for your category. Change any number to match your business.' }: { calc: UsCalc; title?: string; lead?: string }) {
+export function CalculatorSection({ calc, title = 'Google Ads revenue calculator', lead = 'Starting values are US averages for your category. Change any number to match your business.', eyebrow = 'Calculator' }: { calc: UsCalc; title?: string; lead?: string; eyebrow?: string }) {
   const { catId, cat, inp, pick, set, market, plan, setPlan, range, setRange, fees, setFees } = calc
   const m = useMemo(() => steady(inp), [inp])
   const plans = useMemo(() => allPlans(inp, range, undefined, fees), [inp, range, fees])
@@ -62,7 +62,7 @@ export function CalculatorSection({ calc, title = 'Google Ads revenue calculator
   const on = (t: RTab) => (tab === t ? 'tab-on' : 'tab-off')
   return (
         <section id="jdp-calc" className="anchor block calc-block">
-          <header className="calc-head"><div className="eyebrow">Calculator</div><h2>{title}</h2>
+          <header className="calc-head"><div className="eyebrow">{eyebrow}</div><h2>{title}</h2>
             <p className="lead">{lead}</p></header>
 
           <div className="us-pickers">
