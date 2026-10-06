@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const YT_ID = "Ui89g6mua0o";
 const YT_THUMB = `https://img.youtube.com/vi/${YT_ID}/maxresdefault.jpg`;
@@ -24,12 +24,16 @@ export function CalcVideoGuide({ label = "Calculator budget guide" }: { label?: 
     }
   }, []);
 
-  const onFsChange = useCallback(() => {
-    if (!document.fullscreenElement) setFs(false);
+  useEffect(() => {
+    const handleFsChange = () => {
+      if (!document.fullscreenElement) setFs(false);
+    };
+    document.addEventListener("fullscreenchange", handleFsChange);
+    return () => document.removeEventListener("fullscreenchange", handleFsChange);
   }, []);
 
   return (
-    <div className="calc-video" ref={wrapRef} onFullscreenChange={onFsChange}>
+    <div className="calc-video" ref={wrapRef}>
       <div className="calc-video-inner">
         <div className="calc-video-label">
           <svg viewBox="0 0 24 24" aria-hidden>

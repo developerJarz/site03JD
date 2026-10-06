@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CA_MARKET, US_MARKET, caCityMarket } from "@/content/country-sites/us/market";
 import { setMoney } from "@/content/country-sites/us/money";
 import { CalculatorSection, useUsCalc } from "./calculator";
@@ -74,12 +74,16 @@ function CalcVideoGuide() {
     }
   }, []);
 
-  const onFsChange = useCallback(() => {
-    if (!document.fullscreenElement) setFs(false);
+  useEffect(() => {
+    const handleFsChange = () => {
+      if (!document.fullscreenElement) setFs(false);
+    };
+    document.addEventListener("fullscreenchange", handleFsChange);
+    return () => document.removeEventListener("fullscreenchange", handleFsChange);
   }, []);
 
   return (
-    <div className="calc-video" ref={wrapRef} onFullscreenChange={onFsChange}>
+    <div className="calc-video" ref={wrapRef}>
       <div className="calc-video-inner">
         <div className="calc-video-label">
           <svg viewBox="0 0 24 24" aria-hidden>
