@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowUpRight, Check, Mail, MapPin, Navigation, Phone } from "lucide-react";
+import { ArrowUpRight, Check, Mail, MapPin, Navigation } from "lucide-react";
 import { Stagger, StaggerItem } from "@/components/animations/reveal";
 import { ProjectCard } from "@/components/marketing/cards";
 import { CtaBanner } from "@/components/marketing/cta-banner";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { PageHero } from "@/components/marketing/page-hero";
 import { WhatsAppButton } from "@/components/marketing/whatsapp";
+import { WhatsAppPill } from "@/components/marketing/whatsapp-pill";
 import { Accordion } from "@/components/ui/accordion";
 import { WhatsappIcon } from "@/components/ui/brand-icons";
 import { ButtonLink } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import { getPosts, getProjects, getServices, getSiteSettings } from "@/lib/data/
 import { postsForOffice } from "@/lib/content/links";
 import { PostCard } from "@/components/blog/post-card";
 import { faqSchema, isPhysicalOffice, localBusinessSchema } from "@/lib/seo";
-import { publicUrl, whatsappDisplay, whatsappLink, whatsappMessage } from "@/config/contact";
+import { whatsappFor } from "@/config/contact";
 import { brandFacts } from "@/content/seed";
 import { locationOffices, officeArea, officePath, officeSlug } from "@/lib/seo/locations";
 import { pageMetadata } from "@/lib/seo/page";
@@ -46,7 +47,6 @@ export async function generateMetadata({ params }: PageProps<"/locations/[city]"
   return pageMetadata(officePath(office), { title, description, image: office.image?.src });
 }
 
-const tel = (phone: string) => `tel:${phone.replace(/[^+\d]/g, "")}`;
 const mapsLink = (o: Office) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.mapQuery || o.address)}`;
 const mapsEmbed = (o: Office) => `https://www.google.com/maps?q=${encodeURIComponent(o.mapQuery || o.address)}&output=embed`;
 
@@ -69,7 +69,7 @@ function locationFaqs(o: Office, services: Service[], settings: SiteSettings, lo
     },
     {
       question: `How can I contact Jarz Digital in ${o.city}?`,
-      answer: `Message us on WhatsApp or call ${o.phone}${o.email ? `, email ${o.email}` : ""}, or send a request through our contact form. ${settings.contact.responseTime}.`,
+      answer: `Message or call us on WhatsApp at ${whatsappFor(o.country)}${o.email ? `, email ${o.email}` : ""}, or send a request through our contact form. ${settings.contact.responseTime}.`,
     },
     {
       question: `Which services do you offer in ${place}?`,
@@ -126,7 +126,7 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
   const faqs = locationFaqs(office, services, settings, work);
   const physical = isPhysicalOffice(office);
   const others = locationOffices(settings).filter((o) => o.code !== office.code);
-  const whatsapp = settings.contact.whatsapp;
+  const whatsapp = whatsappFor(office.country);
   // Light/mist alternate through the optional sections (why = light, work = mist).
   const flip = (t: "light" | "mist"): "light" | "mist" => (t === "light" ? "mist" : "light");
   const afterWork: "light" | "mist" = work.length > 0 ? "mist" : "light";
@@ -147,14 +147,9 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
           { name: office.city, path: officePath(office) },
         ]}
         actions={
-          <>
-            <WhatsAppButton number={settings.contact.whatsapp} intent={`I’m a business in ${office.city} and would like a free consultation.`} from={`${office.city} location page`} path={officePath(office)}>
-              WhatsApp {office.city} team
-            </WhatsAppButton>
-            <ButtonLink href={tel(office.phone)} size="lg" variant="outline-light">
-              Call {office.phone}
-            </ButtonLink>
-          </>
+          <WhatsAppButton number={whatsapp} intent={`I’m a business in ${office.city} and would like a free consultation.`} from={`${office.city} location page`} path={officePath(office)}>
+            WhatsApp {office.city} team
+          </WhatsAppButton>
         }
         aside={
           office.image ? (
@@ -183,14 +178,12 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
                   <span className="font-medium text-ink-900">{office.address}</span>
                 </span>
               </li>
-              <li>
-                <a href={tel(office.phone)} className="group flex items-start gap-3">
-                  <Phone className="mt-0.5 size-5 shrink-0 text-brand-600" aria-hidden />
-                  <span>
-                    <span className="block text-sm text-mist-500">Phone</span>
-                    <span className="font-medium text-ink-900 group-hover:text-brand-700">{office.phone}</span>
-                  </span>
-                </a>
+              <li className="flex items-start gap-3">
+                <WhatsappIcon className="mt-0.5 size-5 shrink-0 text-[#1fbd59]" />
+                <span>
+                  <span className="mb-1 block text-sm text-mist-500">WhatsApp</span>
+                  <WhatsAppPill number={whatsapp} intent={`I’d like to contact your ${office.city} office.`} from={`${office.city} location page`} path={officePath(office)} />
+                </span>
               </li>
               {office.email && (
                 <li>
@@ -199,22 +192,6 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
                     <span>
                       <span className="block text-sm text-mist-500">Email</span>
                       <span className="font-medium text-ink-900 group-hover:text-brand-700">{office.email}</span>
-                    </span>
-                  </a>
-                </li>
-              )}
-              {whatsapp && (
-                <li>
-                  <a
-                    href={whatsappLink(whatsapp, whatsappMessage({ intent: `I’d like to contact your ${office.city} office.`, from: `${office.city} location page — ${publicUrl(officePath(office))}` }))}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-start gap-3"
-                  >
-                    <WhatsappIcon className="mt-0.5 size-5 shrink-0 text-brand-600" />
-                    <span>
-                      <span className="block text-sm text-mist-500">WhatsApp</span>
-                      <span className="font-medium text-ink-900 group-hover:text-brand-700">{whatsappDisplay(settings.contact)}</span>
                     </span>
                   </a>
                 </li>
@@ -399,7 +376,7 @@ export default async function LocationPage({ params }: PageProps<"/locations/[ci
       <CtaBanner
         title={`Grow your ${office.city} business online.`}
         description={`Tell us about your goals — our ${office.city} team responds within 24 hours with a plan for your website, search and marketing.`}
-        whatsapp={{ intent: `I’m a business in ${office.city} and would like to start a project.`, from: `${office.city} location page`, path: officePath(office) }}
+        whatsapp={{ number: whatsapp, intent: `I’m a business in ${office.city} and would like to start a project.`, from: `${office.city} location page`, path: officePath(office) }}
         primary={{ label: "Send a Request", href: `/contact?intent=project&office=${office.code}#contact-form` }}
         secondary={{ label: "Explore Services", href: "/services" }}
       />

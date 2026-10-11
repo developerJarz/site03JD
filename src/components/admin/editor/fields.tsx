@@ -202,6 +202,45 @@ function GalleryField({ value, onChange }: { value: PickedImage[]; onChange: (v:
   );
 }
 
+const centsToText = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? String(v / 100) : "");
+
+/** Edits an amount in dollars; the stored value is integer cents ("" when empty). */
+function MoneyInput({ id, value, onChange, invalid, describedBy }: { id: string; value: unknown; onChange: (v: unknown) => void; invalid: boolean; describedBy?: string }) {
+  const [text, setText] = useState(() => centsToText(value));
+  const [last, setLast] = useState(value);
+  // Follow outside changes (e.g. a reset) without fighting the user's typing.
+  if (value !== last) {
+    setLast(value);
+    const parsed = text.trim() === "" ? "" : Math.round(Number(text) * 100);
+    if (parsed !== value) setText(centsToText(value));
+  }
+  return (
+    <div className={cn("flex items-center rounded-xl border bg-white pl-3 focus-within:border-brand-500", invalid ? "border-danger-500" : "border-mist-200")}>
+      <span className="text-sm text-mist-500" aria-hidden>
+        $
+      </span>
+      <input
+        id={id}
+        type="text"
+        inputMode="decimal"
+        value={text}
+        onChange={(e) => {
+          const t = e.target.value.replace(/[^\d.]/g, "");
+          setText(t);
+          const n = Number(t);
+          const next = t.trim() === "" ? "" : Number.isFinite(n) ? Math.round(n * 100) : value;
+          setLast(next);
+          onChange(next);
+        }}
+        aria-invalid={invalid}
+        aria-describedby={describedBy}
+        className="h-11 min-w-0 flex-1 bg-transparent px-1.5 text-sm outline-none"
+      />
+      <span className="pr-3 text-xs text-mist-400">USD</span>
+    </div>
+  );
+}
+
 function MultiChoice({ options, value, onChange, id }: { options: { value: string; label: string }[]; value: string[]; onChange: (v: string[]) => void; id: string }) {
   const [q, setQ] = useState("");
   const shown = options.filter((o) => !q || o.label.toLowerCase().includes(q.toLowerCase()));
@@ -276,7 +315,7 @@ function SeoField({ value, onChange, values }: { value: Record<string, unknown>;
 }
 
 function RepeaterField({ field, value, onChange, errors, errorPrefix, relations }: { field: FieldDef; value: Values[]; onChange: (v: Values[]) => void; errors?: Record<string, string>; errorPrefix: string; relations?: RelationOptions }) {
-  const blank = () => Object.fromEntries((field.fields ?? []).map((f) => [f.name, f.type === "list" ? [] : f.type === "boolean" ? false : ""]));
+  const blank = () => Object.fromEntries((field.fields ?? []).map((f) => [f.name, f.multiple || ["list", "gallery", "repeater"].includes(f.type) ? [] : f.type === "boolean" ? false : f.type === "image" ? null : ""]));
   return (
     <div className="space-y-3">
       {value.map((item, i) => (
@@ -373,6 +412,12 @@ export function FieldRenderer({ field, value, onChange, error, errors, values, r
           <input id={id} type="number" inputMode="numeric" value={str === null ? "" : String(value ?? "")} min={field.min} max={field.max} onChange={(e) => onChange(e.target.value)} aria-invalid={Boolean(error)} className={controlClass(Boolean(error), "h-11")} />
         </FieldShell>
       );
+    case "money":
+      return (
+        <FieldShell id={id} label={field.label} required={field.required} help={field.help} error={error} className={full}>
+          <MoneyInput id={id} value={value} onChange={onChange} invalid={Boolean(error)} describedBy={describedBy} />
+        </FieldShell>
+      );
     case "date":
       return (
         <FieldShell id={id} label={field.label} help={field.help} error={error} className={full}>
@@ -464,6 +509,7 @@ export function FieldRenderer({ field, value, onChange, error, errors, values, r
       return (
         <div className="sm:col-span-2">
           <p className="mb-2 text-sm font-medium text-ink-800">{field.label}</p>
+          {field.help && <p className="-mt-1 mb-2 text-xs text-mist-500">{field.help}</p>}
           <RepeaterField field={field} value={(value as Values[]) ?? []} onChange={onChange} errors={errors} errorPrefix={field.name} relations={relations} />
         </div>
       );

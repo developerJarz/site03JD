@@ -1,12 +1,14 @@
-import { whatsappDisplay } from "@/config/contact";
+import { telHref, whatsappFor } from "@/config/contact";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
-import { SOCIAL_ICONS, WhatsappIcon } from "@/components/ui/brand-icons";
+import { WhatsAppPill } from "@/components/marketing/whatsapp-pill";
+import { SOCIAL_ICONS } from "@/components/ui/brand-icons";
 import { Logo } from "@/components/ui/logo";
 import { officePath } from "@/lib/seo/locations";
 import type { Industry, Service, SiteSettings } from "@/types/content";
 import { CookieSettingsButton } from "@/components/analytics/analytics";
 import { analyticsEnabled } from "@/lib/analytics";
+import { BUILDER_NAV, withBuilderLink } from "@/lib/ecommerce-builder/constants";
 import { NewsletterForm } from "./newsletter-form";
 
 export function Footer({ settings, services, industries }: { settings: SiteSettings; services: Service[]; industries: Industry[] }) {
@@ -15,7 +17,13 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
   const year = new Date().getFullYear();
 
   const columns: { title: string; links: { label: string; href: string }[] }[] = [
-    { title: "Services", links: services.map((s) => ({ label: s.shortTitle || s.title, href: `/services/${s.slug}` })) },
+    {
+      title: "Services",
+      links: withBuilderLink(
+        services.map((s) => ({ slug: s.slug, label: s.shortTitle || s.title, href: `/services/${s.slug}` })),
+        () => ({ slug: BUILDER_NAV.slug, label: BUILDER_NAV.shortTitle, href: `/services/${BUILDER_NAV.slug}` }),
+      ),
+    },
     {
       title: "Industries",
       links: [...industries.slice(0, 7).map((i) => ({ label: i.name, href: `/industries/${i.slug}` })), { label: "All industries →", href: "/industries" }],
@@ -108,10 +116,10 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
             <div key={o.code}>
               <p className="font-display text-3xl font-semibold tracking-tight text-white/90">
                 {o.hidePage ? (
-                  o.code
+                  o.city
                 ) : (
-                  <Link href={officePath(o)} className="transition-colors hover:text-brand-300" aria-label={`${o.code} — ${o.city} office`}>
-                    {o.code}
+                  <Link href={officePath(o)} className="transition-colors hover:text-brand-300" aria-label={`${o.city} office`}>
+                    {o.city}
                   </Link>
                 )}
               </p>
@@ -119,36 +127,24 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
                 <MapPin className="mt-0.5 size-3.5 shrink-0" aria-hidden />
                 {o.address}
               </p>
-              {/* Offices with their own line (e.g. Dhaka) list their direct contacts. */}
-              {o.phone !== contact.phone && (
-                <div className="mt-2.5 space-y-1.5 text-sm">
-                  <a href={`tel:${o.phone.replace(/[^+\d]/g, "")}`} className="flex items-center gap-2 text-white/70 hover:text-white">
-                    <Phone className="size-3.5 shrink-0" aria-hidden /> {o.phone}
+              <div className="mt-3 space-y-1.5 text-sm">
+                <WhatsAppPill tone="dark" number={whatsappFor(o.country)} intent={`I’d like to contact your ${o.city} office.`} from={`Footer — ${o.city} office`} />
+                {o.email && o.email !== contact.email && (
+                  <a href={`mailto:${o.email}`} className="flex items-center gap-2 text-white/70 hover:text-white">
+                    <Mail className="size-3.5 shrink-0" aria-hidden /> {o.email}
                   </a>
-                  {o.email && (
-                    <a href={`mailto:${o.email}`} className="flex items-center gap-2 text-white/70 hover:text-white">
-                      <Mail className="size-3.5 shrink-0" aria-hidden /> {o.email}
-                    </a>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ))}
           <div className="space-y-2.5 text-sm">
             <a href={`mailto:${contact.email}`} className="flex items-center gap-2 text-white/70 hover:text-white">
               <Mail className="size-3.5" aria-hidden /> {contact.email}
             </a>
-            <a href={`tel:${contact.phone.replace(/[^+\d]/g, "")}`} className="flex items-center gap-2 text-white/70 hover:text-white">
+            <a href={telHref(contact.phone)} className="flex items-center gap-2 text-white/70 hover:text-white">
               <Phone className="size-3.5" aria-hidden /> {contact.phone}
             </a>
-            <a
-              href={`https://wa.me/${contact.whatsapp.replace(/\D/g, "")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-white/70 hover:text-white"
-            >
-              <WhatsappIcon className="size-3.5" /> WhatsApp {whatsappDisplay(contact)}
-            </a>
+            <WhatsAppPill tone="dark" number={contact.whatsapp} from="Footer" />
             <p className="text-white/55">{contact.mailingAddress}</p>
           </div>
         </div>

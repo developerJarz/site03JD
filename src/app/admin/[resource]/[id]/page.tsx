@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: PageProps<"/admin/[resource]/
 export default async function EditResourcePage({ params }: PageProps<"/admin/[resource]/[id]">) {
   const { resource, id } = await params;
   if (!isResourceKey(resource) || !/^[a-f0-9]{24}$/.test(id)) notFound();
-  await requirePermission("content:manage");
   const def = RESOURCES[resource];
+  await requirePermission(def.permission ?? "content:manage");
   await connectDB();
   const doc = await MODELS[resource].findById(id).lean<Record<string, unknown>>();
   if (!doc) notFound();

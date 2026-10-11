@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
 
 /**
- * Private areas stay out of search. /media/ (CMS uploads used in posts and
+ * Private areas (including customer quotation and invoice links) stay out of search. /media/ (CMS uploads used in posts and
  * share images) stays crawlable. No Host line — it isn't a Google directive.
  */
 export default function robots(): MetadataRoute.Robots {
@@ -11,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/dashboard", "/api/", "/login", "/register", "/forgot-password", "/reset-password"],
+        disallow: ["/admin", "/dashboard", "/api/", "/login", "/register", "/forgot-password", "/reset-password", "/quote/", "/invoice/"],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

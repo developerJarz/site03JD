@@ -1,5 +1,6 @@
 import "server-only";
 import type { Metadata } from "next";
+import { whatsappFor } from "@/config/contact";
 import { teamMemberPath } from "@/config/team";
 import { env } from "@/lib/env";
 import type { FaqItem, Office, Post, Project, SeoFields, Service, SiteSettings, TeamMember } from "@/types/content";
@@ -163,10 +164,13 @@ export function profilePageSchema(m: TeamMember, extra: { description: string; k
   };
 }
 
-/** One contact point per distinct office phone, tagged with the countries it serves. */
+/** One contact point per distinct office line (whatsappFor), tagged with the countries it serves. */
 function contactPoints(s: SiteSettings): Json[] {
   const byPhone = new Map<string, Set<string>>();
-  for (const o of s.offices) byPhone.set(o.phone, (byPhone.get(o.phone) ?? new Set()).add(countryCode(o.country)));
+  for (const o of s.offices) {
+    const phone = whatsappFor(o.country);
+    byPhone.set(phone, (byPhone.get(phone) ?? new Set()).add(countryCode(o.country)));
+  }
   return [...byPhone].map(([telephone, areas]) => ({
     "@type": "ContactPoint",
     telephone,
@@ -219,7 +223,7 @@ export function localBusinessSchema(o: Office, s: SiteSettings): Json | null {
     url: abs(officePath(o)),
     image: abs(o.image?.src ?? s.branding.logo),
     logo: abs(s.branding.logo),
-    telephone: o.phone,
+    telephone: whatsappFor(o.country),
     ...(o.email ? { email: o.email } : {}),
     hasMap: o.gbpUrl || mapUrl(o),
     ...(o.gbpUrl ? { sameAs: [o.gbpUrl] } : {}),

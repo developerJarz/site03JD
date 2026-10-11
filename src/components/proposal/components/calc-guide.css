@@ -1,0 +1,85 @@
+/* Calculator video guide + "Analyze your business in detail" panel and popup.
+   Shared by the proposal page (.jdp) and the country pages (.jdc); both define the same tokens.
+   Amber (#F2A33A, --amber) marks this block apart from the teal calculator below it. */
+
+:is(.jdc, .jdp) .calc-guide { container-type: inline-size; }
+.jdc .calc-guide { margin: 28px 0 10px; }
+.jdp .calc-guide { margin: 8px 0 24px; }
+:is(.jdc, .jdp) .calc-guide-row { display: grid; gap: 22px; }
+@container (min-width: 760px) {
+  :is(.jdc, .jdp) .calc-guide-row { grid-template-columns: minmax(0, 580px) minmax(260px, 1fr); gap: 36px; align-items: center; }
+  :is(.jdc, .jdp) .calc-analyze { padding-left: 32px; border-left: 1px solid rgba(242,163,58,.28); }
+}
+
+/* ---- video ---- */
+:is(.jdc, .jdp) .calc-video-inner { position: relative; border-radius: var(--r); border: 1px solid rgba(242,163,58,.55); background: linear-gradient(165deg, rgba(242,163,58,.08) 0%, var(--night-3) 40%, var(--night-2) 100%); overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.3), 0 0 0 1px rgba(242,163,58,.1); }
+:is(.jdc, .jdp) .calc-video-label { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: rgba(242,163,58,.1); border-bottom: 1px solid rgba(242,163,58,.25); }
+:is(.jdc, .jdp) .calc-video-label svg { width: 17px; height: 17px; fill: none; stroke: var(--amber); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+:is(.jdc, .jdp) .calc-video-label span { font-size: 12.5px; font-weight: 650; color: var(--amber); letter-spacing: .04em; text-transform: uppercase; }
+:is(.jdc.bn, .jdp.bn) .calc-video-label span { letter-spacing: .02em; }
+:is(.jdc, .jdp) .calc-video-frame { position: relative; width: 100%; padding-bottom: 56.25%; /* 16:9 */ }
+:is(.jdc, .jdp) .calc-video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+:is(.jdc, .jdp) .calc-video-poster { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background: var(--night); cursor: pointer; display: grid; place-items: center; }
+:is(.jdc, .jdp) .calc-video-poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+:is(.jdc, .jdp) .calc-video-play { position: relative; z-index: 1; width: 60px; height: 60px; border-radius: 50%; background: var(--amber); box-shadow: 0 6px 24px rgba(242,163,58,.4); display: grid; place-items: center; transition: background .25s, transform .2s; }
+:is(.jdc, .jdp) .calc-video-poster:hover .calc-video-play { background: #F6B85F; transform: scale(1.08); }
+:is(.jdc, .jdp) .calc-video-play svg { width: 24px; height: 24px; fill: var(--night); margin-left: 3px; }
+:is(.jdc, .jdp) .calc-video-fs { position: absolute; bottom: 10px; right: 10px; width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(242,163,58,.45); background: rgba(6,11,19,.78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: grid; place-items: center; cursor: pointer; transition: background .2s, border-color .2s, transform .15s; z-index: 2; }
+:is(.jdc, .jdp) .calc-video-fs:hover { background: var(--amber); border-color: var(--amber); transform: scale(1.08); }
+:is(.jdc, .jdp) .calc-video-fs svg { width: 15px; height: 15px; fill: none; stroke: var(--amber); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+:is(.jdc, .jdp) .calc-video-fs:hover svg { stroke: var(--night); }
+:is(.jdc, .jdp) .calc-video:fullscreen { display: grid; place-items: center; background: var(--night); }
+:is(.jdc, .jdp) .calc-video:fullscreen .calc-video-inner { max-width: 1060px; width: 92vw; }
+:is(.jdc, .jdp) .calc-video:fullscreen .calc-video-fs { bottom: 14px; right: 14px; width: 38px; height: 38px; }
+@media (max-width: 640px) {
+  :is(.jdc, .jdp) .calc-video-inner { border-radius: var(--r-sm); }
+}
+
+/* ---- side panel ---- */
+:is(.jdc, .jdp) .calc-analyze h3 { font-size: 21px; line-height: 1.25; font-weight: 650; max-width: 22ch; }
+:is(.jdc, .jdp) .calc-analyze > p { color: var(--fg-2); font-size: 14.5px; margin-top: 10px; max-width: 46ch; }
+:is(.jdc, .jdp) .calc-analyze ul { list-style: none; margin: 14px 0 20px; padding: 0; display: grid; gap: 7px; font-size: 14px; color: var(--fg); }
+:is(.jdc, .jdp) .calc-analyze li { display: flex; gap: 10px; align-items: baseline; }
+:is(.jdc, .jdp) .calc-analyze li::before { content: ""; flex: none; width: 10px; height: 6px; border-left: 2px solid var(--amber); border-bottom: 2px solid var(--amber); transform: translateY(-3px) rotate(-45deg); }
+:is(.jdc, .jdp) .calc-analyze small { display: block; margin-top: 10px; font-size: 12.5px; color: var(--fg-3); }
+
+:is(.jdc, .jdp) .calc-analyze-btn { border: 0; border-radius: 999px; padding: 13px 22px; background: var(--amber); color: var(--night); font-weight: 700; font-size: 15px; line-height: 1.3; text-align: center; transition: background .2s, transform .15s; }
+:is(.jdc, .jdp) .calc-analyze-btn:hover { background: #F6B85F; }
+:is(.jdc, .jdp) .calc-analyze-btn:active { transform: scale(.98); }
+:is(.jdc, .jdp) .calc-analyze-btn:disabled { opacity: .65; cursor: progress; }
+:is(.jdc, .jdp) :is(.calc-analyze-btn, .calc-video-fs, .calc-video-poster, .cad-x):focus-visible { outline-color: var(--amber); }
+
+/* ---- popup ---- */
+:is(.jdc, .jdp) .calc-analyze-dialog { width: min(560px, calc(100% - 24px)); max-height: calc(100dvh - 32px); margin: auto; padding: 0; border: 1px solid rgba(242,163,58,.4); border-top: 3px solid var(--amber); border-radius: var(--r); background: var(--night-2); color: var(--fg); box-shadow: 0 24px 80px rgba(0,0,0,.6); overflow: auto; }
+:is(.jdc, .jdp) .calc-analyze-dialog::backdrop { background: rgba(3,6,11,.72); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+:is(.jdc, .jdp) .cad-body { position: relative; padding: 26px 26px 24px; }
+:is(.jdc, .jdp) .cad-body h2 { font-size: 22px; line-height: 1.25; font-weight: 700; padding-right: 40px; }
+:is(.jdc, .jdp) .cad-x { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line-2); background: var(--card-2); display: grid; place-items: center; }
+:is(.jdc, .jdp) .cad-x:hover { border-color: var(--amber); }
+:is(.jdc, .jdp) .cad-x svg { width: 16px; height: 16px; fill: none; stroke: var(--fg); stroke-width: 2; stroke-linecap: round; }
+:is(.jdc, .jdp) .cad-lead { color: var(--fg-2); font-size: 14.5px; margin: 8px 0 20px; max-width: 52ch; }
+:is(.jdc, .jdp) .cad-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+:is(.jdc, .jdp) .cad-field { display: grid; gap: 6px; align-content: start; }
+:is(.jdc, .jdp) .cad-field.full { grid-column: 1 / -1; }
+:is(.jdc, .jdp) .cad-field span { font-size: 13.5px; font-weight: 600; color: var(--fg); }
+:is(.jdc, .jdp) .cad-field em { font-style: normal; font-weight: 400; color: var(--fg-3); }
+:is(.jdc, .jdp) .cad-field input { width: 100%; font: inherit; font-size: 15px; color: var(--fg); background: var(--night); border: 1px solid var(--line-2); border-radius: var(--r-sm); padding: 11px 13px; transition: border-color .15s, box-shadow .15s; }
+:is(.jdc, .jdp) .cad-field input::placeholder { color: var(--fg-3); }
+:is(.jdc, .jdp) .cad-field input:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px rgba(242,163,58,.22); }
+:is(.jdc, .jdp) .cad-field input[aria-invalid] { border-color: var(--neg); }
+:is(.jdc, .jdp) .cad-field i { font-style: normal; font-size: 12.5px; color: var(--neg); }
+:is(.jdc, .jdp) .cad-hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+:is(.jdc, .jdp) .cad-error { margin: -4px 0 14px; padding: 10px 12px; border-radius: var(--r-sm); background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.3); font-size: 14px; color: var(--fg); }
+:is(.jdc, .jdp) .cad-body form .calc-analyze-btn { width: 100%; }
+:is(.jdc, .jdp) .cad-sent { margin-top: 12px; }
+:is(.jdc, .jdp) .cad-sent p { color: var(--fg-2); margin-bottom: 20px; }
+:is(.jdc, .jdp) .cad-sent b { color: var(--amber); }
+@media (max-width: 520px) {
+  :is(.jdc, .jdp) .cad-grid { grid-template-columns: 1fr; }
+  :is(.jdc, .jdp) .cad-body { padding: 22px 18px 20px; }
+  :is(.jdc, .jdp) .calc-analyze-btn { width: 100%; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  :is(.jdc, .jdp) .calc-analyze-dialog[open] { animation: cad-in .22s ease-out; }
+  @keyframes cad-in { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+}

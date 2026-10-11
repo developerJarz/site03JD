@@ -15,6 +15,7 @@ import { RESOURCES, isResourceKey } from "@/lib/cms/resources";
 import { getPath, listResource, publicUrl } from "@/lib/cms/server";
 import type { ColumnDef, ResourceDef } from "@/lib/cms/types";
 import { isDbConfigured } from "@/lib/db/connect";
+import { formatMoney } from "@/lib/ecommerce-builder/pricing";
 import { formatDate } from "@/lib/utils";
 
 export async function generateMetadata({ params }: PageProps<"/admin/[resource]">): Promise<Metadata> {
@@ -50,6 +51,8 @@ function Cell({ col, row, def }: { col: ColumnDef; row: Record<string, any>; def
       return v ? <Badge tone={col.key === "needsReview" ? "warning" : "brand"}>{col.key === "needsReview" ? "Review" : "Yes"}</Badge> : <span className="text-mist-400">—</span>;
     case "number":
       return <span className="tabular-nums text-mist-700">{v ?? "—"}</span>;
+    case "money":
+      return <span className="tabular-nums text-mist-700">{typeof v === "number" ? formatMoney(v) : "—"}</span>;
     default:
       return <span className="text-mist-700">{v ? String(v) : "—"}</span>;
   }
@@ -58,8 +61,8 @@ function Cell({ col, row, def }: { col: ColumnDef; row: Record<string, any>; def
 export default async function ResourceListPage({ params, searchParams }: PageProps<"/admin/[resource]">) {
   const { resource } = await params;
   if (!isResourceKey(resource)) notFound();
-  await requirePermission("content:manage");
   const def = RESOURCES[resource];
+  await requirePermission(def.permission ?? "content:manage");
   const sp = await searchParams;
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const page = Math.max(1, Number(str("page") ?? 1) || 1);
@@ -95,7 +98,7 @@ export default async function ResourceListPage({ params, searchParams }: PagePro
       <PageHeader
         title={def.label}
         description={def.description}
-        crumbs={[{ label: "Dashboard", href: "/admin" }, { label: def.group }, { label: def.label }]}
+        crumbs={[{ label: "Dashboard", href: "/admin" }, def.parent ?? { label: def.group }, { label: def.label }]}
         actions={
           <ButtonLink href={`/admin/${resource}/new`} variant="dark" size="sm">
             <Plus className="size-4" aria-hidden /> New {def.singular.toLowerCase()}

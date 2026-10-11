@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/db/connect";
 import { TAGS } from "@/lib/data/cache-tags";
 import { sanitizeRichText } from "@/lib/security/sanitize";
 import { escapeRegex, readingTime, serialize, slugify } from "@/lib/utils";
+import { BuilderCategory, BuilderFeature, BuilderTemplate } from "@/models/builder";
 import { Category, Faq, Industry, Page, Post, Project, Service, Tag, TeamMember, Testimonial } from "@/models/content";
 import { RESOURCES, allFields } from "./resources";
 import type { FieldDef, ResourceDef, ResourceKey } from "./types";
@@ -23,6 +24,9 @@ export const MODELS: Record<ResourceKey, AnyModel> = {
   team: TeamMember as AnyModel,
   testimonials: Testimonial as AnyModel,
   faqs: Faq as AnyModel,
+  "ecommerce-templates": BuilderTemplate as AnyModel,
+  "ecommerce-categories": BuilderCategory as AnyModel,
+  "ecommerce-features": BuilderFeature as AnyModel,
 };
 
 /** Public cache tags to refresh when a resource changes. */
@@ -37,6 +41,10 @@ export const RESOURCE_TAGS: Record<ResourceKey, string[]> = {
   team: [TAGS.team],
   testimonials: [TAGS.testimonials],
   faqs: [TAGS.faqs],
+  // Catalog edits are drafts: customers see them only after Publish pricing.
+  "ecommerce-templates": [],
+  "ecommerce-categories": [],
+  "ecommerce-features": [],
 };
 
 /* ------------------------------- Path helpers ------------------------------ */
@@ -89,7 +97,7 @@ const seoSchema = z
   .partial()
   .default({});
 
-function fieldSchema(f: FieldDef): z.ZodTypeAny {
+export function fieldSchema(f: FieldDef): z.ZodTypeAny {
   const req = (s: z.ZodString) => (f.required ? s.min(1, `${f.label} is required`) : s);
   switch (f.type) {
     case "text":
@@ -123,6 +131,10 @@ function fieldSchema(f: FieldDef): z.ZodTypeAny {
           .max(f.max ?? Infinity, `Maximum is ${f.max}`)
           .nullable(),
       );
+    case "money": {
+      const amount = z.number({ error: `${f.label} must be an amount` }).int().min(f.min ?? 0, `Minimum is ${(f.min ?? 0) / 100}`).max(f.max ?? 100_000_000, `Maximum is ${(f.max ?? 100_000_000) / 100}`);
+      return z.preprocess((v) => (v === "" || v === null || v === undefined ? null : Number(v)), f.required ? amount : amount.nullable());
+    }
     case "boolean":
       return z.boolean().optional().default(false);
     case "date":
@@ -136,7 +148,8 @@ function fieldSchema(f: FieldDef): z.ZodTypeAny {
       return f.required ? z.enum(values, { error: `Choose a ${f.label.toLowerCase()}` }) : z.union([z.enum(values), z.literal("")]).optional().default("");
     }
     case "relation":
-      return f.multiple ? z.array(objectId).max(100).optional().default([]) : z.union([objectId, z.literal(""), z.null()]).optional().default(null);
+      if (f.multiple) return z.array(objectId).max(100).optional().default([]);
+      return f.required ? z.string({ error: `Choose a ${f.label.toLowerCase()}` }).regex(/^[a-f0-9]{24}$/i, `Choose a ${f.label.toLowerCase()}`) : z.union([objectId, z.literal(""), z.null()]).optional().default(null);
     case "image":
       return f.required ? imageSchema.refine((v) => v !== null, `${f.label} is required`) : imageSchema.optional().default(null);
     case "gallery":
@@ -156,7 +169,11 @@ function fieldSchema(f: FieldDef): z.ZodTypeAny {
 }
 
 export function buildSchema(def: ResourceDef) {
-  return z.object(Object.fromEntries(allFields(def).map((f) => [f.name, fieldSchema(f)])));
+  return buildFieldsSchema(allFields(def));
+}
+
+export function buildFieldsSchema(fields: FieldDef[]) {
+  return z.object(Object.fromEntries(fields.map((f) => [f.name, fieldSchema(f)])));
 }
 
 /* ------------------------------- Normalising ------------------------------- */
@@ -191,7 +208,7 @@ export function toEditorValues(def: ResourceDef, doc: any): Record<string, unkno
     if (f.type === "list" || f.type === "gallery" || f.type === "repeater" || (f.type === "select" && f.multiple)) v = v ?? [];
     if (f.type === "image") v = v && v.src ? v : null;
     if (f.type === "seo") v = v ?? {};
-    if (v === undefined || v === null) v = f.type === "number" ? "" : f.type === "image" ? null : "";
+    if (v === undefined || v === null) v = f.type === "number" || f.type === "money" ? "" : f.type === "image" ? null : "";
     values[f.name] = v;
   }
   return values;
@@ -202,6 +219,9 @@ export function emptyValues(def: ResourceDef): Record<string, unknown> {
   if (def.key === "faqs") values.group = "general";
   if (def.key === "categories") values.kind = "post";
   if (def.key === "posts") values.authorName = "Jarz Digital Team";
+  if (def.key === "ecommerce-templates") Object.assign(values, { price: 10000, published: true });
+  if (def.key === "ecommerce-categories") Object.assign(values, { icon: "sparkles", published: true });
+  if (def.key === "ecommerce-features") Object.assign(values, { pricing: "fixed", price: 0, minQty: 1, maxQty: 1, recurringInterval: "month", icon: "sparkles", published: true });
   return values;
 }
 

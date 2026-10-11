@@ -6,9 +6,12 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   Bell,
   Briefcase,
+  ChartColumn,
+  ClipboardList,
   Building2,
   ExternalLink,
   File,
+  FileText,
   Folder,
   Globe,
   HelpCircle,
@@ -16,16 +19,24 @@ import {
   Image as ImageIcon,
   Inbox,
   KanbanSquare,
+  Layers,
   LayoutDashboard,
+  LayoutTemplate,
   LogOut,
   Menu,
   Newspaper,
   PenLine,
+  Percent,
+  Puzzle,
   Quote,
+  Receipt,
   Search,
   Settings,
   Shield,
+  ShoppingCart,
+  SlidersHorizontal,
   Sparkles,
+  Store,
   Tag,
   User,
   Users,
@@ -63,11 +74,22 @@ const ICONS: Record<string, LucideIcon> = {
   settings: Settings,
   history: History,
   bell: Bell,
+  store: Store,
+  "shopping-cart": ShoppingCart,
+  receipt: Receipt,
+  "layout-template": LayoutTemplate,
+  layers: Layers,
+  puzzle: Puzzle,
+  percent: Percent,
+  "file-text": FileText,
+  "clipboard-list": ClipboardList,
+  "chart-column": ChartColumn,
+  sliders: SlidersHorizontal,
 };
 
 export interface AdminShellProps {
   user: { name: string; email: string; role: Role };
-  counts: { leads: number; requests: number; notifications: number };
+  counts: { leads: number; requests: number; notifications: number; orders: number };
   dbReady: boolean;
   children: ReactNode;
 }
@@ -82,6 +104,7 @@ function NavLinks({ role, counts, onNavigate }: { role: Role; counts: AdminShell
     if (href.includes("?")) return current === href;
     if (href === "/admin/users") return pathname.startsWith("/admin/users") && !search.get("role");
     if (href === "/admin/seo") return pathname === "/admin/seo";
+    if (href === "/admin/ecommerce-builder") return pathname === href;
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 

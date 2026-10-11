@@ -84,7 +84,7 @@ export default function Calculator({ s, lang, showVideo = false }: { s: Strings;
 
   return (
     <div className="calc">
-      {showVideo && <CalcVideoGuide label={s.calcVideoLabel} />}
+      {showVideo && <CalcVideoGuide label={s.calcVideoLabel} analyze={s.analyze} />}
 
       <header className="calc-head">
         <div className="eyebrow">{s.calcEyebrow ?? s.tabs.calc}</div>
@@ -110,9 +110,9 @@ export default function Calculator({ s, lang, showVideo = false }: { s: Strings;
       <div className="calc-grid">
         <aside className="inputs">
           {GROUPS.map((g) => (
-            <section key={g.id} className={`grp ${open[g.id] ? 'open' : ''}`}>
+            <section key={g.id} className={`grp g-${g.id} ${open[g.id] ? 'open' : ''}`}>
               <button className="grp-h" aria-expanded={!!open[g.id]} onClick={() => setToggled((o) => ({ ...o, [g.id]: !open[g.id] }))}>
-                <span>{s.groups[g.id]}</span><i aria-hidden>⌄</i>
+                <span>{g.id === 'growth' && <svg className="grp-ico" viewBox="0 0 24 24" aria-hidden><path d="M3 17l6-6 4 4 8-8M15 7h6v6" /></svg>}{s.groups[g.id]}</span><i aria-hidden>⌄</i>
               </button>
               {open[g.id] && (
                 <div className="grp-b">

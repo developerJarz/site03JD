@@ -227,6 +227,39 @@ export function leadNotificationEmail(lead: {
   };
 }
 
+export function businessAnalysisEmail(req: {
+  name: string;
+  businessName: string;
+  phone: string;
+  address?: string;
+  websiteUrl?: string;
+  pagePath?: string;
+}) {
+  const site = req.websiteUrl && (/^https?:\/\//i.test(req.websiteUrl) ? req.websiteUrl : `https://${req.websiteUrl}`);
+  const fields: [string, string | undefined][] = [
+    ["Name", req.name],
+    ["Business", req.businessName],
+    ["Phone", req.phone],
+    ["Website", req.websiteUrl],
+    ["Address", req.address],
+    ["Sent from", req.pagePath ? url(req.pagePath) : undefined],
+  ];
+  const rows = fields
+    .filter(([, v]) => v)
+    .map(([k, v]) => `<strong>${k}:</strong> ${esc(String(v))}`)
+    .join("<br>");
+  return {
+    subject: `Business analysis request: ${req.businessName}`,
+    html: layout({
+      preheader: `${req.name} from ${req.businessName} asked for a detailed analysis.`,
+      heading: "New business analysis request",
+      body: `${esc(req.name)} asked for a detailed analysis of ${esc(req.businessName)} from the calculator.<br><br>${rows}`,
+      cta: site ? { label: "Open their website", href: site } : undefined,
+    }),
+    text: fields.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`).join("\n"),
+  };
+}
+
 export function projectRequestNotificationEmail(req: { id: string; title: string; clientName: string; service?: string }) {
   return {
     subject: `New project request: ${req.title}`,
@@ -258,5 +291,73 @@ export function adminNotificationEmail(title: string, body: string, href?: strin
     subject: title,
     html: layout({ preheader: body.slice(0, 90), heading: title, body: esc(body), cta: href ? { label: "Open admin", href: url(href) } : undefined }),
     text: `${title}\n\n${body}${href ? `\n${url(href)}` : ""}`,
+  };
+}
+
+/* ------------------------- E-commerce website builder ------------------------- */
+
+interface BuilderOrderMail {
+  orderId: string;
+  orderNumber: string;
+  quoteNumber: string;
+  quoteUrl: string;
+  customer: { name: string; email: string; phone: string; businessName?: string; businessCategory: string; domain?: string; contactMethod: string; requirements?: string };
+  templateName: string;
+  lines: { name: string; amount: string }[];
+  customItems: string[];
+  total: string;
+  validUntil: string;
+}
+
+const rows = (items: [string, string | undefined][]) =>
+  items
+    .filter(([, v]) => v)
+    .map(([k, v]) => `<tr><td style="padding:6px 12px 6px 0;color:#677787;vertical-align:top;white-space:nowrap">${esc(k)}</td><td style="padding:6px 0;color:#060b13">${esc(v!)}</td></tr>`)
+    .join("");
+
+function lineTable(o: BuilderOrderMail) {
+  const items = [[`Design: ${o.templateName}`, ""], ...o.lines.map((l) => [l.name, l.amount])]
+    .map(([n, a]) => `<tr><td style="padding:6px 0;border-bottom:1px solid #eaeff3">${esc(n)}</td><td style="padding:6px 0;border-bottom:1px solid #eaeff3;text-align:right">${esc(a)}</td></tr>`)
+    .join("");
+  const custom = o.customItems.length ? `<p style="margin:12px 0 0;color:#677787">Priced after consultation: ${esc(o.customItems.join(", "))}</p>` : "";
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;font-size:14px">${items}<tr><td style="padding:10px 0;font-weight:700">Estimated development total</td><td style="padding:10px 0;text-align:right;font-weight:700">${esc(o.total)}</td></tr></table>${custom}`;
+}
+
+/** To the team: a new e-commerce builder order request. */
+export function builderOrderNotificationEmail(o: BuilderOrderMail) {
+  const c = o.customer;
+  return {
+    subject: `New e-commerce order ${o.orderNumber} — ${c.businessName || c.name} (${o.total})`,
+    html: layout({
+      preheader: `${c.name} configured a ${o.templateName} store (${o.total}).`,
+      heading: `New store order ${o.orderNumber}`,
+      body: `<table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px">${rows([
+        ["Name", c.name],
+        ["Email", c.email],
+        ["Phone / WhatsApp", c.phone],
+        ["Business", c.businessName],
+        ["Category", c.businessCategory],
+        ["Website / domain", c.domain],
+        ["Contact via", c.contactMethod],
+        ["Quote", o.quoteNumber],
+      ])}</table>${lineTable(o)}${c.requirements ? `<p style="margin:16px 0 0;white-space:pre-wrap">${esc(c.requirements)}</p>` : ""}`,
+      cta: { label: "Open the order", href: url(`/admin/ecommerce-builder/orders/${o.orderId}`) },
+    }),
+    text: `New e-commerce order ${o.orderNumber} (${o.total})\n\n${c.name} <${c.email}> · ${c.phone}\nBusiness: ${c.businessName ?? "—"} (${c.businessCategory})\nContact via: ${c.contactMethod}\nDesign: ${o.templateName}\n${o.lines.map((l) => `- ${l.name}: ${l.amount}`).join("\n")}\n\nOpen: ${url(`/admin/ecommerce-builder/orders/${o.orderId}`)}`,
+  };
+}
+
+/** To the customer: order request received, with a link to their quotation. */
+export function builderOrderConfirmationEmail(o: BuilderOrderMail) {
+  const first = o.customer.name.split(" ")[0];
+  return {
+    subject: `We received your e-commerce website request (${o.orderNumber})`,
+    html: layout({
+      preheader: `Your quotation ${o.quoteNumber} and next steps.`,
+      heading: `Thanks, ${first} — we’ve got your request.`,
+      body: `Your order reference is <strong>${esc(o.orderNumber)}</strong>. Our team will contact you within 24 hours by ${esc(o.customer.contactMethod.toLowerCase())} to confirm the scope, timeline and next steps.${lineTable(o)}<p style="margin:16px 0 0;color:#677787">This is an estimate (quotation ${esc(o.quoteNumber)}, valid until ${esc(o.validUntil)}), not an invoice. No payment has been taken.</p>`,
+      cta: { label: "View your quotation", href: o.quoteUrl },
+    }),
+    text: `Thanks, ${first} — we've received your e-commerce website request.\n\nOrder reference: ${o.orderNumber}\nQuotation: ${o.quoteNumber} (valid until ${o.validUntil})\nEstimated development total: ${o.total}\n\nView your quotation: ${o.quoteUrl}\n\nThis is an estimate, not an invoice. No payment has been taken.`,
   };
 }

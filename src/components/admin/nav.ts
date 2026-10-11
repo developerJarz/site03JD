@@ -5,7 +5,7 @@ export interface AdminNavItem {
   href: string;
   icon: string;
   permission: Permission;
-  badge?: "leads" | "requests" | "notifications";
+  badge?: "leads" | "requests" | "notifications" | "orders";
 }
 
 export interface AdminNavGroup {
@@ -54,6 +54,23 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: "All users", href: "/admin/users", icon: "user", permission: "users:manage" },
       { label: "Admins", href: "/admin/users?role=ADMIN", icon: "shield", permission: "users:manage" },
       { label: "Editors", href: "/admin/users?role=EDITOR", icon: "pen", permission: "users:manage" },
+    ],
+  },
+  {
+    label: "E-commerce Builder",
+    items: [
+      { label: "Overview", href: "/admin/ecommerce-builder", icon: "store", permission: "builder:content" },
+      { label: "Customer orders", href: "/admin/ecommerce-builder/orders", icon: "shopping-cart", permission: "builder:orders", badge: "orders" },
+      { label: "Quotes & invoices", href: "/admin/ecommerce-builder/quotes", icon: "receipt", permission: "builder:orders" },
+      { label: "Website templates", href: "/admin/ecommerce-templates", icon: "layout-template", permission: "builder:catalog" },
+      { label: "Feature categories", href: "/admin/ecommerce-categories", icon: "layers", permission: "builder:catalog" },
+      { label: "Features", href: "/admin/ecommerce-features", icon: "puzzle", permission: "builder:catalog" },
+      { label: "Pricing & coupons", href: "/admin/ecommerce-builder/pricing", icon: "percent", permission: "builder:catalog" },
+      { label: "Page content", href: "/admin/ecommerce-builder/content", icon: "file-text", permission: "builder:content" },
+      { label: "Builder SEO", href: "/admin/ecommerce-builder/seo", icon: "search", permission: "builder:content" },
+      { label: "Order form", href: "/admin/ecommerce-builder/form", icon: "clipboard-list", permission: "builder:catalog" },
+      { label: "Leads & analytics", href: "/admin/ecommerce-builder/analytics", icon: "chart-column", permission: "builder:orders" },
+      { label: "Builder settings", href: "/admin/ecommerce-builder/general", icon: "sliders", permission: "builder:catalog" },
     ],
   },
   { label: "Media", items: [{ label: "Media library", href: "/admin/media", icon: "image", permission: "media:manage" }] },

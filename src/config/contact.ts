@@ -6,6 +6,19 @@
 export const CONTACT_EMAIL = "jarzdigital36@gmail.com";
 export const CONTACT_PHONE = "+8801925982536";
 export const WHATSAPP_NUMBER = "+8801925982536";
+
+/**
+ * WhatsApp lines by market: Bangladesh (Dhaka office, /bangladesh) uses the main
+ * number; every other country (USA, Canada, Ireland offices and country pages)
+ * shares the international line. The site-wide number stays in Admin → Settings.
+ */
+export const WHATSAPP_BANGLADESH = "+8801925982536";
+export const WHATSAPP_INTERNATIONAL = "+8801677248045";
+export const whatsappFor = (country: string) => (/bangladesh/i.test(country) ? WHATSAPP_BANGLADESH : WHATSAPP_INTERNATIONAL);
+
+/** Site-wide buttons (header, floating button): the international line on pages under `intlPaths`, else `main`. */
+export const whatsappForPath = (pathname: string, main: string, intlPaths: readonly string[]) =>
+  intlPaths.some((p) => pathname === p || pathname.startsWith(`${p}/`)) ? WHATSAPP_INTERNATIONAL : main;
 export const OFFICE_CITIES = ["Dhaka", "Dallas", "Calgary", "Cork"] as const;
 
 /**

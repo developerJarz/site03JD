@@ -8,6 +8,9 @@ import type { Role } from "@/models/shared";
  * EDITOR — content (blog, services, portfolio, industries, team, testimonials,
  *          FAQs, pages, taxonomy, media, page-level SEO).
  * USER   — own account and own requests only (enforced by ownership checks).
+ *
+ * E-commerce builder: editors may edit page copy and SEO; pricing, catalog
+ * and customer orders are admin-only.
  */
 export const PERMISSIONS = {
   "dashboard:view": ["ADMIN", "EDITOR"],
@@ -20,6 +23,12 @@ export const PERMISSIONS = {
   "users:manage": ["ADMIN"],
   "settings:manage": ["ADMIN"],
   "activity:view": ["ADMIN"],
+  /** E-commerce builder: page copy, SEO and FAQs. */
+  "builder:content": ["ADMIN", "EDITOR"],
+  /** E-commerce builder: templates, features, pricing, publishing and settings. */
+  "builder:catalog": ["ADMIN"],
+  /** E-commerce builder: customer orders, quotes, invoices and analytics (customer data). */
+  "builder:orders": ["ADMIN"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

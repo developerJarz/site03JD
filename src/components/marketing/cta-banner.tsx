@@ -23,12 +23,13 @@ export async function CtaBanner({
   title?: string;
   description?: string;
   /** What the visitor wants and where they are — becomes the WhatsApp message. */
-  whatsapp?: { intent: string; from: string; path?: string };
+  whatsapp?: { intent: string; from: string; path?: string; /** Defaults to the number in Settings. */ number?: string };
   /** The contact-form button. */
   primary?: { label: string; href: string };
   secondary?: { label: string; href: string } | null;
 }) {
   const { contact } = await getSiteSettings();
+  const { number = contact.whatsapp, ...message } = whatsapp;
   return (
     <section className="theme-dark relative overflow-hidden bg-ink-950 py-28 md:py-40">
       <div aria-hidden className="absolute inset-0 bg-grid opacity-50 mask-radial" />
@@ -40,7 +41,7 @@ export async function CtaBanner({
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/65">{description}</p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Magnetic>
-              <WhatsAppButton number={contact.whatsapp} {...whatsapp}>
+              <WhatsAppButton number={number} {...message}>
                 Start a Project
               </WhatsAppButton>
             </Magnetic>
@@ -48,20 +49,13 @@ export async function CtaBanner({
               {primary.label}
             </ButtonLink>
           </div>
-          <p className="mt-6 text-sm text-white/60">
-            WhatsApp or call{" "}
-            <a href={`tel:${contact.phone.replace(/[^+\d]/g, "")}`} className="font-medium text-white underline-offset-4 hover:underline">
-              {contact.phone}
-            </a>
-            {secondary && (
-              <>
-                {" · "}
-                <Link href={secondary.href} className="font-medium text-brand-300 underline-offset-4 hover:underline">
-                  {secondary.label}
-                </Link>
-              </>
-            )}
-          </p>
+          {secondary && (
+            <p className="mt-6 text-sm">
+              <Link href={secondary.href} className="font-medium text-brand-300 underline-offset-4 hover:underline">
+                {secondary.label}
+              </Link>
+            </p>
+          )}
         </Reveal>
       </div>
     </section>

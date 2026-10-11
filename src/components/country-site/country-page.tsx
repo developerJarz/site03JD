@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { JsonLd } from "@/components/marketing/json-ld";
-import { publicUrl, whatsappDisplay, whatsappLink, whatsappMessage } from "@/config/contact";
+import { WHATSAPP_INTERNATIONAL, publicUrl, whatsappLink, whatsappMessage } from "@/config/contact";
 import { cityPath, countryImage, placeOf, type CountrySite } from "@/content/country-sites";
 import { FACEBOOK, type City, type Faq } from "@/content/country-sites/site/content";
 import type { LongSection } from "@/content/country-sites/site/longform";
@@ -33,8 +33,8 @@ export async function CountryPage({ site, city }: { site: CountrySite; city?: Ci
   const { contact, socials } = await getSiteSettings();
   const path = city ? cityPath(site, city) : site.path;
   const c: Contact = {
-    href: (intent, from) => whatsappLink(contact.whatsapp, whatsappMessage({ intent, from: `${from} — ${publicUrl(path)}` })),
-    display: whatsappDisplay(contact),
+    href: (intent, from) => whatsappLink(WHATSAPP_INTERNATIONAL, whatsappMessage({ intent, from: `${from} — ${publicUrl(path)}` })),
+    display: WHATSAPP_INTERNATIONAL,
     email: contact.email,
     facebook: socials.facebook || FACEBOOK,
   };

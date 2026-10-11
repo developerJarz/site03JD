@@ -10,6 +10,8 @@ export const TAGS = {
   posts: "posts",
   pages: "pages",
   taxonomy: "taxonomy",
+  /** E-commerce builder page: published pricebook + builder settings. */
+  ecommerceBuilder: "ecommerce-builder",
 } as const;
 
 export type CacheTag = (typeof TAGS)[keyof typeof TAGS];

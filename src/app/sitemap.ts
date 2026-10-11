@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { FOUNDER_PROFILE, teamMemberPath } from "@/config/team";
 import { COUNTRY_PAGES } from "@/content/country-sites";
+import { BUILDER_PATH } from "@/lib/ecommerce-builder/constants";
+import { getBuilderSettings } from "@/lib/ecommerce-builder/server";
 import { getCategories, getIndexablePageSlugs, getIndustries, getPosts, getProjects, getServices, getSiteSettings, getTeam } from "@/lib/data/public";
 import { SITE_URL, postModifiedAt, teamProfileIndexable } from "@/lib/seo";
 import { locationOffices, officePath } from "@/lib/seo/locations";
@@ -13,7 +15,7 @@ export const revalidate = 3600;
  * timestamps would teach Google to ignore lastmod.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [settings, services, projects, industries, posts, categories, team, pages] = await Promise.all([
+  const [settings, services, projects, industries, posts, categories, team, pages, builder] = await Promise.all([
     getSiteSettings(),
     getServices(),
     getProjects(),
@@ -22,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getCategories("post"),
     getTeam(),
     getIndexablePageSlugs(),
+    getBuilderSettings(),
   ]);
   const url = (path: string) => `${SITE_URL}${path}`;
 
@@ -47,6 +50,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((o) => visible(officePath(o)))
       .map((o) => ({ url: url(officePath(o)), changeFrequency: "monthly" as const, priority: 0.8 })),
     ...COUNTRY_PAGES.filter((p) => visible(p.path)).map((p) => ({ url: url(p.path), changeFrequency: "monthly" as const, priority: 0.8 })),
+    // The builder page has its own SEO settings (Admin → E-commerce Builder → SEO); a canonical pointing elsewhere keeps it out.
+    ...(builder.seo.noindex || (builder.seo.canonical && builder.seo.canonical.replace(/\/$/, "") !== url(BUILDER_PATH)) ? [] : [{ url: url(BUILDER_PATH), changeFrequency: "monthly" as const, priority: 0.9 }]),
     ...services.filter((x) => !x.seo?.noindex).map((s) => ({ url: url(`/services/${s.slug}`), changeFrequency: "monthly" as const, priority: 0.9 })),
     ...projects.filter((x) => !x.seo?.noindex).map((p) => ({ url: url(`/work/${p.slug}`), changeFrequency: "monthly" as const, priority: 0.6 })),
     ...industries.filter((x) => !x.seo?.noindex).map((i) => ({ url: url(`/industries/${i.slug}`), changeFrequency: "monthly" as const, priority: 0.6 })),

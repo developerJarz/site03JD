@@ -1,16 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
+import { ArrowUpRight, Mail, MapPin } from "lucide-react";
 import { Stagger, StaggerItem } from "@/components/animations/reveal";
 import { WhatsAppButton } from "@/components/marketing/whatsapp";
-import { telHref } from "@/config/contact";
+import { WhatsAppPill } from "@/components/marketing/whatsapp-pill";
+import { whatsappFor } from "@/config/contact";
 import { officePath } from "@/lib/seo/locations";
 import type { Office } from "@/types/content";
 
 /**
  * Office cards: contact details plus direct actions — WhatsApp (message names
- * the office), the office's Google Business Profile, and a call button for the
- * Bangladesh office. `from` says which page the section is on.
+ * the office, on its country's line — see whatsappFor) and the office's Google
+ * Business Profile. `from` says which page the section is on.
  */
 export function Locations({ offices, from = "Locations section", path }: { offices: Office[]; from?: string; path?: string }) {
   return (
@@ -51,9 +52,7 @@ export function Locations({ offices, from = "Locations section", path }: { offic
                 {o.address}
               </li>
               <li>
-                <a href={`tel:${o.phone.replace(/[^+\d]/g, "")}`} className="flex items-center gap-2.5 hover:text-ink-900">
-                  <Phone className="size-4 text-brand-600" aria-hidden /> {o.phone}
-                </a>
+                <WhatsAppPill number={whatsappFor(o.country)} intent={`I’d like to contact your ${o.city} office.`} from={`${from} — ${o.city}`} path={path} />
               </li>
               {o.email && (
                 <li>
@@ -66,10 +65,10 @@ export function Locations({ offices, from = "Locations section", path }: { offic
             <div className="relative z-10 mt-5 flex flex-col gap-2">
               <WhatsAppButton
                 size="md"
+                number={whatsappFor(o.country)}
                 intent={`I’d like to contact your ${o.city} office.`}
                 from={`${from} — ${o.city}`}
                 path={path}
-                showNumber={o.phone}
                 className="h-auto w-full flex-wrap gap-x-2 gap-y-0 whitespace-normal py-2.5 text-sm"
               >
                 Contact now
@@ -83,14 +82,6 @@ export function Locations({ offices, from = "Locations section", path }: { offic
                     className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-mist-200 px-3 text-sm font-medium text-ink-900 transition-colors hover:border-ink-900"
                   >
                     <MapPin className="size-4 text-brand-600" aria-hidden /> Google Maps
-                  </a>
-                )}
-                {o.country === "Bangladesh" && (
-                  <a
-                    href={telHref(o.phone)}
-                    className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-ink-900 px-3 text-sm font-medium text-white transition-colors hover:bg-ink-700"
-                  >
-                    <Phone className="size-4 text-brand-300" aria-hidden /> Call {o.phone}
                   </a>
                 )}
               </div>

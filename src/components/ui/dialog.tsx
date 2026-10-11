@@ -94,7 +94,7 @@ export function Dialog({
                   </p>
                 )}
               </div>
-              <button data-close onClick={onClose} className="rounded-lg p-1.5 text-mist-400 hover:bg-mist-100 hover:text-ink-900" aria-label="Close dialog">
+              <button type="button" data-close onClick={onClose} className="rounded-lg p-1.5 text-mist-400 hover:bg-mist-100 hover:text-ink-900" aria-label="Close dialog">
                 <X className="size-4" />
               </button>
             </div>

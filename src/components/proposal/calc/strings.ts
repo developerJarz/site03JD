@@ -1,4 +1,6 @@
 // Calculator and app-shell wording in English and Bangla.
+import { ANALYZE_EN } from '../components/analyze-strings'
+
 export type Lang = 'en' | 'bn'
 
 const en = {
@@ -10,6 +12,8 @@ const en = {
   calcEyebrow: 'Bangladesh Ad Revenue and Profit Calculator',
   calcTitle: 'Ads revenue & profit calculator',
   calcVideoLabel: 'Calculator budget guide',
+  markets: { label: 'Choose your country', bd: 'Bangladesh', us: 'USA Ad Revenue and Profit Calculator', ca: 'Canada Ad Revenue and Profit Calculator' },
+  analyze: ANALYZE_EN,
   calcSub: 'Pick your business type, set your budget and see exactly what your ads can return: orders, sales, costs and profit, month by month.',
   presetsLabel: 'Your business type',
   presets: { food: 'Food & snacks', beauty: 'Beauty & cosmetics', fashion: 'Fashion & clothing', gadgets: 'Gadgets & electronics', home: 'Home & furniture', services: 'Local services', custom: 'Custom' },
@@ -75,6 +79,25 @@ const bn: typeof en = {
   calcEyebrow: 'বাংলাদেশ অ্যাড রেভিনিউ ও প্রফিট ক্যালকুলেটর',
   calcTitle: 'অ্যাড রেভিনিউ ও প্রফিট ক্যালকুলেটর',
   calcVideoLabel: 'ক্যালকুলেটর বাজেট গাইড',
+  markets: { label: 'আপনার দেশ বেছে নিন', bd: 'বাংলাদেশ', us: 'USA অ্যাড রেভিনিউ ও প্রফিট ক্যালকুলেটর', ca: 'কানাডা অ্যাড রেভিনিউ ও প্রফিট ক্যালকুলেটর' },
+  analyze: {
+    title: 'গড় হিসাব নয়, আপনার ব্যবসার আসল হিসাব চান?',
+    text: 'ক্যালকুলেটর ক্যাটাগরির গড় দিয়ে চলে। কয়েকটি তথ্য দিন, আমরা আপনার ব্যবসা ভালোভাবে দেখব, তারপর কলে ফলাফল বুঝিয়ে বলব।',
+    points: ['আপনার ওয়েবসাইট ও ট্র্যাকিং', 'আপনার এলাকার প্রতিযোগীদের বিজ্ঞাপন', 'আপনার এলাকার জন্য বাজেট পরিকল্পনা'],
+    button: 'আপনার ব্যবসার বিস্তারিত বিশ্লেষণ নিন',
+    note: '২৪ ঘণ্টার মধ্যে আমরা কল করব।',
+    formText: 'আপনার পরিচয় আর অনলাইনে কোথায় পাওয়া যাবে জানান। আমরা ব্যবসাটি দেখে ২৪ ঘণ্টার মধ্যে কল করব।',
+    name: 'আপনার নাম',
+    businessName: 'ব্যবসার নাম',
+    phone: 'ফোন নম্বর',
+    websiteUrl: 'ওয়েবসাইট',
+    address: 'ব্যবসার ঠিকানা',
+    optional: 'ঐচ্ছিক',
+    submit: 'তথ্য পাঠান',
+    sending: 'পাঠানো হচ্ছে…',
+    sentTitle: 'তথ্য পাঠানো হয়েছে',
+    close: 'বন্ধ করুন',
+  },
   calcSub: 'আপনার ব্যবসার ধরন বেছে নিন, বাজেট দিন, আর দেখুন অ্যাড থেকে ঠিক কী আসতে পারে: অর্ডার, বিক্রি, খরচ আর লাভ, মাস ধরে।',
   presetsLabel: 'আপনার ব্যবসার ধরন',
   presets: { food: 'খাবার ও স্ন্যাকস', beauty: 'বিউটি ও কসমেটিকস', fashion: 'ফ্যাশন ও পোশাক', gadgets: 'গ্যাজেট ও ইলেকট্রনিক্স', home: 'ঘর ও ফার্নিচার', services: 'লোকাল সার্ভিস', custom: 'নিজের মতো' },

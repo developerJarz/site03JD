@@ -7,6 +7,7 @@ import type { FieldDef, ResourceDef, ResourceKey } from "./types";
  * Client-safe: no server imports.
  */
 
+const BUILDER_PARENT = { label: "E-commerce Builder", href: "/admin/ecommerce-builder" };
 const seo: FieldDef = { name: "seo", label: "SEO", type: "seo" };
 const slug = (from = "title"): FieldDef => ({ name: "slug", label: "Slug", type: "slug", from, required: true, help: "URL path segment. Generated from the title — edit if needed." });
 const order: FieldDef = { name: "order", label: "Display order", type: "number", min: 0, help: "Lower numbers appear first.", width: "half" };
@@ -551,6 +552,177 @@ export const RESOURCES: Record<ResourceKey, ResourceDef> = {
           order,
         ],
       },
+    ],
+  },
+
+  /* ------------------------- E-commerce builder catalog ------------------------- */
+
+  "ecommerce-templates": {
+    key: "ecommerce-templates",
+    label: "Website templates",
+    singular: "Website template",
+    group: "E-commerce Builder",
+    parent: BUILDER_PARENT,
+    permission: "builder:catalog",
+    description: "Store designs customers choose from. Changes go live when you publish pricing in E-commerce Builder → Overview.",
+    titleField: "name",
+    publish: { field: "published", draft: false, live: true },
+    searchFields: ["name", "slug", "tagline"],
+    defaultSort: { order: 1, name: 1 },
+    columns: [
+      { key: "desktopImage", label: "", type: "image" },
+      { key: "name", label: "Template", type: "title" },
+      { key: "price", label: "Base price", type: "money" },
+      { key: "order", label: "Order", type: "number" },
+      { key: "published", label: "Status", type: "status" },
+    ],
+    sections: [
+      {
+        title: "Template",
+        fields: [
+          { name: "name", label: "Display name", type: "text", required: true, max: 120 },
+          { ...slug("name"), label: "Template ID", help: "Stable identifier stored on quotes and orders. Avoid changing it once published." },
+          { name: "tagline", label: "Tagline", type: "text", max: 160 },
+          { name: "description", label: "Short description", type: "textarea", rows: 3, max: 600 },
+          { name: "categories", label: "Suitable business categories", type: "list", placeholder: "e.g. Skincare" },
+          { name: "price", label: "Base price (USD)", type: "money", required: true, width: "half", help: "One-time development price for this design." },
+          { name: "demoUrl", label: "Live preview URL", type: "url", width: "half", help: "Public demo customers can open. Leave empty to hide the Live Preview button." },
+          { name: "referenceUrl", label: "Design reference (internal)", type: "url", help: "Internal note — never shown publicly." },
+        ],
+      },
+      {
+        title: "Preview images",
+        aside: true,
+        fields: [
+          { name: "desktopImage", label: "Desktop preview", type: "image", help: "A screenshot you own, about 1600×1000." },
+          { name: "mobileImage", label: "Mobile preview", type: "image", help: "Optional phone screenshot, about 600×1200." },
+        ],
+      },
+      { title: "Settings", aside: true, fields: [order] },
+    ],
+  },
+
+  "ecommerce-categories": {
+    key: "ecommerce-categories",
+    label: "Feature categories",
+    singular: "Feature category",
+    group: "E-commerce Builder",
+    parent: BUILDER_PARENT,
+    permission: "builder:catalog",
+    description: "Groups for dashboard features (the tabs on the builder). Changes go live when you publish pricing.",
+    titleField: "name",
+    publish: { field: "published", draft: false, live: true },
+    searchFields: ["name", "slug"],
+    defaultSort: { order: 1, name: 1 },
+    columns: [
+      { key: "name", label: "Category", type: "title" },
+      { key: "order", label: "Order", type: "number" },
+      { key: "published", label: "Status", type: "status" },
+    ],
+    sections: [
+      {
+        title: "Category",
+        fields: [
+          { name: "name", label: "Name", type: "text", required: true, max: 80 },
+          { ...slug("name"), label: "Category ID" },
+          { name: "description", label: "Description", type: "textarea", rows: 2, max: 300 },
+          { name: "icon", label: "Icon", type: "icon", options: ICON_OPTIONS },
+        ],
+      },
+      { title: "Settings", aside: true, fields: [order] },
+    ],
+  },
+
+  "ecommerce-features": {
+    key: "ecommerce-features",
+    label: "Features",
+    singular: "Feature",
+    group: "E-commerce Builder",
+    parent: BUILDER_PARENT,
+    permission: "builder:catalog",
+    description: "Included and premium dashboard features with their prices and dependencies. Changes go live when you publish pricing.",
+    titleField: "name",
+    publish: { field: "published", draft: false, live: true },
+    searchFields: ["name", "slug", "summary"],
+    defaultSort: { order: 1, name: 1 },
+    filters: [
+      {
+        field: "pricing",
+        label: "Pricing",
+        options: [
+          { value: "included", label: "Included" },
+          { value: "fixed", label: "Fixed price" },
+          { value: "quantity", label: "Per unit" },
+          { value: "bundled", label: "Bundled" },
+          { value: "custom", label: "Custom quote" },
+        ],
+      },
+    ],
+    columns: [
+      { key: "name", label: "Feature", type: "title" },
+      { key: "category", label: "Category", type: "relation" },
+      { key: "pricing", label: "Pricing", type: "text" },
+      { key: "price", label: "Price", type: "money" },
+      { key: "order", label: "Order", type: "number" },
+      { key: "published", label: "Status", type: "status" },
+    ],
+    sections: [
+      {
+        title: "Feature",
+        fields: [
+          { name: "name", label: "Feature name", type: "text", required: true, max: 120 },
+          { ...slug("name"), label: "Feature ID", help: "Stable identifier stored on quotes, orders and discount rules. Avoid changing it once published." },
+          { name: "category", label: "Category", type: "relation", resource: "ecommerce-categories", required: true },
+          { name: "summary", label: "Short description", type: "textarea", rows: 2, max: 400, help: "Shown on the feature card — write for non-technical customers." },
+          { name: "details", label: "Learn more", type: "textarea", rows: 5, max: 3000, help: "Optional longer explanation shown in the Learn more dialog." },
+          { name: "icon", label: "Icon", type: "icon", options: ICON_OPTIONS, width: "half" },
+          { name: "image", label: "Screenshot", type: "image", width: "half" },
+        ],
+      },
+      {
+        title: "Pricing",
+        fields: [
+          {
+            name: "pricing",
+            label: "Billing type",
+            type: "select",
+            required: true,
+            options: [
+              { value: "included", label: "Included in base package ($0)" },
+              { value: "fixed", label: "Fixed one-time price" },
+              { value: "quantity", label: "Price per unit (e.g. per provider)" },
+              { value: "bundled", label: "Bundled — free with the features it requires" },
+              { value: "custom", label: "Custom quote (Contact for pricing)" },
+            ],
+            width: "half",
+          },
+          { name: "price", label: "Price (USD)", type: "money", width: "half", help: "Fixed price, or price per unit. Ignored for included, bundled and custom." },
+          { name: "mandatory", label: "Mandatory — included feature can't be removed", type: "boolean" },
+          { name: "unitLabel", label: "Unit label", type: "text", max: 40, width: "half", placeholder: "provider", help: "Per-unit pricing only." },
+          { name: "minQty", label: "Minimum quantity", type: "number", min: 0, max: 1000, width: "half" },
+          { name: "maxQty", label: "Maximum quantity", type: "number", min: 1, max: 1000, width: "half" },
+          { name: "requires", label: "Requires", type: "relation", resource: "ecommerce-features", multiple: true, help: "Selecting this feature also selects these. A bundled feature comes free with the feature(s) listed here." },
+        ],
+      },
+      {
+        title: "Recurring third-party costs",
+        description: "Shown separately from the development total.",
+        fields: [
+          { name: "recurringNote", label: "Note", type: "text", max: 300, placeholder: "SMS credits are billed by your SMS provider." },
+          { name: "recurringAmount", label: "Amount (USD, optional)", type: "money", width: "half", help: "Leave empty when it depends on the provider." },
+          {
+            name: "recurringInterval",
+            label: "Interval",
+            type: "select",
+            options: [
+              { value: "month", label: "Per month" },
+              { value: "year", label: "Per year" },
+            ],
+            width: "half",
+          },
+        ],
+      },
+      { title: "Settings", aside: true, fields: [order, { name: "popular", label: "Show a “Popular” badge", type: "boolean" }] },
     ],
   },
 };

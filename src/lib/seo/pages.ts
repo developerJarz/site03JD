@@ -1,4 +1,5 @@
 import { COUNTRY_PAGES } from "@/content/country-sites";
+import { whatsappFor } from "@/config/contact";
 import type { Office } from "@/types/content";
 import { officePath } from "./locations";
 
@@ -94,6 +95,6 @@ export function locationPageSeo(o: Office): StaticPageSeo {
     path: officePath(o),
     label: `Location · ${o.city}`,
     title: `Web Design & SEO Agency in ${place}`,
-    description: `Web development, local SEO, Google Ads and social media marketing for businesses in ${place}. Contact Jarz Digital ${o.city}: ${o.phone}.`,
+    description: `Web development, local SEO, Google Ads and social media marketing for businesses in ${place}. WhatsApp Jarz Digital ${o.city}: ${whatsappFor(o.country)}.`,
   };
 }

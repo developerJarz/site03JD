@@ -89,10 +89,10 @@ export function MediaPicker({ open, onClose, onPick }: { open: boolean; onClose:
       size="xl"
       footer={
         <>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
             Cancel
           </Button>
-          <Button variant="dark" size="sm" onClick={confirm} disabled={tab === "url" ? !url : !selected}>
+          <Button type="button" variant="dark" size="sm" onClick={confirm} disabled={tab === "url" ? !url : !selected}>
             Use image
           </Button>
         </>
@@ -100,7 +100,7 @@ export function MediaPicker({ open, onClose, onPick }: { open: boolean; onClose:
     >
       <div role="tablist" className="mb-5 flex gap-1 rounded-xl bg-mist-100 p-1 text-sm">
         {(["library", "upload", "url"] as const).map((t) => (
-          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={cn("flex-1 rounded-lg py-2 font-medium capitalize", tab === t ? "bg-white text-ink-900 shadow-sm" : "text-mist-600")}>
+          <button type="button" key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={cn("flex-1 rounded-lg py-2 font-medium capitalize", tab === t ? "bg-white text-ink-900 shadow-sm" : "text-mist-600")}>
             {t === "url" ? "Site path / URL" : t}
           </button>
         ))}
@@ -163,7 +163,7 @@ export function MediaPicker({ open, onClose, onPick }: { open: boolean; onClose:
           <p className="mt-4 font-medium text-ink-900">Drag & drop an image here</p>
           <p className="mt-1 text-sm text-mist-500">PNG, JPG, WebP, GIF or AVIF — up to 8 MB.</p>
           <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" className="sr-only" onChange={(e) => handleFiles(e.target.files)} aria-label="Choose file to upload" />
-          <Button variant="outline" size="sm" className="mt-5" onClick={() => fileRef.current?.click()} loading={uploading}>
+          <Button type="button" variant="outline" size="sm" className="mt-5" onClick={() => fileRef.current?.click()} loading={uploading}>
             Browse files
           </Button>
         </div>

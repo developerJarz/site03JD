@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COUPON_CODE_PATTERN, normalizeCouponCode } from "@/lib/ecommerce-builder/coupons";
 import { BUDGET_OPTIONS, PROJECT_TYPE_OPTIONS, TIMELINE_OPTIONS } from "@/config/forms";
 
 /**
@@ -103,6 +104,49 @@ export const contactSchema = z.object({
   startedAt: z.coerce.number().optional(),
 });
 export type ContactInput = z.infer<typeof contactSchema>;
+
+/** "Analyze your business in detail" request from the calculator video guide. */
+export const businessAnalysisSchema = z.object({
+  name: trimmed(120).min(2, "Enter your name"),
+  businessName: trimmed(160).min(2, "Enter your business name"),
+  phone: z.string().trim().max(40).refine((v) => /^[+()\d\s.-]{6,}$/.test(v), "Enter a valid phone number"),
+  address: optionalText(300),
+  websiteUrl: optionalText(300).refine((v) => !v || /^(https?:\/\/)?[^\s/.]+(\.[^\s/.]+)+(\/\S*)?$/i.test(v), "Enter a web address like yourbusiness.com"),
+  pagePath: optionalText(300),
+  website: z.string().max(0, "Spam detected").optional(),
+  startedAt: z.coerce.number().optional(),
+});
+export type BusinessAnalysisInput = z.infer<typeof businessAnalysisSchema>;
+
+/**
+ * E-commerce builder order request. Business category and contact method
+ * are checked against the admin-managed lists on the server.
+ */
+export const builderOrderSchema = z.object({
+  name: trimmed(120).min(2, "Enter your full name"),
+  phone: z.string().trim().max(40).refine((v) => /^[+()\d\s.-]{6,}$/.test(v), "Enter a valid phone or WhatsApp number"),
+  email: emailSchema,
+  businessName: optionalText(160),
+  businessCategory: z.string({ error: "Choose your business category" }).trim().min(1, "Choose your business category").max(80),
+  domain: optionalText(160),
+  requirements: optionalText(5000),
+  contactMethod: z.string({ error: "Choose how we should contact you" }).trim().min(1, "Choose how we should contact you").max(40),
+  terms: z.literal("on", { error: "Please accept the terms to continue" }),
+  selection: z.string().max(20_000),
+  quoteToken: z.string().max(128).optional(),
+  idempotencyKey: z.string().regex(/^[A-Za-z0-9-]{16,80}$/, "Please refresh the page and try again"),
+  website: z.string().max(0, "Spam detected").optional(),
+  startedAt: z.coerce.number().optional(),
+});
+export type BuilderOrderInput = z.infer<typeof builderOrderSchema>;
+
+/** A selection posted by the builder. Only ids and quantities — never prices. */
+export const builderSelectionSchema = z.object({
+  templateId: z.string().max(80).nullable(),
+  couponCode: z.string().trim().max(40).transform(normalizeCouponCode).refine((v) => !v || COUPON_CODE_PATTERN.test(v), "Enter a valid coupon code").optional(),
+  features: z.record(z.string().max(80), z.number().int().min(0).max(1000)).refine((r) => Object.keys(r).length <= 200, "Too many features"),
+  omitted: z.array(z.string().max(80)).max(200).default([]),
+});
 
 export const newsletterSchema = z.object({
   email: emailSchema,

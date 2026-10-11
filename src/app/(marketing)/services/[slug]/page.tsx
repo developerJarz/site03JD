@@ -15,8 +15,10 @@ import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { PostCard } from "@/components/blog/post-card";
+import { BuilderCallout } from "@/components/ecommerce-builder/callout";
 import { postsForService } from "@/lib/content/links";
 import { getIndustries, getPosts, getProjects, getServiceBySlug, getServices, getSiteSettings } from "@/lib/data/public";
+import { BUILDER_LINKED_SERVICES } from "@/lib/ecommerce-builder/constants";
 import { lowerTitle } from "@/lib/utils";
 import { sanitizeRichText } from "@/lib/security/sanitize";
 import { locationOffices, officeCountries, officePath } from "@/lib/seo/locations";
@@ -137,6 +139,13 @@ export default async function ServicePage({ params }: PageProps<"/services/[slug
           )}
         </div>
       </Section>
+
+      {/* Store builder link — services related to e-commerce point to the configurator */}
+      {BUILDER_LINKED_SERVICES.includes(service.slug) && (
+        <Section tone="light" aria-label="E-commerce website builder" className="pt-0 md:pt-0">
+          <BuilderCallout />
+        </Section>
+      )}
 
       {/* In-depth guide — long-form, keyword-focused copy edited in Admin → Services */}
       {guideHtml && (

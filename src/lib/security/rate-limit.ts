@@ -83,6 +83,9 @@ export const LIMITS = {
   upload: { limit: 60, windowMs: 60 * 60_000 },
   message: { limit: 30, windowMs: 10 * 60_000 },
   view: { limit: 120, windowMs: 60 * 60_000 },
+  builderQuote: { limit: 30, windowMs: 60 * 60_000 },
+  builderOrder: { limit: 5, windowMs: 60 * 60_000 },
+  quotePdf: { limit: 60, windowMs: 60 * 60_000 },
 } as const;
 
 export type LimitName = keyof typeof LIMITS;

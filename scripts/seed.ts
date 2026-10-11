@@ -26,6 +26,7 @@ import { readingTime } from "../src/lib/utils";
 import { Category, Faq, Industry, Page, Post, Project, Service, Tag, TeamMember } from "../src/models/content";
 import { SiteSettingsModel } from "../src/models/operations";
 import { User } from "../src/models/User";
+import { seedEcommerceBuilder } from "./seed-ecommerce-builder";
 
 const reset = process.argv.includes("--reset");
 const uri = process.env.MONGODB_URI;
@@ -139,6 +140,9 @@ async function main() {
     );
   }
   console.log(`✓ ${postSeed.length} blog posts`);
+
+  /* E-commerce website builder (insert-only; never overwrites admin edits) */
+  await seedEcommerceBuilder();
 
   /* Optional first admin */
   const email = process.env.SEED_ADMIN_EMAIL?.toLowerCase();

@@ -10,7 +10,7 @@ import { WhatsAppButton } from "@/components/marketing/whatsapp";
 import { Accordion } from "@/components/ui/accordion";
 import { WhatsappIcon } from "@/components/ui/brand-icons";
 import { Section, SectionHeader } from "@/components/ui/section";
-import { publicUrl, telHref, whatsappDisplay, whatsappLink, whatsappMessage } from "@/config/contact";
+import { publicUrl, telHref, whatsappLink, whatsappMessage } from "@/config/contact";
 import { getFaqs, getServices, getSiteSettings } from "@/lib/data/public";
 import { faqSchema } from "@/lib/seo";
 import { officePath } from "@/lib/seo/locations";
@@ -30,9 +30,9 @@ export default async function ContactPage() {
   const waHref = whatsappLink(contact.whatsapp, whatsappMessage({ intent: "I’d like to talk about a project.", from: `${FROM} — ${publicUrl("/contact")}` }));
 
   const channels = [
-    { Icon: Phone, title: "Phone", value: contact.phone, href: telHref(contact.phone), note: "Available 24/7 for urgent matters" },
+    { Icon: Phone, title: "Phone", value: contact.phone, href: telHref(contact.phone), note: "Call us directly" },
     { Icon: Mail, title: "Email", value: contact.email, href: `mailto:${contact.email}`, note: contact.responseTime },
-    { Icon: WhatsappIcon, title: "WhatsApp", value: whatsappDisplay(contact), href: waHref, note: "Message our team directly" },
+    { Icon: WhatsappIcon, title: "WhatsApp", value: "Support 24/7", href: waHref, note: "Message our team directly" },
     { Icon: Video, title: "Video call", value: "Zoom, Google Meet or Teams", href: "#contact-form", note: "Schedule a consultation" },
   ];
 
@@ -55,7 +55,7 @@ export default async function ContactPage() {
         crumbs={[{ name: "Contact", path: "/contact" }]}
         actions={
           <>
-            <WhatsAppButton number={contact.whatsapp} intent="I’d like a free consultation." from={FROM} path="/contact" showNumber={contact.phone}>
+            <WhatsAppButton number={contact.whatsapp} intent="I’d like a free consultation." from={FROM} path="/contact">
               WhatsApp us
             </WhatsAppButton>
             <a href={telHref(contact.phone)} className="inline-flex h-14 items-center gap-2 rounded-full border border-white/20 px-7 font-medium text-white transition-colors hover:border-white hover:bg-white hover:text-ink-900">

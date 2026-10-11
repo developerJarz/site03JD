@@ -34,8 +34,8 @@ export async function saveResourceAction(
   try {
     if (!isResourceKey(key)) return { ok: false, error: "Unknown content type." };
     if (id && !/^[a-f0-9]{24}$/.test(id)) return { ok: false, error: "Invalid id." };
-    const user = await assertPermission("content:manage");
     const def = RESOURCES[key];
+    const user = await assertPermission(def.permission ?? "content:manage");
     const model = MODELS[key];
 
     const parsed = buildSchema(def).safeParse(values);
@@ -90,8 +90,8 @@ export async function saveResourceAction(
 export async function deleteResourceAction(key: string, id: string): Promise<ActionResult> {
   try {
     if (!isResourceKey(key) || !/^[a-f0-9]{24}$/.test(id)) return { ok: false, error: "Invalid request." };
-    const user = await assertPermission("content:manage");
     const def = RESOURCES[key];
+    const user = await assertPermission(def.permission ?? "content:manage");
     await connectDB();
     const doc = await MODELS[key].findByIdAndDelete(id).lean<Record<string, unknown>>();
     if (!doc) return { ok: false, error: "Already deleted." };
@@ -108,8 +108,8 @@ export async function deleteResourceAction(key: string, id: string): Promise<Act
 export async function togglePublishAction(key: string, id: string): Promise<ActionResult> {
   try {
     if (!isResourceKey(key) || !/^[a-f0-9]{24}$/.test(id)) return { ok: false, error: "Invalid request." };
-    const user = await assertPermission("content:manage");
     const def = RESOURCES[key];
+    const user = await assertPermission(def.permission ?? "content:manage");
     if (!def.publish) return { ok: false, error: "This content type has no publishing workflow." };
     await connectDB();
     const doc = await MODELS[key].findById(id);

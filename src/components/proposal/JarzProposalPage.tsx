@@ -3,6 +3,7 @@
 // Rendered inside the site layout (navbar + footer). All styles are scoped under .jdp.
 // Navigation: a sticky sidebar on desktop; on smaller screens a compact section bar that opens a side drawer.
 import Link from 'next/link'
+import { WhatsappIcon } from '@/components/ui/brand-icons'
 import { useEffect, useRef, useState, type MouseEvent, type ReactElement } from 'react'
 import enContent from './content/en.json'
 import bnContent from './content/bn.json'
@@ -127,7 +128,12 @@ export default function JarzProposalPage({ contact }: { contact: ProposalContact
                 <a className="btn primary" href={contact.whatsappHref} target="_blank" rel="noopener noreferrer">{s.ctaBtn}</a>
                 <Link className="btn ghost" href="/contact">{s.ctaWeb}</Link>
               </div>
-              <p className="contact-line">WhatsApp {contact.whatsappDisplay} · {contact.email}</p>
+              <p className="contact-line">
+                <a className="wa-num" href={contact.whatsappHref} target="_blank" rel="noopener noreferrer">
+                  <i><WhatsappIcon /></i>WhatsApp
+                </a>
+                <span>{contact.email}</span>
+              </p>
             </section>
           </main>
         </div>

@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Magnetic } from "@/components/animations";
 import { buttonClasses } from "@/components/ui/button";
 import { WhatsappIcon } from "@/components/ui/brand-icons";
-import { startProjectHref } from "./types";
+import { navWhatsapp, startProjectHref } from "./types";
 import { Icon } from "@/components/ui/icon";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
@@ -157,7 +157,7 @@ export function Navbar({ data }: { data: NavData }) {
               <span className="hidden xl:inline">{account ? "Dashboard" : "Sign in"}</span>
             </Link>
             <Magnetic className="hidden sm:block">
-              <a href={startProjectHref(data.whatsapp, pathname)} target="_blank" rel="noopener noreferrer" className={buttonClasses({ size: "sm", className: "h-10 px-5" })}>
+              <a href={startProjectHref(navWhatsapp(data, pathname), pathname)} target="_blank" rel="noopener noreferrer" className={buttonClasses({ size: "sm", className: "h-10 px-5" })}>
                 <WhatsappIcon className="size-4" />
                 Start a Project
               </a>

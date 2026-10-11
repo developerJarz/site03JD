@@ -2,15 +2,17 @@
 
 import { usePathname } from "next/navigation";
 import { WhatsappIcon } from "@/components/ui/brand-icons";
-import { publicUrl, whatsappLink, whatsappMessage } from "@/config/contact";
+import { publicUrl, whatsappForPath, whatsappLink, whatsappMessage } from "@/config/contact";
 
 /**
- * Floating WhatsApp button, bottom-right on every public page. The prefilled
+ * Floating WhatsApp button, bottom-right on every public page (international line on
+ * USA/Canada pages — see whatsappForPath). The prefilled
  * message carries the page the visitor was on. Client-side only for the path;
  * no dependencies beyond the icon.
  */
-export function WhatsAppFloat({ number }: { number: string }) {
+export function WhatsAppFloat({ number: main, intlPaths }: { number: string; intlPaths: string[] }) {
   const pathname = usePathname();
+  const number = whatsappForPath(pathname, main, intlPaths);
   const href = whatsappLink(number, whatsappMessage({ intent: "I’d like to talk to your team about my project.", from: publicUrl(pathname) }));
   return (
     <a

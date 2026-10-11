@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: PageProps<"/admin/[resource]/
 export default async function NewResourcePage({ params }: PageProps<"/admin/[resource]/new">) {
   const { resource } = await params;
   if (!isResourceKey(resource)) notFound();
-  await requirePermission("content:manage");
   const def = RESOURCES[resource];
+  await requirePermission(def.permission ?? "content:manage");
   return <ResourceEditor def={def} id={null} initial={emptyValues(def)} relations={await relationOptions(def)} liveUrl={null} />;
 }

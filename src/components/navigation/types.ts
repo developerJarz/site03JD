@@ -1,4 +1,4 @@
-import { publicUrl, whatsappLink, whatsappMessage } from "@/config/contact";
+import { publicUrl, whatsappForPath, whatsappLink, whatsappMessage } from "@/config/contact";
 
 export interface NavService {
   slug: string;
@@ -21,7 +21,12 @@ export interface NavData {
   email: string;
   /** WhatsApp number for "Start a Project" (message includes the current page). */
   whatsapp: string;
+  /** Pages for markets outside Bangladesh (USA, Canada, their offices): these use the international WhatsApp line. */
+  intlPaths: string[];
 }
+
+/** WhatsApp number for the header on this page: the country line on USA/Canada pages, else the main one. */
+export const navWhatsapp = (data: Pick<NavData, "whatsapp" | "intlPaths">, pathname: string) => whatsappForPath(pathname, data.whatsapp, data.intlPaths);
 
 /** WhatsApp link for the header "Start a Project" buttons, tagged with the page the visitor is on. */
 export const startProjectHref = (number: string, pathname: string) =>

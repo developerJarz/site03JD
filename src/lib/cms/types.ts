@@ -4,7 +4,22 @@
  * validation/persistence (server).
  */
 
-export type ResourceKey = "posts" | "pages" | "categories" | "tags" | "services" | "projects" | "industries" | "team" | "testimonials" | "faqs";
+import type { Permission } from "@/lib/auth/permissions";
+
+export type ResourceKey =
+  | "posts"
+  | "pages"
+  | "categories"
+  | "tags"
+  | "services"
+  | "projects"
+  | "industries"
+  | "team"
+  | "testimonials"
+  | "faqs"
+  | "ecommerce-templates"
+  | "ecommerce-categories"
+  | "ecommerce-features";
 
 export type FieldType =
   | "text"
@@ -13,6 +28,8 @@ export type FieldType =
   | "slug"
   | "url"
   | "number"
+  /** Integer minor units (cents); edited as dollars. */
+  | "money"
   | "boolean"
   | "date"
   | "select"
@@ -56,7 +73,7 @@ export interface SectionDef {
   fields: FieldDef[];
 }
 
-export type ColumnType = "title" | "text" | "status" | "date" | "image" | "relation" | "boolean" | "number" | "tags";
+export type ColumnType = "title" | "text" | "status" | "date" | "image" | "relation" | "boolean" | "number" | "tags" | "money";
 
 export interface ColumnDef {
   key: string;
@@ -79,6 +96,10 @@ export interface ResourceDef {
   publish?: { field: "status" | "published"; draft: string | boolean; live: string | boolean };
   /** Public URL pattern, e.g. "/blog/:slug" */
   publicPath?: string;
+  /** Permission required to list and edit (default "content:manage"). */
+  permission?: Permission;
+  /** Breadcrumb / back link parent, e.g. { label: "E-commerce Builder", href: "/admin/ecommerce-builder" } */
+  parent?: { label: string; href: string };
   /** Filters shown above the list */
   filters?: { field: string; label: string; options: { value: string; label: string }[] }[];
 }

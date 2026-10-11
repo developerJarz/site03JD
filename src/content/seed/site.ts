@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, CONTACT_PHONE, WHATSAPP_NUMBER } from "@/config/contact";
+import { CONTACT_EMAIL, CONTACT_PHONE, WHATSAPP_INTERNATIONAL, WHATSAPP_NUMBER } from "@/config/contact";
 import type { SiteSettings } from "@/types/content";
 
 /**
@@ -48,9 +48,9 @@ export const siteSeed: SiteSettings = {
       city: "Dallas",
       code: "DAL",
       region: "Texas",
-      country: "United States",
+      country: "United States", 
       address: "1024 Alyssa Ln, Carrollton, TX 75006, United States",
-      phone: CONTACT_PHONE,
+      phone: WHATSAPP_INTERNATIONAL,
       email: CONTACT_EMAIL,
       description:
         "Founded in Dallas, Jarz Digital helps Texas-based businesses scale faster with local SEO, custom web design, and business management solutions. Our Dallas team works closely with local clients to boost rankings, improve digital visibility, and increase leads.",
@@ -65,7 +65,7 @@ export const siteSeed: SiteSettings = {
       country: "Canada",
       // Corrected from the old site's "3730108 Ave NE … T3N IV9" (missing space; letter I in the postcode). Unit number as published.
       address: "3730 108 Ave NE #2138, Calgary, AB T3N 1V9",
-      phone: CONTACT_PHONE,
+      phone: WHATSAPP_INTERNATIONAL,
       email: CONTACT_EMAIL,
       description:
         "Jarz Digital serves Canadian businesses from our Calgary location with a focus on Shopify, WordPress, and Laravel website development. We help companies rank higher, grow faster, and convert better with targeted marketing strategies.",
@@ -79,7 +79,7 @@ export const siteSeed: SiteSettings = {
       region: "County Cork",
       country: "Ireland",
       address: "Cork, Ireland",
-      phone: CONTACT_PHONE,
+      phone: WHATSAPP_INTERNATIONAL,
       email: CONTACT_EMAIL,
       description: "Our Cork location brings Jarz Digital’s local SEO and website development to businesses in Cork and across Ireland — delivered with the same team and process our clients rely on worldwide.",
       image: null,
