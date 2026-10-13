@@ -22,10 +22,13 @@ function withRules(rules: Partial<Pricebook["rules"]>): Pricebook {
 }
 
 describe("seed catalog", () => {
-  it("has four $100 templates and passes catalog validation", async () => {
+  it("has seed templates and passes catalog validation", async () => {
     const { assemblePricebook } = await import("./catalog");
-    assert.equal(pb.templates.length, 4);
-    for (const t of pb.templates) assert.equal(t.price, 10000);
+    assert.equal(pb.templates.length, 5);
+    for (const t of pb.templates.filter((t) => t.id !== "custom-service-website")) {
+      assert.equal(t.price, 10000);
+    }
+    assert.equal(pb.templates.find((t) => t.id === "custom-service-website")?.price, 25000);
     // Re-assemble the seed pricebook and expect no blocking issues.
     const again = assemblePricebook({ templates: pb.templates, categories: pb.categories, features: pb.features.map((f) => ({ ...f, recurringAmount: null, recurringInterval: "month", recurringNote: f.recurring?.note ?? "" })), pricing: { tax: { enabled: false, label: "VAT", ratePercent: null }, discounts: [], quoteValidityDays: 14, bdtPerUsd: null, paymentTerms: "", disclaimer: "" }, version: 1, publishedAt: null });
     assert.deepEqual(again.issues.filter((i) => i.level === "error"), []);

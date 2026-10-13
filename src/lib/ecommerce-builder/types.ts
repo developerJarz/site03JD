@@ -22,8 +22,8 @@ export type FeaturePricing = (typeof FEATURE_PRICING)[number];
 export interface PbImage {
   src: string;
   alt: string;
-  width?: number;
-  height?: number;
+  width?: number | null;
+  height?: number | null;
 }
 
 export interface PbTemplate {
