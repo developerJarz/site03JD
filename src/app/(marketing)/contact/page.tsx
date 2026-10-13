@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/marketing/json-ld";
 import { PageHero } from "@/components/marketing/page-hero";
 import { WhatsAppButton } from "@/components/marketing/whatsapp";
 import { Accordion } from "@/components/ui/accordion";
-import { WhatsappIcon } from "@/components/ui/brand-icons";
+import { LinkedinIcon, WhatsappIcon } from "@/components/ui/brand-icons";
 import { Section, SectionHeader } from "@/components/ui/section";
 import { publicUrl, telHref, whatsappLink, whatsappMessage } from "@/config/contact";
 import { getFaqs, getServices, getSiteSettings } from "@/lib/data/public";
@@ -33,6 +33,7 @@ export default async function ContactPage() {
     { Icon: Phone, title: "Phone", value: contact.phone, href: telHref(contact.phone), note: "Call us directly" },
     { Icon: Mail, title: "Email", value: contact.email, href: `mailto:${contact.email}`, note: contact.responseTime },
     { Icon: WhatsappIcon, title: "WhatsApp", value: "Support 24/7", href: waHref, note: "Message our team directly" },
+    { Icon: LinkedinIcon, title: "LinkedIn", value: "Jarz Digital", href: settings.socials.linkedin || "https://www.linkedin.com/in/jarz-digital-a0982b1b9", note: "Connect on LinkedIn" },
     { Icon: Video, title: "Video call", value: "Zoom, Google Meet or Teams", href: "#contact-form", note: "Schedule a consultation" },
   ];
 

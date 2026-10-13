@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "motion/react";
-import { BarChart3, Code2, MapPin, MousePointerClick, Search, TrendingUp } from "lucide-react";
+import { BarChart3, Code2, MapPin, MousePointerClick, Search, ShoppingCart, TrendingUp } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, type CSSProperties, type ReactNode } from "react";
@@ -241,6 +241,10 @@ export function HomeHero({ trust, whatsappHref, children }: { trust: string[]; w
             </Magnetic>
             <ButtonLink href="/work" size="lg" variant="outline-light">
               Explore Our Work
+            </ButtonLink>
+            <ButtonLink href="/services/ecommerce-website-development-bangladesh" size="lg" variant="outline-light">
+              <ShoppingCart className="size-4" />
+              Build Your Website
             </ButtonLink>
           </FadeIn>
 

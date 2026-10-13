@@ -59,40 +59,42 @@ export function FeatureCard({
   return (
     <div
       className={cn(
-        "relative flex flex-col rounded-3xl border bg-white p-5 transition-[border-color,box-shadow,background-color] duration-200",
-        state.checked ? "border-brand-500 bg-brand-50/40 shadow-[0_0_0_2px_rgb(0_175_185/0.12)]" : "border-mist-200 hover:border-mist-300",
+        "relative flex flex-col rounded-2xl border bg-white p-4 transition-all duration-200 sm:rounded-3xl sm:p-5",
+        state.checked
+          ? "border-brand-500 bg-brand-50/40 shadow-[0_0_0_2px_rgb(0_175_185/0.12),0_8px_24px_-8px_rgb(0_175_185/0.12)]"
+          : "border-mist-200 hover:border-brand-200 hover:shadow-[0_8px_24px_-8px_rgb(0_0_0/0.08)] hover:-translate-y-0.5",
       )}
     >
-      <label htmlFor={inputId} className={cn("flex gap-4", state.locked ? "cursor-default" : "cursor-pointer")}>
+      <label htmlFor={inputId} className={cn("flex gap-3 sm:gap-4", state.locked ? "cursor-default" : "cursor-pointer")}>
         <input id={inputId} type="checkbox" className="peer sr-only" checked={state.checked} disabled={state.locked && state.checked} onChange={onToggle} aria-describedby={`${inputId}-price`} />
-        <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-2xl transition-colors", state.checked ? "bg-ink-900 text-brand-300" : "bg-mist-50 text-brand-700")}>
-          <Icon name={feature.icon} className="size-5" />
+        <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors sm:size-11 sm:rounded-2xl", state.checked ? "bg-ink-900 text-brand-300" : "bg-mist-50 text-brand-700")}>
+          <Icon name={feature.icon} className="size-4 sm:size-5" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="font-display text-[1.05rem] font-semibold leading-snug tracking-tight text-ink-900">{feature.name}</span>
-            {feature.popular && <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wider text-brand-800">Popular</span>}
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <span className="font-display text-[0.95rem] font-semibold leading-snug tracking-tight text-ink-900 sm:text-[1.05rem]">{feature.name}</span>
+            {feature.popular && <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-800 sm:text-[0.68rem]">Popular</span>}
           </span>
-          {categoryName && <span className="mt-0.5 block text-xs text-mist-500">{categoryName}</span>}
-          <span className="mt-1.5 block text-sm leading-relaxed text-mist-600">{feature.summary}</span>
-          <span id={`${inputId}-price`} className={cn("mt-3 inline-flex items-center gap-1.5 text-sm font-semibold", custom ? "text-violet-700" : feature.pricing === "bundled" ? "text-green-700" : "text-ink-900")}>
-            {feature.pricing === "bundled" && <Link2 className="size-3.5" aria-hidden />}
+          {categoryName && <span className="mt-0.5 block text-[0.7rem] text-mist-500 sm:text-xs">{categoryName}</span>}
+          <span className="mt-1 block text-xs leading-relaxed text-mist-600 sm:mt-1.5 sm:text-sm">{feature.summary}</span>
+          <span id={`${inputId}-price`} className={cn("mt-2 inline-flex items-center gap-1.5 text-xs font-semibold sm:mt-3 sm:text-sm", custom ? "text-violet-700" : feature.pricing === "bundled" ? "text-green-700" : "text-ink-900")}>
+            {feature.pricing === "bundled" && <Link2 className="size-3 sm:size-3.5" aria-hidden />}
             {priceLabel(feature, pb)}
           </span>
         </span>
         <span
           aria-hidden
           className={cn(
-            "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-lg border-2 transition-colors peer-focus-visible:ring-4 peer-focus-visible:ring-brand-500/30",
+            "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors peer-focus-visible:ring-4 peer-focus-visible:ring-brand-500/30 sm:size-6 sm:rounded-lg",
             state.checked ? "border-brand-500 bg-brand-500 text-ink-950" : "border-mist-300 bg-white",
           )}
         >
-          {state.checked && (state.locked ? <Lock className="size-3" /> : <Check className="size-3.5" strokeWidth={3} />)}
+          {state.checked && (state.locked ? <Lock className="size-2.5 sm:size-3" /> : <Check className="size-3 sm:size-3.5" strokeWidth={3} />)}
         </span>
       </label>
 
       {(state.requiredBy.length > 0 || (requires.length > 0 && feature.pricing !== "bundled") || feature.recurring) && (
-        <ul className="mt-3 space-y-1 border-t border-mist-100 pt-3 text-xs text-mist-600">
+        <ul className="mt-2.5 space-y-1 border-t border-mist-100 pt-2.5 text-[0.7rem] text-mist-600 sm:mt-3 sm:pt-3 sm:text-xs">
           {state.requiredBy.length > 0 && (
             <li className="flex items-start gap-1.5 text-amber-800">
               <Lock className="mt-0.5 size-3 shrink-0" aria-hidden /> Required by {state.requiredBy.join(", ")}
@@ -111,9 +113,9 @@ export function FeatureCard({
         </ul>
       )}
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-        <button type="button" onClick={onLearnMore} className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-sm font-medium text-brand-700 hover:bg-brand-50 hover:text-brand-800">
-          <Info className="size-4" aria-hidden /> Learn more<span className="sr-only"> about {feature.name}</span>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 sm:mt-4">
+        <button type="button" onClick={onLearnMore} className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50 hover:text-brand-800 sm:text-sm">
+          <Info className="size-3.5 sm:size-4" aria-hidden /> Learn more<span className="sr-only"> about {feature.name}</span>
         </button>
         {feature.pricing === "quantity" && state.checked && <QtyStepper feature={feature} qty={state.qty} onQty={onQty} />}
       </div>

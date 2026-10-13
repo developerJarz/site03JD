@@ -90,7 +90,8 @@ export const siteSeed: SiteSettings = {
     },
   ],
   socials: {
-    facebook: "https://www.facebook.com/profile.php?id=61563196033794",
+    facebook: "https://www.facebook.com/people/Jarz-Digital/61563196033794/",
+    linkedin: "https://www.linkedin.com/in/jarz-digital-a0982b1b9",
   },
   stats: [
     { value: "500+", label: "Global clients served" },

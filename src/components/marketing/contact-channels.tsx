@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { ArrowUpRight, Send, ShoppingBag } from "lucide-react";
-import { FacebookIcon, WhatsappIcon } from "@/components/ui/brand-icons";
+import { FacebookIcon, LinkedinIcon, WhatsappIcon } from "@/components/ui/brand-icons";
 import { publicUrl, whatsappDisplay, whatsappLink, whatsappMessage } from "@/config/contact";
 import { cn } from "@/lib/utils";
 import type { SiteSettings } from "@/types/content";
 
 /**
- * "Order | Send request | Facebook | WhatsApp" — the four ways to start, as
- * one row of cards. Facebook appears only when a page is set in Settings.
+ * "Order | Send request | Facebook | LinkedIn | WhatsApp" — the ways to start, as
+ * one row of cards.
  */
 export function ContactChannels({ settings, from, path, tone = "light" }: { settings: Pick<SiteSettings, "contact" | "socials">; from: string; path: string; tone?: "light" | "dark" }) {
   const { contact, socials } = settings;
@@ -30,9 +30,24 @@ export function ContactChannels({ settings, from, path, tone = "light" }: { sett
       href: "#contact-form",
       accent: "bg-azure-500/10 text-azure-600",
     },
-    ...(socials.facebook
-      ? [{ key: "facebook", Icon: FacebookIcon, title: "Facebook", text: "Follow our work or send us a message on Facebook.", cta: "Visit our page", href: socials.facebook, accent: "bg-[#1877F2]/10 text-[#1877F2]" }]
-      : []),
+    {
+      key: "facebook",
+      Icon: FacebookIcon,
+      title: "Facebook",
+      text: "Follow our work or send us a message on Facebook.",
+      cta: "Visit our page",
+      href: socials.facebook || "https://www.facebook.com/people/Jarz-Digital/61563196033794/",
+      accent: "bg-[#1877F2]/10 text-[#1877F2]",
+    },
+    {
+      key: "linkedin",
+      Icon: LinkedinIcon,
+      title: "LinkedIn",
+      text: "Connect with Jarz Digital and see our updates on LinkedIn.",
+      cta: "Connect on LinkedIn",
+      href: socials.linkedin || "https://www.linkedin.com/in/jarz-digital-a0982b1b9",
+      accent: "bg-[#0A66C2]/10 text-[#0A66C2]",
+    },
     {
       key: "whatsapp",
       Icon: WhatsappIcon,
@@ -46,7 +61,7 @@ export function ContactChannels({ settings, from, path, tone = "light" }: { sett
   const dark = tone === "dark";
 
   return (
-    <ul className={cn("grid gap-4 sm:grid-cols-2", channels.length === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
+    <ul className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-5")}>
       {channels.map(({ key, Icon, title, text, cta, href, accent }) => {
         const external = href.startsWith("http");
         const cls = cn(

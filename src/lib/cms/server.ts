@@ -41,8 +41,8 @@ export const RESOURCE_TAGS: Record<ResourceKey, string[]> = {
   team: [TAGS.team],
   testimonials: [TAGS.testimonials],
   faqs: [TAGS.faqs],
-  // Catalog edits are drafts: customers see them only after Publish pricing.
-  "ecommerce-templates": [],
+  // Saved preview images update immediately; other catalog edits await Publish pricing.
+  "ecommerce-templates": [TAGS.ecommerceBuilder],
   "ecommerce-categories": [],
   "ecommerce-features": [],
 };

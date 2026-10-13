@@ -6,9 +6,9 @@ import { builderSettingsSeed } from "@/content/seed/ecommerce-builder";
 import { TAGS } from "@/lib/data/cache-tags";
 import { connectDB, isDbConfigured } from "@/lib/db/connect";
 import { BuilderCategory, BuilderCounter, BuilderFeature, BuilderPricebook, BuilderSettingsModel, BuilderTemplate } from "@/models/builder";
-import { assembleFromDocs, pricebookHash, seedPricebook, type CatalogIssue } from "./catalog";
+import { assembleFromDocs, pricebookHash, seedPricebook, withTemplatePreviews, type CatalogIssue } from "./catalog";
 import type { BuilderSettings } from "./settings";
-import type { Pricebook } from "./types";
+import type { PbTemplate, Pricebook } from "./types";
 
 export { seedPricebook, type CatalogIssue } from "./catalog";
 
@@ -17,7 +17,7 @@ export { seedPricebook, type CatalogIssue } from "./catalog";
  *
  * Public reads (`getPublishedPricebook`, `getBuilderSettings`) are cached
  * under the "ecommerce-builder" tag; publishing pricing or saving builder
- * settings revalidates it. Server actions use the uncached loaders so a
+ * settings or template preview images revalidates it. Server actions use the uncached loaders so a
  * price is never taken from a stale cache.
  */
 
@@ -29,7 +29,7 @@ const SEED_VERSION = createHash("sha256")
   .update(JSON.stringify(builderSettingsSeed))
   .digest("hex")
   .slice(0, 12);
-const CACHE_VERSION = `${process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ?? "local"}-${SEED_VERSION}`;
+const CACHE_VERSION = `${process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ?? "local"}-${SEED_VERSION}-standard-v5`;
 
 /* --------------------------------- Settings -------------------------------- */
 
@@ -66,7 +66,11 @@ export async function loadDraftPricebook(): Promise<{ pricebook: Pricebook; issu
     readBuilderSettings(),
     BuilderPricebook.findOne().sort({ version: -1 }).select("version").lean(),
   ]);
-  return assembleFromDocs({ templates, categories, features, pricing: settings.pricing, version: (latest?.version ?? 0) + 1 });
+  const mappedFeatures = features.map((f: any) => ({
+    ...f,
+    name: typeof f.name === "string" ? f.name.replace(/^Basic\s+/i, "Standard ") : f.name,
+  }));
+  return assembleFromDocs({ templates, categories, features: mappedFeatures, pricing: settings.pricing, version: (latest?.version ?? 0) + 1 });
 }
 
 export { pricebookHash };
@@ -79,11 +83,44 @@ export async function loadPublishedPricebook(): Promise<Pricebook> {
   await connectDB();
   const doc = await BuilderPricebook.findOne().sort({ version: -1 }).lean();
   if (!doc) return seedPricebook();
-  return { ...(doc.data as Pricebook), version: doc.version, publishedAt: new Date(doc.createdAt).toISOString() };
+  const data = doc.data as Pricebook;
+  const customTemplate: PbTemplate = {
+    id: "custom-service-website",
+    name: "Custom Service & Business Website",
+    tagline: "For school, college, builder, hospital, news, personal & corporate sites",
+    description: "A tailored, high-converting website built specifically for your service or business model — with custom layouts, lead capture, dynamic content sections and full brand identity.",
+    categories: ["School & College", "Builder / Real Estate", "Corporate", "Healthcare", "News Portal", "Personal", "Business"],
+    demoUrl: "",
+    desktopImage: null,
+    mobileImage: null,
+    price: 25000,
+  };
+  const templates = (data.templates || []).some((t) => t.id === "custom-service-website")
+    ? data.templates
+    : [...(data.templates || []), customTemplate];
+  const features = (data.features || []).map((f) => ({
+    ...f,
+    name: f.name.replace(/^Basic\s+/i, "Standard "),
+  }));
+  const rules = {
+    ...data.rules,
+    bdtPerUsd: data.rules?.bdtPerUsd ?? 123.14,
+  };
+  return { ...data, templates, features, rules, version: doc.version, publishedAt: new Date(doc.createdAt).toISOString() };
+}
+
+/** Public presentation uses saved preview images; quoting keeps the published snapshot. */
+export async function loadPublicPricebook(): Promise<Pricebook> {
+  const pricebook = await loadPublishedPricebook();
+  if (!isDbConfigured) return pricebook;
+  const templates = await BuilderTemplate.find({ published: true, slug: { $in: pricebook.templates.map((t) => t.id) } })
+    .select("slug published desktopImage mobileImage")
+    .lean();
+  return withTemplatePreviews(pricebook, templates);
 }
 
 export const getPublishedPricebook = cache(
-  unstable_cache(loadPublishedPricebook, [CACHE_VERSION, "ecommerce-builder-pricebook"], { tags: [TAGS.ecommerceBuilder], revalidate: 3600 }),
+  unstable_cache(loadPublicPricebook, [CACHE_VERSION, "ecommerce-builder-public-pricebook"], { tags: [TAGS.ecommerceBuilder], revalidate: 3600 }),
 );
 
 /* ---------------------------------- Numbers ---------------------------------- */

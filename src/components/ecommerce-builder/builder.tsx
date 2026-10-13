@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CheckCircle2, Download, ExternalLink, FileText, Loader2, Lock, Mail, Search, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, ChevronDown, Download, ExternalLink, FileText, Loader2, Lock, Mail, Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -17,6 +17,8 @@ import { OrderForm } from "./order-form";
 import { QuoteBreakdownView } from "./quote-breakdown";
 import { TemplateCard } from "./template-card";
 import { CouponField } from "./coupon-field";
+import { useLiveBdtRate, formatLiveBdt } from "@/hooks/use-live-bdt";
+import { CustomServiceCard, SERVICE_WEBSITE_OPTIONS } from "./custom-service-card";
 
 const STORAGE_KEY = "jd-ecom-builder";
 
@@ -51,7 +53,7 @@ function StepHeader({ id, index, eyebrow, title, description, aside }: { id: str
 }
 
 export function EcommerceBuilder({
-  pricebook: pb,
+  pricebook: rawPb,
   content,
   form,
   acceptingOrders,
@@ -66,8 +68,21 @@ export function EcommerceBuilder({
   /** False without a database — the page still calculates estimates. */
   canQuote: boolean;
 }) {
+  const pb = useMemo(
+    () => ({
+      ...rawPb,
+      features: (rawPb.features || []).map((f) => ({
+        ...f,
+        name: f.name.replace(/^Basic\s+/i, "Standard "),
+      })),
+    }),
+    [rawPb],
+  );
   const toast = useToast();
   const [selection, setSelection] = useState<Selection>(EMPTY_SELECTION);
+  const { rate: liveBdtRate } = useLiveBdtRate(pb.rules.bdtPerUsd);
+  const [customServiceType, setCustomServiceType] = useState<string>("school-college");
+  const [customServiceOther, setCustomServiceOther] = useState<string>("");
   const [quote, setQuote] = useState<StoredQuote | null>(null);
   const [order, setOrder] = useState<OrderPayload | null>(null);
   const [quoting, setQuoting] = useState(false);
@@ -86,11 +101,18 @@ export function EcommerceBuilder({
     try {
       const raw = sessionStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const saved = JSON.parse(raw) as { selection?: Selection; quote?: StoredQuote | null };
+        const saved = JSON.parse(raw) as {
+          selection?: Selection;
+          quote?: StoredQuote | null;
+          customServiceType?: string;
+          customServiceOther?: string;
+        };
         const preserveCoupon = Boolean(saved.selection && saved.quote?.breakdown && new Date(saved.quote.validUntil) > new Date() && saved.quote.selectionKey === selectionKey(saved.selection));
         // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time restore from storage after hydration
         setSelection(sanitizeSelection(pb, saved.selection, { preserveCoupon }));
         if (saved.quote && new Date(saved.quote.validUntil) > new Date()) setQuote(saved.quote);
+        if (saved.customServiceType) setCustomServiceType(saved.customServiceType);
+        if (saved.customServiceOther) setCustomServiceOther(saved.customServiceOther);
       }
     } catch {
       /* storage unavailable */
@@ -102,11 +124,14 @@ export function EcommerceBuilder({
   useEffect(() => {
     if (!restored) return;
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ selection, quote }));
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ selection, quote, customServiceType, customServiceOther }),
+      );
     } catch {
       /* storage unavailable */
     }
-  }, [selection, quote, restored]);
+  }, [selection, quote, customServiceType, customServiceOther, restored]);
 
   /* Show the mobile price bar only while the builder is on screen. */
   useEffect(() => {
@@ -127,6 +152,21 @@ export function EcommerceBuilder({
   // A fresh server quote is authoritative (it may use newer pricing than this cached page).
   const breakdown = quoteFresh && quote?.breakdown ? quote.breakdown : liveBreakdown;
   const template = pb.templates.find((t) => t.id === selection.templateId) ?? null;
+
+  const demoTemplates = useMemo(
+    () => pb.templates.filter((t) => t.id !== "custom-service-website"),
+    [pb.templates],
+  );
+  const customServiceTemplate = useMemo(
+    () => pb.templates.find((t) => t.id === "custom-service-website"),
+    [pb.templates],
+  );
+  const selectedServiceOpt = SERVICE_WEBSITE_OPTIONS.find((o) => o.id === customServiceType);
+  const customServiceName = selectedServiceOpt
+    ? customServiceType === "other" && customServiceOther.trim()
+      ? `Custom (${customServiceOther.trim()}) Website`
+      : `${selectedServiceOpt.label} Website`
+    : "Custom Service & Business Website";
 
   const update = useCallback((next: Selection) => {
     setSelection(next);
@@ -168,7 +208,11 @@ export function EcommerceBuilder({
   };
 
   const selectTemplate = (id: string) => {
-    if (selection.templateId === id) return;
+    if (selection.templateId === id) {
+      update({ ...selection, templateId: "" });
+      track("builder_template_deselected", { template: id });
+      return;
+    }
     update({ ...selection, templateId: id });
     track("builder_template_selected", { template: id });
   };
@@ -210,6 +254,9 @@ export function EcommerceBuilder({
 
   const selectableCats = pb.categories.filter((c) => pb.features.some((f) => f.categoryId === c.id && f.pricing !== "included"));
   const activeCat = selectableCats.some((c) => c.id === category) ? category : selectableCats[0]?.id ?? "";
+  const activeIndex = selectableCats.findIndex((c) => c.id === activeCat);
+  const prevCat = activeIndex > 0 ? selectableCats[activeIndex - 1] : null;
+  const nextCat = activeIndex >= 0 && activeIndex < selectableCats.length - 1 ? selectableCats[activeIndex + 1] : null;
   const q = query.trim().toLowerCase();
   const visibleFeatures = pb.features.filter((f) => f.pricing !== "included" && (q ? `${f.name} ${f.summary}`.toLowerCase().includes(q) : f.categoryId === activeCat));
   const countIn = (catId: string) => pb.features.filter((f) => f.categoryId === catId && f.pricing !== "included" && (f.id in selection.features || (f.pricing === "bundled" && featureState(f).checked))).length;
@@ -237,7 +284,19 @@ export function EcommerceBuilder({
       <div className="mt-5 space-y-3 text-sm">
         <div className="flex items-start justify-between gap-3">
           <span className="text-white/60">Design</span>
-          <span className="text-right font-medium text-white">{template ? template.name : <button type="button" onClick={() => scrollToId("templates")} className="text-brand-300 underline underline-offset-4">Choose a design</button>}</span>
+          <span className="text-right font-medium text-white">
+            {template ? (
+              template.id === "custom-service-website" ? (
+                <span className="text-brand-300 font-semibold">{customServiceName}</span>
+              ) : (
+                template.name
+              )
+            ) : (
+              <button type="button" onClick={() => scrollToId("templates")} className="text-brand-300 underline underline-offset-4">
+                Choose a design
+              </button>
+            )}
+          </span>
         </div>
         <div className="flex justify-between gap-3">
           <span className="text-white/60">Base website</span>
@@ -280,12 +339,19 @@ export function EcommerceBuilder({
           One-time total
           {breakdown.recurring.length > 0 && <span className="block text-xs text-white/45">+ separate running costs</span>}
         </span>
-        <span className="text-right">
-          <span className="block font-display text-4xl font-semibold tracking-tight text-white tabular-nums" aria-live="polite">
-            {formatMoney(breakdown.total, currency)}
+        <div className="text-right">
+          <div className="flex flex-wrap items-baseline justify-end gap-2">
+            <span className="block font-display text-3xl sm:text-4xl font-semibold tracking-tight text-white tabular-nums" aria-live="polite">
+              {formatMoney(breakdown.total, currency)}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/20 px-2.5 py-0.5 text-xs font-bold text-emerald-300 border border-emerald-400/35 shadow-xs">
+              {formatLiveBdt(breakdown.total, liveBdtRate)}
+            </span>
+          </div>
+          <span className="block text-[0.68rem] text-emerald-400/80 mt-1 font-mono">
+            Live USD/BDT rate: ৳{liveBdtRate.toFixed(2)}
           </span>
-          {pb.rules.bdtPerUsd && <span className="text-xs text-white/50">≈ ৳{Math.round((breakdown.total / 100) * pb.rules.bdtPerUsd).toLocaleString("en-IN")}</span>}
-        </span>
+        </div>
       </div>
       <div className="mt-6 grid gap-2">
         <Button size="md" onClick={() => scrollToId(order ? "order" : template ? "order" : "templates")} arrow>
@@ -306,21 +372,45 @@ export function EcommerceBuilder({
           <section aria-labelledby="templates-heading" id="templates" className="scroll-mt-28">
             <StepHeader id="templates-heading" index="01" eyebrow={s.templates.eyebrow} title={s.templates.title} description={s.templates.description} />
             <div role="radiogroup" aria-labelledby="templates-heading" className="grid gap-5 md:grid-cols-2">
-              {pb.templates.map((t) => (
+              {demoTemplates.map((t) => (
                 <TemplateCard key={t.id} template={t} currency={currency} selected={selection.templateId === t.id} onSelect={() => selectTemplate(t.id)} />
               ))}
             </div>
+
+            {/* Custom Service & Business Website Card ($250) */}
+            <div className="mt-6">
+              <CustomServiceCard
+                selected={selection.templateId === "custom-service-website"}
+                onSelect={() => selectTemplate("custom-service-website")}
+                currency={currency}
+                price={customServiceTemplate?.price ?? 25000}
+                rate={liveBdtRate}
+                selectedType={customServiceType}
+                onTypeChange={setCustomServiceType}
+                otherText={customServiceOther}
+                onOtherTextChange={setCustomServiceOther}
+              />
+            </div>
+
             {template && (
               <div className="mt-6 flex flex-col items-start justify-between gap-3 rounded-2xl bg-mist-50 px-5 py-4 text-sm sm:flex-row sm:items-center">
                 <p className="text-mist-700">
                   <CheckCircle2 className="mr-1.5 inline size-4 text-green-600" aria-hidden />
-                  <strong className="font-medium text-ink-900">{template.name}</strong> selected — {formatMoney(template.price, currency)} added. You can switch designs any time.
+                  <strong className="font-medium text-ink-900">
+                    {template.id === "custom-service-website" ? customServiceName : template.name}
+                  </strong>{" "}
+                  selected — {formatMoney(template.price, currency)} added. You can switch designs or click again to deselect any time.
                 </p>
                 <button type="button" onClick={() => scrollToId("features")} className="inline-flex items-center gap-1.5 font-medium text-brand-700 hover:text-brand-800">
                   Next: choose features <ArrowRight className="size-4" aria-hidden />
                 </button>
               </div>
             )}
+            <div className="mt-6 rounded-2xl border border-dashed border-brand-200 bg-brand-50/40 px-5 py-4">
+              <p className="text-sm leading-relaxed text-mist-700">
+                <strong className="font-medium text-ink-900"> Fully customizable —</strong> We provide fully customizable websites. You can ask for anything — from unique layouts and custom features to bespoke integrations. Every design is a starting point that we tailor exactly to your brand.
+              </p>
+            </div>
           </section>
 
           {/* Step 2 — Included */}
@@ -355,7 +445,7 @@ export function EcommerceBuilder({
           <section aria-labelledby="features-heading" id="features" className="scroll-mt-28">
             <StepHeader id="features-heading" index="03" eyebrow={s.features.eyebrow} title={s.features.title} description={s.features.description} />
 
-            <div className="sticky top-[4.5rem] z-20 -mx-4 mb-6 border-b border-mist-100 bg-white/95 px-4 pb-3 pt-3 backdrop-blur sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+            <div className="relative -mx-4 mb-6 border-b border-mist-100 bg-white/60 px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:border-0 lg:bg-transparent lg:p-0">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-mist-400" aria-hidden />
                 <label htmlFor="feature-search" className="sr-only">
@@ -366,8 +456,8 @@ export function EcommerceBuilder({
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder={`Search ${pb.features.filter((f) => f.pricing !== "included").length} features — e.g. POS, courier, bKash…`}
-                  className="h-12 w-full rounded-full border border-mist-200 bg-white pl-11 pr-11 text-[0.9375rem] outline-none transition-[border-color,box-shadow] focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15"
+                  placeholder={`Search features — e.g. POS, courier, bKash…`}
+                  className="h-11 w-full rounded-full border border-mist-200 bg-white pl-11 pr-11 text-sm outline-none transition-[border-color,box-shadow] focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 sm:h-12 sm:text-[0.9375rem]"
                 />
                 {query && (
                   <button type="button" onClick={() => setQuery("")} className="absolute right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-mist-400 hover:bg-mist-100 hover:text-ink-900" aria-label="Clear search">
@@ -376,40 +466,80 @@ export function EcommerceBuilder({
                 )}
               </div>
               {!q && (
-                <div role="tablist" aria-label="Feature categories" className="scrollbar-none -mx-4 mt-3 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
-                  {selectableCats.map((c, i) => {
-                    const active = c.id === activeCat;
-                    const n = countIn(c.id);
-                    return (
-                      <button
-                        key={c.id}
-                        id={`feature-tab-${c.id}`}
-                        type="button"
-                        role="tab"
-                        aria-selected={active}
-                        aria-controls="feature-panel"
-                        tabIndex={active ? 0 : -1}
-                        onClick={() => setCategory(c.id)}
-                        onKeyDown={(e) => onTabKey(e, i)}
-                        className={cn(
-                          "flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500",
-                          active ? "border-ink-900 bg-ink-900 text-white" : "border-mist-200 bg-white text-mist-700 hover:border-mist-400",
-                        )}
+                <>
+                  {/* Quick category selector on mobile */}
+                  <div className="relative mt-2.5 sm:hidden">
+                    <label htmlFor="mobile-category-select" className="sr-only">
+                      Select feature category
+                    </label>
+                    <div className="relative flex items-center rounded-2xl border-2 border-[#F2A33A] bg-gradient-to-r from-[#FFF8EE] via-[#FFFBF5] to-white p-1 shadow-[0_2px_12px_rgba(242,163,58,0.22)] transition-all">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#F2A33A] text-ink-950 shadow-sm">
+                        <Icon name={selectableCats.find((c) => c.id === activeCat)?.icon || "layers"} className="size-4.5 text-ink-950" />
+                      </div>
+                      <select
+                        id="mobile-category-select"
+                        value={activeCat}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full appearance-none bg-transparent py-2 pl-3 pr-11 text-[0.85rem] font-bold text-ink-950 focus:outline-none"
                       >
-                        <Icon name={c.icon} className={cn("size-4", active ? "text-brand-300" : "text-brand-700")} />
-                        {c.name}
-                        {n > 0 && <span className={cn("rounded-full px-1.5 text-[0.7rem] font-semibold", active ? "bg-brand-400 text-ink-950" : "bg-brand-50 text-brand-800")}>{n}</span>}
-                      </button>
-                    );
-                  })}
-                </div>
+                        {selectableCats.map((c) => {
+                          const n = countIn(c.id);
+                          return (
+                            <option key={c.id} value={c.id} className="bg-white text-ink-900 font-medium py-1">
+                              {c.name} {n > 0 ? `(${n} selected)` : ""}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 flex size-7 items-center justify-center rounded-full bg-[#F2A33A]/25 text-[#B86B14]">
+                        <ChevronDown className="size-5 stroke-[2.75]" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Horizontal pill tablist on mobile (no x-axis page scroll, scrollbar hidden), wrapped on larger screens */}
+                  <div
+                    role="tablist"
+                    aria-label="Feature categories"
+                    className="scrollbar-none -mx-4 mt-2.5 flex items-center gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0"
+                  >
+                    {selectableCats.map((c, i) => {
+                      const active = c.id === activeCat;
+                      const n = countIn(c.id);
+                      return (
+                        <button
+                          key={c.id}
+                          id={`feature-tab-${c.id}`}
+                          type="button"
+                          role="tab"
+                          aria-selected={active}
+                          aria-controls="feature-panel"
+                          tabIndex={active ? 0 : -1}
+                          onClick={() => setCategory(c.id)}
+                          onKeyDown={(e) => onTabKey(e, i)}
+                          className={cn(
+                            "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 sm:gap-2 sm:px-3.5 sm:py-2 sm:text-[0.8rem]",
+                            "hover:shadow-[0_4px_12px_-4px_rgb(0_0_0/0.12)] hover:-translate-y-px",
+                            active
+                              ? "border-ink-900 bg-ink-900 text-white shadow-[0_4px_16px_-4px_rgb(0_0_0/0.25)]"
+                              : "border-mist-200 bg-white text-mist-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-800",
+                          )}
+                        >
+                          <Icon name={c.icon} className={cn("size-3.5 transition-colors sm:size-4", active ? "text-brand-300" : "text-brand-700")} />
+                          <span className="whitespace-nowrap leading-tight">{c.name}</span>
+                          {n > 0 && <span className={cn("rounded-full px-1.5 text-[0.65rem] font-semibold tabular-nums transition-colors", active ? "bg-brand-400 text-ink-950" : "bg-brand-50 text-brand-800")}>{n}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
               )}
             </div>
 
             <div id="feature-panel" role={q ? "region" : "tabpanel"} aria-labelledby={q ? undefined : `feature-tab-${activeCat}`} aria-label={q ? "Search results" : undefined}>
-              {!q && activeCat && <p className="mb-5 text-sm text-mist-600">{pb.categories.find((c) => c.id === activeCat)?.description}</p>}
+              {!q && activeCat && <p className="mb-4 text-xs leading-relaxed text-mist-600 sm:mb-5 sm:text-sm">{pb.categories.find((c) => c.id === activeCat)?.description}</p>}
               {q && (
-                <p className="mb-5 text-sm text-mist-600" aria-live="polite">
+                <p className="mb-4 text-xs leading-relaxed text-mist-600 sm:mb-5 sm:text-sm" aria-live="polite">
                   {visibleFeatures.length} {visibleFeatures.length === 1 ? "feature" : "features"} match “{query.trim()}”
                 </p>
               )}
@@ -419,7 +549,7 @@ export function EcommerceBuilder({
                   <p className="mt-1 text-sm text-mist-500">Try another word, or describe what you need in the order form — we build custom features too.</p>
                 </div>
               ) : (
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
                   {visibleFeatures.map((f) => (
                     <FeatureCard
                       key={f.id}
@@ -434,6 +564,40 @@ export function EcommerceBuilder({
                   ))}
                 </div>
               )}
+
+              {!q && selectableCats.length > 1 && (
+                <div className="mt-8 flex flex-col gap-3 rounded-2xl border border-mist-100 bg-mist-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-xs text-mist-600">
+                    Category {activeIndex + 1} of {selectableCats.length}: <strong className="font-semibold text-ink-900">{selectableCats[activeIndex]?.name}</strong>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {prevCat && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCategory(prevCat.id);
+                          scrollToId("features-heading");
+                        }}
+                        className="flex-1 rounded-full border border-mist-200 bg-white px-3.5 py-1.5 text-xs font-medium text-ink-900 shadow-sm transition-colors hover:border-mist-400 sm:flex-initial"
+                      >
+                        ← {prevCat.name}
+                      </button>
+                    )}
+                    {nextCat && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCategory(nextCat.id);
+                          scrollToId("features-heading");
+                        }}
+                        className="flex-1 rounded-full bg-ink-900 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-ink-800 sm:flex-initial"
+                      >
+                        {nextCat.name} →
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </section>
 
@@ -441,10 +605,10 @@ export function EcommerceBuilder({
           <section aria-labelledby="quote-heading" id="quote" className="scroll-mt-28">
             <StepHeader id="quote-heading" index="04" eyebrow={s.quote.eyebrow} title={s.quote.title} description={s.quote.description} />
             <div className="rounded-[28px] border border-mist-200 bg-white p-5 sm:p-8">
-              {breakdown && <QuoteBreakdownView breakdown={breakdown} bdtPerUsd={pb.rules.bdtPerUsd} onRemove={(id) => update(removeFeature(selection, id))} onChooseTemplate={() => scrollToId("templates")} />}
+              {breakdown && <QuoteBreakdownView breakdown={breakdown} bdtPerUsd={liveBdtRate} onRemove={(id) => update(removeFeature(selection, id))} onChooseTemplate={() => scrollToId("templates")} />}
               <CouponField pricebook={pb} selection={selection} onChange={update} validationError={selection.couponCode && !calc.ok && !quoteFresh ? calc.errors[0] : undefined} />
               {s.quote.instructions && <p className="mt-5 text-xs leading-relaxed text-mist-500">{s.quote.instructions}</p>}
-              {pb.rules.bdtPerUsd && <p className="mt-1 text-xs text-mist-500">Taka amounts are approximate, at ৳{pb.rules.bdtPerUsd} per US$1.</p>}
+              <p className="mt-1 text-xs text-mist-500">Taka amounts are dynamically converted at the real-time forex rate of ৳{liveBdtRate.toFixed(2)} per US$1.</p>
 
               <div className="mt-6 flex flex-col gap-4 rounded-2xl bg-mist-50 p-5 sm:flex-row sm:items-center sm:justify-between">
                 {quoteFresh && quote ? (
@@ -498,7 +662,10 @@ export function EcommerceBuilder({
                   {template && breakdown && (
                     <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-mist-50 px-5 py-4 text-sm">
                       <span className="text-mist-700">
-                        <strong className="font-medium text-ink-900">{template.name}</strong> · {addOnCount} add-on{addOnCount === 1 ? "" : "s"}
+                        <strong className="font-medium text-ink-900">
+                          {template.id === "custom-service-website" ? customServiceName : template.name}
+                        </strong>{" "}
+                        · {addOnCount} add-on{addOnCount === 1 ? "" : "s"}
                       </span>
                       <span className="font-display text-xl font-semibold text-ink-900">{formatMoney(breakdown.total, currency)}</span>
                     </div>
@@ -545,8 +712,15 @@ export function EcommerceBuilder({
         >
           <button type="button" onClick={() => setDrawer(true)} className="theme-dark flex h-14 w-full items-center justify-between gap-3 rounded-full bg-ink-900 pl-5 pr-2 text-left shadow-[0_18px_40px_-12px_rgb(0_0_0/0.55)]" aria-haspopup="dialog">
             <span className="min-w-0">
-              <span className="block truncate text-[0.7rem] uppercase tracking-wider text-white/55">{template ? `${template.name} · ${addOnCount} add-on${addOnCount === 1 ? "" : "s"}` : "Choose a design"}</span>
-              <span className="block font-display text-lg font-semibold leading-tight text-white tabular-nums">{formatMoney(breakdown.total, currency)}</span>
+              <span className="block truncate text-[0.7rem] uppercase tracking-wider text-white/55">
+                {template ? `${template.id === "custom-service-website" ? customServiceName : template.name} · ${addOnCount} add-on${addOnCount === 1 ? "" : "s"}` : "Choose a design"}
+              </span>
+              <span className="flex flex-wrap items-baseline gap-2">
+                <span className="block font-display text-lg font-semibold leading-tight text-white tabular-nums">{formatMoney(breakdown.total, currency)}</span>
+                <span className="inline-flex items-center rounded-full bg-emerald-400/20 px-2 py-0.5 text-[0.68rem] font-bold text-emerald-300 border border-emerald-400/30">
+                  {formatLiveBdt(breakdown.total, liveBdtRate)}
+                </span>
+              </span>
             </span>
             <span className="shrink-0 rounded-full bg-brand-400 px-4 py-2 text-sm font-semibold text-ink-950">View quote</span>
           </button>
@@ -556,7 +730,7 @@ export function EcommerceBuilder({
         open={drawer}
         onClose={() => setDrawer(false)}
         title="Your quotation"
-        description={template ? template.name : "No design selected yet"}
+        description={template ? (template.id === "custom-service-website" ? customServiceName : template.name) : "No design selected yet"}
         size="md"
         footer={
           <Button
@@ -571,7 +745,7 @@ export function EcommerceBuilder({
           </Button>
         }
       >
-        {breakdown && <QuoteBreakdownView breakdown={breakdown} bdtPerUsd={pb.rules.bdtPerUsd} onRemove={(id) => update(removeFeature(selection, id))} />}
+        {breakdown && <QuoteBreakdownView breakdown={breakdown} bdtPerUsd={liveBdtRate} onRemove={(id) => update(removeFeature(selection, id))} />}
       </Dialog>
 
       <FeatureDialog feature={dialogFeature} pb={pb} state={dialogFeature ? featureState(dialogFeature) : null} onClose={() => setDialogId(null)} onToggle={() => dialogFeature && toggle(dialogFeature)} />

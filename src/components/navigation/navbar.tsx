@@ -80,6 +80,10 @@ export function Navbar({ data }: { data: NavData }) {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setOpen(key);
   }, []);
+  const closeMenu = useCallback(() => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(null);
+  }, []);
   const scheduleClose = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => setOpen(null), 140);
@@ -200,7 +204,7 @@ export function Navbar({ data }: { data: NavData }) {
                             .filter((s) => s.group === group)
                             .map((s) => (
                               <li key={s.slug}>
-                                <Link href={`/services/${s.slug}`} className="group flex items-start gap-4 rounded-2xl p-3 transition-colors hover:bg-white/[0.05]">
+                                <Link href={`/services/${s.slug}`} onClick={closeMenu} className="group flex items-start gap-4 rounded-2xl p-3 transition-colors hover:bg-white/[0.05]">
                                   <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-brand-300 transition-colors group-hover:border-brand-400/40 group-hover:text-brand-200">
                                     <Icon name={s.icon} className="size-5" />
                                   </span>
@@ -215,7 +219,7 @@ export function Navbar({ data }: { data: NavData }) {
                       </div>
                     ))}
                     <div className="col-span-4">
-                      <Link href="/pricing" className="group relative flex h-full min-h-56 flex-col justify-end overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand-500/25 via-ink-800 to-ink-900 p-6">
+                      <Link href="/pricing" onClick={closeMenu} className="group relative flex h-full min-h-56 flex-col justify-end overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand-500/25 via-ink-800 to-ink-900 p-6">
                         <div aria-hidden className="absolute inset-0 bg-grid opacity-60 mask-radial" />
                         <p className="eyebrow relative text-brand-200">Transparent pricing</p>
                         <p className="relative mt-3 font-display text-2xl font-semibold tracking-tight text-white">Plans from $40/month.</p>
@@ -230,14 +234,14 @@ export function Navbar({ data }: { data: NavData }) {
                   <div>
                     <div className="mb-6 flex items-end justify-between">
                       <p className="eyebrow text-white/55">Web design & growth by industry</p>
-                      <Link href="/industries" className="link-underline text-sm text-white/70 hover:text-white">
+                      <Link href="/industries" onClick={closeMenu} className="link-underline text-sm text-white/70 hover:text-white">
                         Explore all industries →
                       </Link>
                     </div>
                     <ul className="grid grid-cols-4 gap-1">
                       {data.industries.map((i) => (
                         <li key={i.slug}>
-                          <Link href={`/industries/${i.slug}`} className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-white/75 transition-colors hover:bg-white/[0.05] hover:text-white">
+                          <Link href={`/industries/${i.slug}`} onClick={closeMenu} className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-white/75 transition-colors hover:bg-white/[0.05] hover:text-white">
                             <Icon name={i.icon} className="size-4 text-brand-300/80 transition-colors group-hover:text-brand-200" />
                             <span className="text-[0.92rem]">{i.name}</span>
                           </Link>

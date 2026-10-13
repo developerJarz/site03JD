@@ -13,7 +13,12 @@ import { NewsletterForm } from "./newsletter-form";
 
 export function Footer({ settings, services, industries }: { settings: SiteSettings; services: Service[]; industries: Industry[] }) {
   const { contact, offices, socials, general } = settings;
-  const socialEntries = (Object.keys(SOCIAL_ICONS) as (keyof typeof SOCIAL_ICONS)[]).filter((k) => socials[k]);
+  const mergedSocials: Record<string, string> = {
+    ...socials,
+    facebook: socials.facebook || "https://www.facebook.com/people/Jarz-Digital/61563196033794/",
+    linkedin: socials.linkedin || "https://www.linkedin.com/in/jarz-digital-a0982b1b9",
+  };
+  const socialEntries = (Object.keys(SOCIAL_ICONS) as (keyof typeof SOCIAL_ICONS)[]).filter((k) => mergedSocials[k]);
   const year = new Date().getFullYear();
 
   const columns: { title: string; links: { label: string; href: string }[] }[] = [
@@ -78,7 +83,7 @@ export function Footer({ settings, services, industries }: { settings: SiteSetti
                   return (
                     <li key={key}>
                       <a
-                        href={socials[key]}
+                        href={mergedSocials[key]}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={label}

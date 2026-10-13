@@ -3,6 +3,7 @@
 import { Check, ChevronDown, Link2, Lock, RefreshCw, X } from "lucide-react";
 import { useState } from "react";
 import { formatBdt, formatMoney } from "@/lib/ecommerce-builder/pricing";
+import { useLiveBdtRate, formatLiveBdt } from "@/hooks/use-live-bdt";
 import type { QuoteBreakdown } from "@/lib/ecommerce-builder/types";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ export function QuoteBreakdownView({
   showIncluded?: boolean;
   tone?: "light" | "dark";
 }) {
+  const { rate: liveRate } = useLiveBdtRate(bdtPerUsd);
   const [includedOpen, setIncludedOpen] = useState(false);
   const money = (c: number) => formatMoney(c, breakdown.currency);
   const dark = tone === "dark";
@@ -170,8 +172,13 @@ export function QuoteBreakdownView({
             <span className={cn("block text-xs font-normal", muted)}>One-time · {breakdown.currency}</span>
           </dt>
           <dd className="text-right">
-            <span className={cn("font-display text-3xl font-semibold tracking-tight tabular-nums", strong)}>{money(breakdown.total)}</span>
-            {bdtPerUsd ? <span className={cn("block text-xs", muted)}>≈ {formatBdt(breakdown.total, bdtPerUsd)}</span> : null}
+            <div className="flex flex-wrap items-baseline justify-end gap-2">
+              <span className={cn("font-display text-2xl sm:text-3xl font-semibold tracking-tight tabular-nums", strong)}>{money(breakdown.total)}</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 shadow-xs">
+                {formatLiveBdt(breakdown.total, liveRate)}
+              </span>
+            </div>
+            <span className={cn("block text-[0.68rem] mt-0.5", muted)}>Real-time rate: ৳{liveRate.toFixed(2)} / US$1</span>
           </dd>
         </div>
       </dl>

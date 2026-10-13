@@ -76,8 +76,10 @@ export function TemplateCard({ template, selected, onSelect, currency }: { templ
   return (
     <article
       className={cn(
-        "group relative flex flex-col rounded-[28px] border bg-white p-4 transition-[border-color,box-shadow] duration-300 sm:p-5",
-        selected ? "border-brand-500 shadow-[0_0_0_3px_rgb(0_175_185/0.18)]" : "border-mist-200 hover:border-mist-300 hover:shadow-soft",
+        "group relative flex flex-col rounded-[28px] border bg-white p-4 transition-all duration-300 sm:p-5",
+        selected
+          ? "border-brand-500 shadow-[0_0_0_3px_rgb(0_175_185/0.18),0_12px_32px_-8px_rgb(0_175_185/0.12)]"
+          : "border-mist-200 hover:border-mist-300 hover:shadow-[0_12px_32px_-12px_rgb(0_0_0/0.1)] hover:-translate-y-1",
       )}
     >
       {selected && (
@@ -114,8 +116,8 @@ export function TemplateCard({ template, selected, onSelect, currency }: { templ
             aria-checked={selected}
             onClick={onSelect}
             className={cn(
-              "inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full px-5 text-[0.9375rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500",
-              selected ? "bg-ink-900 text-white" : "bg-brand-400 text-ink-950 hover:bg-brand-300",
+              "inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full px-5 text-[0.9375rem] font-medium transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500",
+              selected ? "bg-ink-900 text-white hover:bg-red-600" : "bg-brand-400 text-ink-950 hover:bg-brand-300 hover:shadow-[0_4px_16px_-4px_rgb(0_175_185/0.4)]",
             )}
           >
             {selected ? (

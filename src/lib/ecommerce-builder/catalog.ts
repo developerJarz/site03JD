@@ -104,7 +104,7 @@ export function assemblePricebook(input: { templates: PbTemplate[]; categories: 
     if ((f.pricing === "fixed" || f.pricing === "quantity") && f.price <= 0) issues.push({ level: "warning", message: `“${f.name}” is a paid feature with a $0 price.` });
     features.push({
       id: f.id,
-      name: f.name,
+      name: f.name.replace(/^Basic\s+/i, "Standard "),
       categoryId: f.categoryId,
       summary: f.summary,
       details: f.details,
@@ -166,6 +166,18 @@ export function seedPricebook(): Pricebook {
 
 const image = (v: any): PbImage | null => (v && v.src ? { src: String(v.src), alt: String(v.alt ?? ""), ...(v.width ? { width: v.width } : {}), ...(v.height ? { height: v.height } : {}) } : null);
 
+/** Refresh public preview images without changing the published catalog or prices. */
+export function withTemplatePreviews(pricebook: Pricebook, templates: readonly { slug: string; published: boolean; desktopImage?: PbImage | null; mobileImage?: PbImage | null }[]): Pricebook {
+  const previews = new Map(templates.filter((t) => t.published).map((t) => [t.slug, t]));
+  return {
+    ...pricebook,
+    templates: pricebook.templates.map((template) => {
+      const current = previews.get(template.id);
+      return current ? { ...template, desktopImage: image(current.desktopImage), mobileImage: image(current.mobileImage) } : template;
+    }),
+  };
+}
+
 /** Maps catalog documents (lean Mongo rows) to a validated pricebook. */
 export function assembleFromDocs(input: { templates: any[]; categories: any[]; features: any[]; pricing: PricingSettings; version: number }): { pricebook: Pricebook; issues: CatalogIssue[] } {
   const catSlug = new Map(input.categories.map((c) => [String(c._id), c.slug as string]));
@@ -189,7 +201,7 @@ export function assembleFromDocs(input: { templates: any[]; categories: any[]; f
       .filter((f) => f.published)
       .map((f) => ({
         id: f.slug,
-        name: f.name,
+        name: String(f.name ?? "").replace(/^Basic\s+/i, "Standard "),
         categoryId: f.category ? catSlug.get(String(f.category)) ?? null : null,
         summary: f.summary ?? "",
         details: f.details ?? "",
