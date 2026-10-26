@@ -164,7 +164,8 @@ export function seedPricebook(): Pricebook {
   }).pricebook;
 }
 
-const image = (v: any): PbImage | null => (v && v.src ? { src: String(v.src), alt: String(v.alt ?? ""), ...(v.width ? { width: v.width } : {}), ...(v.height ? { height: v.height } : {}) } : null);
+export const toPbImage = (v: any): PbImage | null => (v && v.src ? { src: String(v.src), alt: String(v.alt ?? ""), ...(v.width ? { width: v.width } : {}), ...(v.height ? { height: v.height } : {}) } : null);
+const image = toPbImage;
 
 /** Refresh public preview images without changing the published catalog or prices. */
 export function withTemplatePreviews(pricebook: Pricebook, templates: readonly { slug: string; published: boolean; desktopImage?: PbImage | null; mobileImage?: PbImage | null }[]): Pricebook {

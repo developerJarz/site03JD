@@ -30,6 +30,7 @@ import {
   Puzzle,
   Quote,
   Receipt,
+  ReceiptText,
   Search,
   Settings,
   Shield,
@@ -77,6 +78,7 @@ const ICONS: Record<string, LucideIcon> = {
   store: Store,
   "shopping-cart": ShoppingCart,
   receipt: Receipt,
+  "receipt-text": ReceiptText,
   "layout-template": LayoutTemplate,
   layers: Layers,
   puzzle: Puzzle,
@@ -201,13 +203,13 @@ export function AdminShell({ user, counts, dbReady, children }: AdminShellProps)
   }, []);
 
   return (
-    <div className="min-h-dvh bg-mist-50">
-      <a href="#admin-main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2">
+    <div className="min-h-dvh bg-mist-50 print:min-h-0 print:bg-white">
+      <a href="#admin-main" className="print:hidden sr-onlyfocus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2">
         Skip to content
       </a>
 
       {/* Desktop sidebar */}
-      <aside className="theme-dark fixed inset-y-0 left-0 z-40 hidden w-64 bg-ink-950 lg:block">
+      <aside className="theme-dark fixed inset-y-0 left-0 z-40 hidden w-64 bg-ink-950 lg:block print:hidden">
         <SidebarContent user={user} counts={counts} />
       </aside>
 
@@ -232,8 +234,8 @@ export function AdminShell({ user, counts, dbReady, children }: AdminShellProps)
         )}
       </AnimatePresence>
 
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-mist-200 bg-white/85 px-4 backdrop-blur-xl sm:px-6">
+      <div className="lg:pl-64 print:pl-0">
+        <header className="sticky top-0 z-30 flex h-16 print:hiddenitems-center gap-3 border-b border-mist-200 bg-white/85 px-4 backdrop-blur-xl sm:px-6">
           <button onClick={() => setDrawer(true)} className="rounded-lg p-2 text-mist-600 hover:bg-mist-100 lg:hidden" aria-label="Open menu">
             <Menu className="size-5" />
           </button>
@@ -286,12 +288,12 @@ export function AdminShell({ user, counts, dbReady, children }: AdminShellProps)
         </header>
 
         {!dbReady && (
-          <div className="border-b border-amber-200 bg-warning-50 px-6 py-2.5 text-sm text-amber-900" role="alert">
+          <div className="border-b border-amber-200 bg-warning-50 px-6 py-2.5 text-sm text-amber-900 print:hidden" role="alert">
             Database not configured — set MONGODB_URI to enable the CMS.
           </div>
         )}
 
-        <main id="admin-main" className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-10">
+        <main id="admin-main" className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6 lg:px-10 print:max-w-none print:p-0">
           {children}
         </main>
       </div>

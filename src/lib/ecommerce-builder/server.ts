@@ -6,7 +6,7 @@ import { builderSettingsSeed } from "@/content/seed/ecommerce-builder";
 import { TAGS } from "@/lib/data/cache-tags";
 import { connectDB, isDbConfigured } from "@/lib/db/connect";
 import { BuilderCategory, BuilderCounter, BuilderFeature, BuilderPricebook, BuilderSettingsModel, BuilderTemplate } from "@/models/builder";
-import { assembleFromDocs, pricebookHash, seedPricebook, withTemplatePreviews, type CatalogIssue } from "./catalog";
+import { assembleFromDocs, pricebookHash, seedPricebook, toPbImage, withTemplatePreviews, type CatalogIssue } from "./catalog";
 import type { BuilderSettings } from "./settings";
 import type { PbTemplate, Pricebook } from "./types";
 

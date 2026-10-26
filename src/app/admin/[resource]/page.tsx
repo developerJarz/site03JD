@@ -105,6 +105,25 @@ export default async function ResourceListPage({ params, searchParams }: PagePro
           </ButtonLink>
         }
       />
+
+      {["ecommerce-features", "ecommerce-categories", "ecommerce-templates"].includes(def.key) && (
+        <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-brand-200 bg-brand-50/70 p-4 text-sm text-brand-950 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2.5">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">i</span>
+            <p>
+              <strong>Changes require publishing:</strong> Edits to features, categories, and templates are saved as drafts. Visit the{" "}
+              <Link href="/admin/ecommerce-builder" className="font-semibold underline hover:text-brand-800">
+                E-commerce Builder
+              </Link>{" "}
+              dashboard to publish pricing live to the website frontend.
+            </p>
+          </div>
+          <ButtonLink href="/admin/ecommerce-builder" size="sm" variant="dark" className="shrink-0 self-start sm:self-auto">
+            Go to Publish Pricing →
+          </ButtonLink>
+        </div>
+      )}
+
       <Suspense>
         <ListToolbar filters={toolbarFilters} placeholder={`Search ${def.label.toLowerCase()}…`} />
       </Suspense>

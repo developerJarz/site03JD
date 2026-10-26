@@ -29,6 +29,8 @@ export const PERMISSIONS = {
   "builder:catalog": ["ADMIN"],
   /** E-commerce builder: customer orders, quotes, invoices and analytics (customer data). */
   "builder:orders": ["ADMIN"],
+  /** Agency quotations/proposals and invoices (client pricing and payments). */
+  "billing:manage": ["ADMIN"],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Permission = keyof typeof PERMISSIONS;

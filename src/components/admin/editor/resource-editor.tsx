@@ -170,6 +170,21 @@ export function ResourceEditor({
         </div>
       )}
 
+      {def.group === "E-commerce Builder" && (
+        <div className="mb-6 flex flex-col gap-2 rounded-xl border border-brand-200 bg-brand-50/70 px-4 py-3 text-xs text-brand-950 sm:flex-row sm:items-center sm:justify-between">
+          <span>
+            <strong>Catalog changes:</strong> Edits to this {def.singular.toLowerCase()} are saved to drafts. Go to{" "}
+            <Link href="/admin/ecommerce-builder" className="font-semibold underline hover:text-brand-800">
+              E-commerce Builder
+            </Link>{" "}
+            to publish pricing live to the website frontend.
+          </span>
+          <Link href="/admin/ecommerce-builder" className="shrink-0 font-medium text-brand-700 hover:underline">
+            Go to Publish Pricing →
+          </Link>
+        </div>
+      )}
+
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-6">{main.map(renderSection)}</div>
         <div className="space-y-6">

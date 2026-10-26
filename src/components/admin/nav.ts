@@ -48,6 +48,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: "Project requests", href: "/admin/requests", icon: "kanban", permission: "requests:manage", badge: "requests" },
     ],
   },
+  { label: "Sales", items: [{ label: "Quotations & invoices", href: "/admin/billing", icon: "receipt-text", permission: "billing:manage" }] },
   {
     label: "Users",
     items: [
