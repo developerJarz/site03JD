@@ -7,8 +7,10 @@ import { useEffect, useRef, useState } from "react";
 import { PageHeader } from "@/components/admin/ui";
 import { formatDocDate, formatMoney, INVOICE_STATUS_META, invoiceStatus, invoiceTotals, quotationTotals } from "@/lib/billing/calc";
 import { createInvoice, createQuotation, duplicateDocument, normalizeDoc, normalizeState, PRESET_IDS, PRESETS, sampleState } from "@/lib/billing/defaults";
+import type { BillingCatalog, OrderImport } from "@/lib/billing/catalog";
 import type { BillingDoc, BillingState, PresetId, Quotation } from "@/lib/billing/types";
 import { cn } from "@/lib/utils";
+import { CatalogProvider, OrderImportDialog } from "./catalog-picker";
 import { CompanySettingsDialog, ConvertDialog } from "./dialogs";
 import { btn, ConfirmAction } from "./fields";
 import { QUOTE_STATUS_OPTIONS } from "./quotation-editor";
@@ -19,12 +21,13 @@ import { Workspace } from "./workspace";
  * Quotation & invoice studio: dashboard list, split-screen editors and A4
  * print output. The open document lives in `?doc=<id>` so back/forward work.
  */
-export function BillingStudio() {
+export function BillingStudio({ catalog, orderImport, importAs }: { catalog: BillingCatalog; orderImport: OrderImport | null; importAs: "quotation" | "invoice" }) {
   const state = useBilling();
   const params = useSearchParams();
   const router = useRouter();
   const [settings, setSettings] = useState(false);
   const [converting, setConverting] = useState<Quotation | null>(null);
+  const importing = orderImport && params.get("fromOrder") === orderImport.id ? orderImport : null;
 
   if (!state) return <div className="h-96 animate-shimmer rounded-2xl bg-[linear-gradient(90deg,var(--color-mist-100)_0%,var(--color-mist-50)_50%,var(--color-mist-100)_100%)] bg-[length:200%_100%]" />;
 
@@ -40,7 +43,21 @@ export function BillingStudio() {
 
   const dialogs = (
     <>
-      {settings && <CompanySettingsDialog company={state.company} onSave={billing.setCompany} onClose={() => setSettings(false)} />}
+      {settings && <CompanySettingsDialog company={state.company} catalogRate={catalog.usdToBdt} onSave={billing.setCompany} onClose={() => setSettings(false)} />}
+      {importing && (
+        <OrderImportDialog
+          order={importing}
+          company={state.company}
+          docs={state.documents}
+          initialAs={importAs}
+          onClose={() => router.replace("/admin/billing")}
+          onOpen={(id) => router.replace(`/admin/billing?doc=${encodeURIComponent(id)}`)}
+          onCreate={(docs, id) => {
+            billing.upsertMany(docs);
+            router.replace(`/admin/billing?doc=${encodeURIComponent(id)}`);
+          }}
+        />
+      )}
       {converting && (
         <ConvertDialog
           quote={converting}
@@ -70,18 +87,23 @@ export function BillingStudio() {
       );
     }
     return (
-      <>
+      <CatalogProvider value={catalog}>
         <Workspace doc={current} state={state} onConvert={() => current.kind === "quotation" && setConverting(current)} onDuplicate={() => duplicate(current)} />
         {dialogs}
-      </>
+      </CatalogProvider>
     );
   }
 
   return (
-    <>
+    <CatalogProvider value={catalog}>
+      {params.get("fromOrder") && !importing && (
+        <p className="mb-4 rounded-xl border border-warning-500/30 bg-warning-50 px-4 py-2.5 text-sm text-amber-900" role="status">
+          That E-commerce Builder order could not be loaded — it may have been deleted, or your account cannot view builder orders.
+        </p>
+      )}
       <Dashboard state={state} open={open} duplicate={duplicate} onConvert={setConverting} onSettings={() => setSettings(true)} />
       {dialogs}
-    </>
+    </CatalogProvider>
   );
 }
 
@@ -276,6 +298,7 @@ function DocRow({ doc, open, duplicate, onConvert }: { doc: BillingDoc; open: (i
             <span className="font-mono text-[0.8rem] font-semibold text-ink-900 hover:text-brand-700">{doc.number}</span>
           </span>
           <span className="mt-0.5 block max-w-[280px] truncate text-xs text-mist-500">{doc.projectTitle || "Untitled project"}</span>
+          {doc.source && <span className="mt-0.5 block text-[0.68rem] font-medium text-azure-600">From order {doc.source.orderNumber}</span>}
         </button>
       </td>
       <td className="px-4 py-3">

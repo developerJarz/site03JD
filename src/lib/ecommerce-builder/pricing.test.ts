@@ -5,6 +5,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { seedPricebook } from "./catalog";
+import { CUSTOM_DESIGN_FEE, CUSTOM_DESIGN_LINE_ID, normalizeReferenceUrl, STORE_TYPES } from "./custom-design";
 import { addFeature, calculateQuote, removeFeature, sanitizeSelection, selectionKey, toggleIncluded } from "./pricing";
 import type { Pricebook, QuoteBreakdown, Selection } from "./types";
 
@@ -273,5 +274,51 @@ describe("coupon codes", () => {
     assert.equal(restored.couponCode, "SAVE10");
     assert.equal(selectionKey(restored), selectionKey(saved));
     assert.equal(sanitizeSelection(pb, { ...saved, couponCode: "bad,code" }, { preserveCoupon: true }).couponCode, undefined);
+  });
+});
+
+describe("custom design request", () => {
+  const design = { storeType: "fashion-apparel", referenceUrl: "www.example-shop.com/collections/" };
+
+  it("adds the flat design fee on top of the base design and lists the request", () => {
+    const base = quote(pb, sel("beauty-commerce"));
+    const q = quote(pb, { ...sel("beauty-commerce"), customDesign: design });
+    assert.equal(q.total - base.total, CUSTOM_DESIGN_FEE);
+    assert.equal(q.lines[0].id, CUSTOM_DESIGN_LINE_ID);
+    assert.match(q.lines[0].name, /Fashion & Apparel.*example-shop\.com\/collections/);
+    assert.deepEqual(q.customDesign, { storeType: "fashion-apparel", referenceUrl: "https://www.example-shop.com/collections/", storeTypeLabel: "Fashion & Apparel" });
+  });
+
+  it("shows the fee before a design is chosen and changes the selection key", () => {
+    const r = calculateQuote(pb, { ...sel(null), customDesign: design }, { allowNoTemplate: true });
+    assert.ok(r.ok);
+    assert.equal(r.breakdown.total, CUSTOM_DESIGN_FEE);
+    assert.notEqual(selectionKey(r.selection), selectionKey(sel(null)));
+  });
+
+  it("rejects unknown store types and unusable links", () => {
+    for (const bad of [
+      { storeType: "spaceships", referenceUrl: "example.com" },
+      { storeType: "grocery", referenceUrl: "not a link" },
+      { storeType: "grocery", referenceUrl: "javascript:alert(1)" },
+      { storeType: "grocery", referenceUrl: "localhost:3000" },
+    ]) {
+      assert.equal(calculateQuote(pb, { ...sel("beauty-commerce"), customDesign: bad }).ok, false, JSON.stringify(bad));
+    }
+  });
+
+  it("can be removed like a line, and invalid saved requests are dropped on restore", () => {
+    const withDesign = { ...sel("beauty-commerce"), customDesign: design };
+    assert.equal(removeFeature(withDesign, CUSTOM_DESIGN_LINE_ID).customDesign, undefined);
+    assert.equal(sanitizeSelection(pb, withDesign).customDesign?.referenceUrl, "https://www.example-shop.com/collections/");
+    assert.equal(sanitizeSelection(pb, { ...withDesign, customDesign: { storeType: "nope", referenceUrl: "x.com" } }).customDesign, undefined);
+  });
+
+  it("offers 40+ store types with unique ids", () => {
+    const ids = STORE_TYPES.map((t) => t.id);
+    assert.ok(ids.length >= 40);
+    assert.equal(new Set(ids).size, ids.length);
+    assert.equal(normalizeReferenceUrl("http://shop.com"), "http://shop.com/");
+    assert.equal(normalizeReferenceUrl("ftp://shop.com"), "");
   });
 });

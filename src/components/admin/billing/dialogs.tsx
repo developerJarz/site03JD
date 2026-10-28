@@ -7,7 +7,7 @@ import { DEFAULT_LOGO, quotationToInvoice, type ConvertMode } from "@/lib/billin
 import type { BillingDoc, CompanyProfile, Invoice, Quotation } from "@/lib/billing/types";
 import { cn } from "@/lib/utils";
 import { BrandMark } from "./doc-parts";
-import { Area, btn, Field, Segmented, Text } from "./fields";
+import { Area, btn, Field, Num, Segmented, Text } from "./fields";
 
 const MAX_LOGO_BYTES = 300 * 1024;
 
@@ -37,7 +37,18 @@ export function Modal({ title, onClose, children, footer, wide }: { title: strin
   );
 }
 
-export function CompanySettingsDialog({ company, onSave, onClose }: { company: CompanyProfile; onSave: (c: CompanyProfile) => void; onClose: () => void }) {
+export function CompanySettingsDialog({
+  company,
+  catalogRate,
+  onSave,
+  onClose,
+}: {
+  company: CompanyProfile;
+  /** E-commerce Builder display rate, used when the company rate is 0. */
+  catalogRate: number | null;
+  onSave: (c: CompanyProfile) => void;
+  onClose: () => void;
+}) {
   const [draft, setDraft] = useState(company);
   const [logoError, setLogoError] = useState("");
   const set = (k: keyof CompanyProfile) => (v: string) => setDraft((d) => ({ ...d, [k]: v }));
@@ -128,6 +139,9 @@ export function CompanySettingsDialog({ company, onSave, onClose }: { company: C
               { value: "USD", label: "USD ($)" },
             ]}
           />
+        </Field>
+        <Field label="USD → BDT rate" hint={`Converts website (USD) service rates. 0 uses the E-commerce Builder rate${catalogRate ? ` (${catalogRate})` : " (not set)"}.`}>
+          <Num value={draft.usdToBdt} onChange={(v) => setDraft((d) => ({ ...d, usdToBdt: v }))} step={0.5} />
         </Field>
         <Field label="Default signatory name">
           <Text value={draft.signatoryName} onChange={set("signatoryName")} placeholder="Optional" />

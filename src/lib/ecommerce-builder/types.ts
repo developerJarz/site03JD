@@ -119,6 +119,15 @@ export interface Selection {
   features: Record<string, number>;
   /** Non-mandatory included features the visitor doesn't need. */
   omitted: string[];
+  /** Custom design after a reference website (a flat design fee). */
+  customDesign?: CustomDesignRequest;
+}
+
+export interface CustomDesignRequest {
+  /** A STORE_TYPES id. */
+  storeType: string;
+  /** Absolute http(s) URL of the website to design after. */
+  referenceUrl: string;
 }
 
 export interface QuoteLine {
@@ -159,6 +168,8 @@ export interface QuoteBreakdown {
   tax: { label: string; ratePercent: number; amount: Cents } | null;
   total: Cents;
   recurring: QuoteRecurringLine[];
+  /** The custom design request behind the "custom-design" line, if any. */
+  customDesign?: CustomDesignRequest & { storeTypeLabel: string };
   /** Deterministic key of the normalized selection — detects stale quotes. */
   selectionKey: string;
 }

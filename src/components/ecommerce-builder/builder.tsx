@@ -19,6 +19,8 @@ import { TemplateCard } from "./template-card";
 import { CouponField } from "./coupon-field";
 import { useLiveBdtRate, formatLiveBdt } from "@/hooks/use-live-bdt";
 import { CustomServiceCard, SERVICE_WEBSITE_OPTIONS } from "./custom-service-card";
+import { CustomDesignCard } from "./custom-design-card";
+import { CUSTOM_DESIGN_LINE_ID } from "@/lib/ecommerce-builder/custom-design";
 
 const STORAGE_KEY = "jd-ecom-builder";
 
@@ -275,6 +277,8 @@ export function EcommerceBuilder({
   };
 
   const s = content.sections;
+  const designLine = breakdown?.lines.find((l) => l.id === CUSTOM_DESIGN_LINE_ID);
+  const featureLines = breakdown ? breakdown.lines.filter((l) => l.id !== CUSTOM_DESIGN_LINE_ID) : [];
 
   /* --------------------------------- Summary -------------------------------- */
 
@@ -302,13 +306,22 @@ export function EcommerceBuilder({
           <span className="text-white/60">Base website</span>
           <span className="tabular-nums text-white">{template ? formatMoney(template.price, currency) : "—"}</span>
         </div>
+        {designLine && breakdown.customDesign && (
+          <div className="flex justify-between gap-3">
+            <span className="min-w-0 text-white/60">
+              Custom design
+              <span className="block truncate text-xs text-white/45">{breakdown.customDesign.storeTypeLabel}</span>
+            </span>
+            <span className="shrink-0 tabular-nums text-white">{formatMoney(designLine.amount, currency)}</span>
+          </div>
+        )}
         <div className="flex justify-between gap-3">
           <span className="text-white/60">Included features</span>
           <span className="text-green-400">{breakdown.included.length} · Free</span>
         </div>
-        {breakdown.lines.length > 0 && (
+        {featureLines.length > 0 && (
           <ul className="space-y-2 border-t border-white/10 pt-3">
-            {breakdown.lines.slice(0, 6).map((l) => (
+            {featureLines.slice(0, 6).map((l) => (
               <li key={l.id} className="flex justify-between gap-3">
                 <span className="truncate text-white/75">
                   {l.name}
@@ -317,7 +330,7 @@ export function EcommerceBuilder({
                 <span className="shrink-0 tabular-nums text-white">{formatMoney(l.amount, currency)}</span>
               </li>
             ))}
-            {breakdown.lines.length > 6 && <li className="text-xs text-white/50">+ {breakdown.lines.length - 6} more in your quotation</li>}
+            {featureLines.length > 6 && <li className="text-xs text-white/50">+ {featureLines.length - 6} more in your quotation</li>}
           </ul>
         )}
         {breakdown.custom.length > 0 && <p className="text-xs text-violet-300">+ {breakdown.custom.length} item(s) priced after review</p>}
@@ -371,6 +384,16 @@ export function EcommerceBuilder({
           {/* Step 1 — Templates */}
           <section aria-labelledby="templates-heading" id="templates" className="scroll-mt-28">
             <StepHeader id="templates-heading" index="01" eyebrow={s.templates.eyebrow} title={s.templates.title} description={s.templates.description} />
+            <CustomDesignCard
+              value={selection.customDesign}
+              currency={currency}
+              rate={liveBdtRate}
+              onConfirm={(customDesign) => {
+                update({ ...selection, customDesign });
+                track("builder_custom_design_confirmed", { store_type: customDesign.storeType });
+              }}
+              onRemove={() => update(removeFeature(selection, CUSTOM_DESIGN_LINE_ID))}
+            />
             <div role="radiogroup" aria-labelledby="templates-heading" className="grid gap-5 md:grid-cols-2">
               {demoTemplates.map((t) => (
                 <TemplateCard key={t.id} template={t} currency={currency} selected={selection.templateId === t.id} onSelect={() => selectTemplate(t.id)} />

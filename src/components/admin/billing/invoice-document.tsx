@@ -3,11 +3,12 @@ import { formatDocDate, formatMoney, INVOICE_STATUS_META, invoiceStatus, invoice
 import { DELIVERY } from "@/lib/billing/defaults";
 import type { BillingType, CompanyProfile, Invoice } from "@/lib/billing/types";
 import { cn } from "@/lib/utils";
-import { CornerPattern, DocFrame, PartyBlock, RichText, RunningFooter, RunningHeader } from "./doc-parts";
+import { CornerPattern, PartyBlock, RichText, RunningFooter, RunningHeader } from "./doc-parts";
+import { block, PagedDocument, table, type Flow } from "./paged-document";
 
-/** A4 invoice matching the quotation design: line items, payments deducted and a clear balance due. */
+/** A4 invoice matching the quotation design: line items, payments deducted and a clear balance due. Long invoices continue onto further pages. */
 
-export const BILLING_TYPE_LABEL: Record<BillingType, string> = { "one-time": "One-Time", milestone: "Milestone", annual: "Annual" };
+export const BILLING_TYPE_LABEL: Record<BillingType, string> = { "one-time": "One-Time", milestone: "Milestone", monthly: "Monthly", annual: "Annual" };
 
 const th = "px-2.5 py-2 whitespace-nowrap text-left text-[9px] font-semibold uppercase tracking-[0.12em]";
 const td = "px-2.5 py-2 align-top";
@@ -20,10 +21,10 @@ export function InvoiceDocument({ inv, company }: { inv: Invoice; company: Compa
 
   const schedule = scheduleProgress(inv.schedule, t.paid);
 
-  const page = (
-    <div className="relative">
-      {/* Title row */}
-      <div className="billing-keep grid grid-cols-[1fr_auto] items-start gap-6">
+  const flows: Flow[] = [
+    block(
+      "title",
+      <div className="grid grid-cols-[1fr_auto] items-start gap-6">
         <div>
           <h1 className="font-display text-[30px] font-semibold leading-none tracking-tight text-ink-900">Invoice</h1>
           <p className="mt-2 font-mono text-[12px] font-semibold text-mist-600">{inv.number}</p>
@@ -31,6 +32,7 @@ export function InvoiceDocument({ inv, company }: { inv: Invoice; company: Compa
             <p className="mt-1.5 text-[11.5px] text-mist-600">
               Project: <span className="font-semibold text-ink-900">{inv.projectTitle}</span>
               {inv.quotationNumber && <span className="text-mist-400"> · Ref. {inv.quotationNumber}</span>}
+              {inv.source && <span className="text-mist-400"> · Order {inv.source.orderNumber}</span>}
             </p>
           )}
         </div>
@@ -44,10 +46,11 @@ export function InvoiceDocument({ inv, company }: { inv: Invoice; company: Compa
             </span>
           )}
         </div>
-      </div>
-
-      {/* Key facts */}
-      <div className="billing-keep mt-4 grid grid-cols-4 overflow-hidden border border-mist-200 text-[10px]">
+      </div>,
+    ),
+    block(
+      "facts",
+      <div className="grid grid-cols-4 overflow-hidden border border-mist-200 text-[10px]">
         {[
           ["Invoice No", inv.number],
           ["Issue Date", formatDocDate(inv.issueDate)],
@@ -59,10 +62,12 @@ export function InvoiceDocument({ inv, company }: { inv: Invoice; company: Compa
             <p className={cn("mt-0.5 font-semibold tabular-nums", i === 3 ? "font-display text-[14px]" : "text-[11.5px] text-ink-900")}>{v}</p>
           </div>
         ))}
-      </div>
-
-      {/* Parties */}
-      <div className="billing-keep mt-3 grid grid-cols-2 gap-3">
+      </div>,
+      { gap: 16 },
+    ),
+    block(
+      "parties",
+      <div className="grid grid-cols-2 gap-3">
         <PartyBlock eyebrow="Bill To" client={inv.client} />
         <div className="border border-mist-200 px-4 py-3">
           <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-brand-700">Pay To</p>
@@ -73,54 +78,57 @@ export function InvoiceDocument({ inv, company }: { inv: Invoice; company: Compa
             {inv.deliveryNote && <p className="pt-1 font-medium text-brand-800">{inv.deliveryNote}</p>}
           </div>
         </div>
-      </div>
-
-      {/* Line items */}
-      <table className="billing-table mt-4 w-full overflow-hidden text-[10.5px]">
-        <thead className="bg-ink-900 text-white">
-          <tr>
-            <th className={cn(th, "w-7")}>#</th>
-            <th className={th}>Item &amp; Description</th>
-            <th className={th}>Type</th>
-            <th className={cn(th, "text-right")}>Qty</th>
-            <th className={cn(th, "text-right")}>Unit Price</th>
-            <th className={cn(th, "text-right")}>Discount</th>
-            {inv.showTax && <th className={cn(th, "text-right")}>Tax</th>}
-            <th className={cn(th, "text-right")}>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {inv.items.map((item, i) => {
-            const a = lineAmounts(item);
-            return (
-              <tr key={item.id} className={cn("billing-keep border-b border-mist-200", i % 2 && "bg-mist-25")}>
-                <td className={cn(td, "font-mono text-[9.5px] text-mist-400")}>{String(i + 1).padStart(2, "0")}</td>
-                <td className={td}>
-                  <p className="font-semibold text-ink-900">{item.title}</p>
-                  {item.description && (
-                    <p className="mt-0.5 text-[9.5px] leading-snug text-mist-600">
-                      <RichText text={item.description} />
-                    </p>
-                  )}
-                </td>
-                <td className={td}>
-                  <span className="whitespace-nowrap border border-mist-200 bg-white px-1.5 py-0.5 text-[8.5px] font-semibold uppercase tracking-wide text-mist-600">
-                    {BILLING_TYPE_LABEL[item.billingType]}
-                  </span>
-                </td>
-                <td className={cn(td, "text-right tabular-nums")}>{item.qty}</td>
-                <td className={cn(td, "whitespace-nowrap text-right tabular-nums")}>{money(item.unitPrice)}</td>
-                <td className={cn(td, "whitespace-nowrap text-right tabular-nums text-mist-600")}>{a.discount ? `−${money(a.discount)}` : "—"}</td>
-                {inv.showTax && <td className={cn(td, "whitespace-nowrap text-right tabular-nums text-mist-600")}>{a.tax ? `${money(a.tax)} (${item.taxRate}%)` : "—"}</td>}
-                <td className={cn(td, "whitespace-nowrap text-right font-semibold tabular-nums text-ink-900")}>{money(a.total)}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-
-      {/* Instructions + totals */}
-      <div className="billing-keep relative mt-3 grid grid-cols-[1fr_250px] gap-4">
+      </div>,
+      { gap: 12 },
+    ),
+    table("items", {
+      gap: 16,
+      className: "text-[10.5px]",
+      head: (
+        <tr className="bg-ink-900 text-white">
+          <th className={cn(th, "w-7")}>#</th>
+          <th className={th}>Item &amp; Description</th>
+          <th className={th}>Type</th>
+          <th className={cn(th, "text-right")}>Qty</th>
+          <th className={cn(th, "text-right")}>Unit Price</th>
+          <th className={cn(th, "text-right")}>Discount</th>
+          {inv.showTax && <th className={cn(th, "text-right")}>Tax</th>}
+          <th className={cn(th, "text-right")}>Total</th>
+        </tr>
+      ),
+      rows: inv.items.map((item, i) => {
+        const a = lineAmounts(item);
+        return {
+          key: item.id,
+          node: (
+            <tr className={cn("[&>td]:border-b [&>td]:border-mist-200", i % 2 && "bg-mist-25")}>
+              <td className={cn(td, "font-mono text-[9.5px] text-mist-400")}>{String(i + 1).padStart(2, "0")}</td>
+              <td className={td}>
+                <p className="font-semibold text-ink-900">{item.title}</p>
+                {item.description && (
+                  <p className="mt-0.5 text-[9.5px] leading-snug text-mist-600">
+                    <RichText text={item.description} />
+                  </p>
+                )}
+              </td>
+              <td className={td}>
+                <span className="whitespace-nowrap border border-mist-200 bg-white px-1.5 py-0.5 text-[8.5px] font-semibold uppercase tracking-wide text-mist-600">
+                  {BILLING_TYPE_LABEL[item.billingType]}
+                </span>
+              </td>
+              <td className={cn(td, "text-right tabular-nums")}>{item.qty}</td>
+              <td className={cn(td, "whitespace-nowrap text-right tabular-nums")}>{money(item.unitPrice)}</td>
+              <td className={cn(td, "whitespace-nowrap text-right tabular-nums text-mist-600")}>{a.discount ? `−${money(a.discount)}` : "—"}</td>
+              {inv.showTax && <td className={cn(td, "whitespace-nowrap text-right tabular-nums text-mist-600")}>{a.tax ? `${money(a.tax)} (${item.taxRate}%)` : "—"}</td>}
+              <td className={cn(td, "whitespace-nowrap text-right font-semibold tabular-nums text-ink-900")}>{money(a.total)}</td>
+            </tr>
+          ),
+        };
+      }),
+    }),
+    block(
+      "totals",
+      <div className="relative grid grid-cols-[1fr_250px] gap-4">
         {inv.showStamp && (
           <div
             className="pointer-events-none absolute bottom-0 left-[30%] z-10 -rotate-12 border-[3px] px-5 py-2 text-center font-display text-[26px] font-bold uppercase leading-none tracking-[0.08em] opacity-30"
@@ -181,38 +189,44 @@ export function InvoiceDocument({ inv, company }: { inv: Invoice; company: Compa
             <p className="text-[9px] text-white/55">Due by {formatDocDate(inv.dueDate)}</p>
           </div>
         </div>
-      </div>
+      </div>,
+      { gap: 12 },
+    ),
+  ];
 
-      {/* Milestone schedule */}
-      {inv.showSchedule && schedule.length > 0 && (
-        <div className="billing-keep mt-4">
-          <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-brand-700">Payment Schedule</p>
-          <table className="billing-table w-full overflow-hidden border border-mist-200 text-[10px]">
-            <tbody>
-              {schedule.map((m) => (
-                <tr key={m.id} className="border-b border-mist-100 last:border-0">
-                  <td className={cn(td, "font-semibold text-ink-900")}>{m.when}</td>
-                  <td className={cn(td, "text-mist-600")}>{m.description}</td>
-                  <td className={cn(td, "text-right font-semibold tabular-nums")}>{money(m.amount)}</td>
-                  <td className={cn(td, "w-20 text-right")}>
-                    <span
-                      className={cn(
-                        "px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-wide",
-                        m.state === "Paid" ? "bg-success-50 text-success-500" : m.state === "Part paid" ? "bg-warning-50 text-warning-500" : "bg-mist-100 text-mist-500",
-                      )}
-                    >
-                      {m.state}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+  if (inv.showSchedule && schedule.length > 0) {
+    flows.push(
+      block("schedule-title", <p className="pb-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-brand-700">Payment Schedule</p>, { gap: 16, keepWithNext: true }),
+      table("schedule", {
+        className: "border border-mist-200 text-[10px]",
+        rows: schedule.map((m, i) => ({
+          key: m.id,
+          node: (
+            <tr className={cn(i > 0 && "[&>td]:border-t [&>td]:border-mist-100")}>
+              <td className={cn(td, "font-semibold text-ink-900")}>{m.when}</td>
+              <td className={cn(td, "text-mist-600")}>{m.description}</td>
+              <td className={cn(td, "text-right font-semibold tabular-nums")}>{money(m.amount)}</td>
+              <td className={cn(td, "w-20 text-right")}>
+                <span
+                  className={cn(
+                    "px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-wide",
+                    m.state === "Paid" ? "bg-success-50 text-success-500" : m.state === "Part paid" ? "bg-warning-50 text-warning-500" : "bg-mist-100 text-mist-500",
+                  )}
+                >
+                  {m.state}
+                </span>
+              </td>
+            </tr>
+          ),
+        })),
+      }),
+    );
+  }
 
-      {/* Terms + signature */}
-      <div className="billing-keep mt-4 grid grid-cols-[1fr_220px] items-end gap-8">
+  flows.push(
+    block(
+      "terms",
+      <div className="grid grid-cols-[1fr_220px] items-end gap-8">
         <div>
           {inv.terms.filter(Boolean).length > 0 && (
             <>
@@ -236,15 +250,16 @@ export function InvoiceDocument({ inv, company }: { inv: Invoice; company: Compa
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </div>,
+      { gap: 16 },
+    ),
   );
 
   return (
-    <DocFrame
+    <PagedDocument
+      flows={flows}
       header={<RunningHeader company={company} label={`Invoice · ${inv.number}`} />}
-      footer={<RunningFooter company={company} note={inv.number} />}
-      pages={[page]}
+      footer={(page, pages) => <RunningFooter company={company} note={inv.number} page={page} pages={pages} />}
       decor={
         <>
           <CornerPattern corner="top-left" />

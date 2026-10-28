@@ -8,6 +8,7 @@
  */
 import type { Cents, PbFeature, Pricebook, QuoteBreakdown, QuoteLine, QuoteResult, Selection } from "./types";
 import { COUPON_CODE_PATTERN, normalizeCouponCode } from "./coupons";
+import { CUSTOM_DESIGN_FEE, CUSTOM_DESIGN_LINE_ID, normalizeReferenceUrl, referenceLabel, storeTypeLabel } from "./custom-design";
 
 export const EMPTY_SELECTION: Selection = { templateId: null, features: {}, omitted: [] };
 
@@ -82,6 +83,15 @@ export function normalizeSelection(pb: Pricebook, input: Selection, opts: { allo
     features[id] = qty;
   }
 
+  let customDesign: Selection["customDesign"];
+  if (input.customDesign) {
+    const { storeType, referenceUrl } = input.customDesign;
+    const url = typeof referenceUrl === "string" ? normalizeReferenceUrl(referenceUrl) : "";
+    if (typeof storeType !== "string" || !storeTypeLabel(storeType)) errors.push("Choose your store type for the custom design.");
+    else if (!url) errors.push("Enter a valid website link for the custom design, e.g. https://example.com.");
+    else customDesign = { storeType, referenceUrl: url };
+  }
+
   const omitted = new Set<string>();
   for (const id of input.omitted ?? []) {
     const f = byId.get(id);
@@ -104,7 +114,7 @@ export function normalizeSelection(pb: Pricebook, input: Selection, opts: { allo
     }
   }
 
-  return { selection: { templateId, features, omitted: [...omitted].sort(), ...(couponCode ? { couponCode } : {}) }, errors };
+  return { selection: { templateId, features, omitted: [...omitted].sort(), ...(couponCode ? { couponCode } : {}), ...(customDesign ? { customDesign } : {}) }, errors };
 }
 
 export function selectionKey(sel: Selection): string {
@@ -113,7 +123,8 @@ export function selectionKey(sel: Selection): string {
     .map(([id, q]) => `${id}=${q}`)
     .join(",");
   const code = normalizeCouponCode(sel.couponCode ?? "");
-  return `t:${sel.templateId ?? ""};f:${f};o:${[...sel.omitted].sort().join(",")}${code ? `;c:${code}` : ""}`;
+  const design = sel.customDesign ? `;d:${sel.customDesign.storeType}|${sel.customDesign.referenceUrl}` : "";
+  return `t:${sel.templateId ?? ""};f:${f};o:${[...sel.omitted].sort().join(",")}${code ? `;c:${code}` : ""}${design}`;
 }
 
 const pct = (amount: Cents, percent: number) => Math.round((amount * percent) / 100);
@@ -139,6 +150,20 @@ export function calculateQuote(pb: Pricebook, input: Selection, opts: { allowNoT
   const bundled: QuoteBreakdown["bundled"] = [];
   const custom: QuoteBreakdown["custom"] = [];
   const recurring: QuoteBreakdown["recurring"] = [];
+
+  const design = selection.customDesign ? { ...selection.customDesign, storeTypeLabel: storeTypeLabel(selection.customDesign.storeType) } : undefined;
+  if (design) {
+    lines.push({
+      id: CUSTOM_DESIGN_LINE_ID,
+      name: `Custom design — ${design.storeTypeLabel} (ref: ${referenceLabel(design.referenceUrl)})`,
+      categoryName: "Custom design",
+      pricing: "fixed",
+      unitPrice: CUSTOM_DESIGN_FEE,
+      qty: 1,
+      unitLabel: "",
+      amount: CUSTOM_DESIGN_FEE,
+    });
+  }
 
   // pb.features is already in display order (category order, then feature order).
   for (const f of pb.features) {
@@ -219,6 +244,7 @@ export function calculateQuote(pb: Pricebook, input: Selection, opts: { allowNoT
       tax,
       total: taxable + (tax?.amount ?? 0),
       recurring,
+      ...(design ? { customDesign: design } : {}),
       selectionKey: selectionKey(selection),
     },
   };
@@ -238,6 +264,10 @@ export function addFeature(pb: Pricebook, sel: Selection, id: string): Selection
 }
 
 export function removeFeature(sel: Selection, id: string): Selection {
+  if (id === CUSTOM_DESIGN_LINE_ID) {
+    const { customDesign: _removed, ...rest } = sel;
+    return rest;
+  }
   const { [id]: _removed, ...features } = sel.features;
   return { ...sel, features };
 }
@@ -272,7 +302,9 @@ export function sanitizeSelection(pb: Pricebook, sel: Partial<Selection> | null 
   });
   const code = typeof sel.couponCode === "string" ? normalizeCouponCode(sel.couponCode) : "";
   const couponCode = code && COUPON_CODE_PATTERN.test(code) && (opts.preserveCoupon || pb.rules.discounts.some((d) => d.code && normalizeCouponCode(d.code) === code)) ? code : undefined;
-  return normalizeSelection(pb, { templateId, features, omitted, couponCode }).selection;
+  const design = sel.customDesign && typeof sel.customDesign === "object" ? sel.customDesign : undefined;
+  const customDesign = design && storeTypeLabel(design.storeType) && normalizeReferenceUrl(design.referenceUrl ?? "") ? design : undefined;
+  return normalizeSelection(pb, { templateId, features, omitted, couponCode, customDesign }).selection;
 }
 
 /* --------------------------------- Formatting -------------------------------- */

@@ -24,6 +24,8 @@ export interface CompanyProfile {
   mobileBanking: string;
   signatoryName: string;
   signatoryTitle: string;
+  /** BDT per 1 USD for converting website (USD) rates. 0 follows the E-commerce Builder rate. */
+  usdToBdt: number;
 }
 
 export interface ClientInfo {
@@ -58,7 +60,8 @@ export interface CostLine {
   id: string;
   label: string;
   amount: number;
-  type: "one-time" | "annual";
+  /** Monthly lines count twelve times towards the first-year total. */
+  type: "one-time" | "monthly" | "annual";
 }
 
 export interface Milestone {
@@ -149,11 +152,23 @@ export interface Quotation {
   signature: { validityNotice: string; clientLabel: string; companyLabel: string; signatoryName: string; signatoryTitle: string };
   sections: SectionConfig[];
   invoiceIds: string[];
+  /** Set when the quotation was created from an E-commerce Builder order. */
+  source?: OrderSource;
+}
+
+/** Link back to the E-commerce Builder order a document was generated from. */
+export interface OrderSource {
+  kind: "ecommerce-order";
+  orderId: string;
+  orderNumber: string;
+  quoteNumber: string;
+  /** Payments already recorded on the order, in the document currency. */
+  payments: PaymentRecord[];
 }
 
 export type WorkflowStep = TextRow;
 
-export type BillingType = "one-time" | "milestone" | "annual";
+export type BillingType = "one-time" | "milestone" | "monthly" | "annual";
 export type InvoiceStatus = "paid" | "partial" | "unpaid" | "overdue";
 
 export interface LineItem {
@@ -207,6 +222,7 @@ export interface Invoice {
   showSignature: boolean;
   signatoryName: string;
   signatoryTitle: string;
+  source?: OrderSource;
 }
 
 export type BillingDoc = Quotation | Invoice;

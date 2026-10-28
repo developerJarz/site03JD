@@ -146,6 +146,7 @@ export const builderSelectionSchema = z.object({
   couponCode: z.string().trim().max(40).transform(normalizeCouponCode).refine((v) => !v || COUPON_CODE_PATTERN.test(v), "Enter a valid coupon code").optional(),
   features: z.record(z.string().max(80), z.number().int().min(0).max(1000)).refine((r) => Object.keys(r).length <= 200, "Too many features"),
   omitted: z.array(z.string().max(80)).max(200).default([]),
+  customDesign: z.object({ storeType: z.string().max(80), referenceUrl: z.string().max(300) }).optional(),
 });
 
 export const newsletterSchema = z.object({

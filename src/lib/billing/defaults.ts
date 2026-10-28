@@ -38,6 +38,7 @@ export function defaultCompany(): CompanyProfile {
     mobileBanking: "bKash (Merchant): [bKash number]\nNagad (Merchant): [Nagad number]\nPlease use the invoice number as the payment reference.",
     signatoryName: "",
     signatoryTitle: "Authorized Signatory, Jarz Digital",
+    usdToBdt: 0,
   };
 }
 
@@ -515,6 +516,9 @@ export function quotationToInvoice(q: Quotation, { company, docs, mode, today = 
     deliveryNote: track ? deliveryNote(track) : "",
     schedule: q.milestones.map((m) => ({ ...m, id: uid() })),
     showSchedule: q.milestones.length > 0,
+    // Payments already taken on the website order are deducted on the first invoice only.
+    payments: q.source && q.invoiceIds.length === 0 ? q.source.payments.map((p) => ({ ...p, id: uid() })) : [],
+    ...(q.source && { source: { ...q.source, payments: [] } }),
   };
 }
 

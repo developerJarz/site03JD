@@ -2,9 +2,12 @@
 
 import { Banknote, CalendarClock, FileText, ListChecks, PenLine, Receipt, RotateCcw, Stamp, User, Wallet } from "lucide-react";
 import { addDays, formatMoney, INVOICE_STATUS_META, invoiceStatus, invoiceTotals, lineAmounts, uid } from "@/lib/billing/calc";
+import { useState } from "react";
+import { catalogToLineItem } from "@/lib/billing/catalog";
 import { deliveryNote } from "@/lib/billing/defaults";
 import type { BillingType, CompanyProfile, Invoice, InvoiceStatus } from "@/lib/billing/types";
 import { cn } from "@/lib/utils";
+import { CatalogButton, CatalogPicker, CatalogSuggest, OrderLink } from "./catalog-picker";
 import { BILLING_TYPE_LABEL } from "./invoice-document";
 import { Area, btn, Field, ListEditor, Num, Panel, Segmented, Select, StringList, Text, Toggle } from "./fields";
 import { ClientFields } from "./quotation-editor";
@@ -16,9 +19,23 @@ export function InvoiceEditor({ inv, company, onChange }: { inv: Invoice; compan
   const t = invoiceTotals(inv);
   const money = (n: number) => formatMoney(n, inv.currency);
   const auto = invoiceStatus({ ...inv, statusOverride: "auto" });
+  const [picking, setPicking] = useState(false);
 
   return (
     <div className="space-y-3">
+      {picking && (
+        <CatalogPicker
+          currency={inv.currency}
+          company={company}
+          onClose={() => setPicking(false)}
+          onAdd={(picked, { rate }) => {
+            // Drop empty placeholder lines so picked items don't sit under a blank row.
+            const keep = inv.items.filter((i) => i.title.trim() || i.unitPrice);
+            set("items", [...keep, ...picked.map(({ item, qty }) => catalogToLineItem(item, inv.currency, rate, qty))]);
+          }}
+        />
+      )}
+      {inv.source && <OrderLink source={inv.source} />}
       <Panel title="Invoice details" icon={FileText} defaultOpen>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Invoice number">
@@ -89,6 +106,7 @@ export function InvoiceEditor({ inv, company, onChange }: { inv: Invoice; compan
 
       <Panel title="Line items" icon={Receipt} defaultOpen badge={<span className="rounded-full bg-mist-100 px-1.5 text-[0.65rem] font-semibold text-mist-600">{inv.items.length}</span>}>
         <Toggle checked={inv.showTax} onChange={(v) => set("showTax", v)} label="Show Tax / VAT column" />
+        <CatalogButton onClick={() => setPicking(true)} />
         <ListEditor
           items={inv.items}
           onChange={(v) => set("items", v)}
@@ -98,7 +116,18 @@ export function InvoiceEditor({ inv, company, onChange }: { inv: Invoice; compan
           render={(item, update) => (
             <>
               <div className="grid grid-cols-[1fr_120px] gap-2">
-                <Text value={item.title} onChange={(v) => update({ title: v })} placeholder="Item title" />
+                <CatalogSuggest
+                  value={item.title}
+                  onChange={(v) => update({ title: v })}
+                  onPick={(picked, rate) => {
+                    const line = catalogToLineItem(picked, inv.currency, rate);
+                    // Custom-priced items keep whatever amount was already agreed.
+                    update({ title: line.title, description: line.description, billingType: line.billingType, unitPrice: picked.price === null ? item.unitPrice : line.unitPrice });
+                  }}
+                  currency={inv.currency}
+                  company={company}
+                  placeholder="Item title — type to search services"
+                />
                 <Select<BillingType>
                   value={item.billingType}
                   onChange={(v) => update({ billingType: v })}
@@ -111,7 +140,7 @@ export function InvoiceEditor({ inv, company, onChange }: { inv: Invoice; compan
                   <Num value={item.qty} onChange={(v) => update({ qty: v })} />
                 </Field>
                 <Field label="Unit price">
-                  <Num value={item.unitPrice} onChange={(v) => update({ unitPrice: v })} step={500} />
+                  <Num value={item.unitPrice} onChange={(v) => update({ unitPrice: v })} step={500} min={-1e12} />
                 </Field>
                 <Field label="Discount">
                   <Num value={item.discount} onChange={(v) => update({ discount: v })} step={100} />

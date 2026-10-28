@@ -22,7 +22,8 @@ export function formatAmountCode(amount: number, currency: Currency): string {
 
 export function lineAmounts(item: LineItem) {
   const gross = round2(num(item.qty) * num(item.unitPrice));
-  const discount = Math.min(gross, Math.max(0, round2(num(item.discount))));
+  // Negative lines (discounts/credits carried over from a quotation) pass through unchanged.
+  const discount = Math.min(Math.max(0, gross), Math.max(0, round2(num(item.discount))));
   const tax = round2(((gross - discount) * Math.max(0, num(item.taxRate))) / 100);
   return { gross, discount, tax, total: round2(gross - discount + tax) };
 }
@@ -69,9 +70,12 @@ export const INVOICE_STATUS_META: Record<InvoiceStatus, { label: string; tone: s
 
 export function quotationTotals(q: Pick<Quotation, "costs" | "milestones">) {
   const oneTime = round2(q.costs.filter((c) => c.type === "one-time").reduce((s, c) => s + num(c.amount), 0));
+  const monthly = round2(q.costs.filter((c) => c.type === "monthly").reduce((s, c) => s + num(c.amount), 0));
   const annual = round2(q.costs.filter((c) => c.type === "annual").reduce((s, c) => s + num(c.amount), 0));
+  /** Every recurring cost over one year (annual lines + 12 × monthly lines). */
+  const recurringYear = round2(annual + monthly * 12);
   const milestones = round2(q.milestones.reduce((s, m) => s + num(m.amount), 0));
-  return { oneTime, annual, firstYear: round2(oneTime + annual), milestones };
+  return { oneTime, monthly, annual, recurringYear, firstYear: round2(oneTime + recurringYear), milestones };
 }
 
 /** Development Cost KPI value when it follows the cost table. */

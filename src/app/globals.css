@@ -448,36 +448,30 @@
 
 /* ==========================================================================
    Billing documents (Admin → Quotations & invoices)
-   Screen: A4 sheets with their own header/footer, scaled by --doc-zoom.
-   Print:  sheets become page-broken blocks inside a table whose thead/tfoot
-           repeat the brand header and contact footer on every page.
+   Each .billing-sheet is one A4 page (PagedDocument packs the content), so the
+   screen preview and the printed PDF have identical page breaks.
    ========================================================================== */
 
 .billing-zoom { zoom: var(--doc-zoom, 1); }
-.billing-frame,
-.billing-frame > tbody,
-.billing-frame > tbody > tr,
-.billing-frame > tbody > tr > td { display: block; }
-.billing-frame-head,
-.billing-frame-foot { display: none; }
 .billing-sheet {
   position: relative;
   display: flex;
   flex-direction: column;
   width: 210mm;
-  min-height: 297mm;
+  height: 297mm;
+  overflow: hidden;
   margin: 0 auto 24px;
   padding: 11mm 14mm 9mm;
   font-family: var(--font-sans);
-  /* Faint guides where content runs past one A4 page. */
-  background: #fff linear-gradient(
-      to bottom,
-      transparent 297mm, rgb(220 38 38 / 0.45) 297mm, rgb(220 38 38 / 0.45) 297.3mm, transparent 297.3mm,
-      transparent 594mm, rgb(220 38 38 / 0.45) 594mm, rgb(220 38 38 / 0.45) 594.3mm, transparent 594.3mm
-    ) no-repeat;
+  background: #fff;
   box-shadow: 0 1px 3px rgb(6 11 19 / 0.08), 0 16px 40px -20px rgb(6 11 19 / 0.35);
 }
 .billing-sheet:last-child { margin-bottom: 0; }
+/* Content that cannot be split to fit one page (a single oversized block). */
+.billing-sheet-grow { height: auto; min-height: 297mm; overflow: visible; }
+.billing-sheet-body { flex: 1 1 auto; min-height: 0; }
+/* Off-screen copy that PagedDocument measures. */
+.billing-measure { position: fixed; top: 0; left: -10000px; visibility: hidden; pointer-events: none; }
 .billing-table { border-collapse: separate; border-spacing: 0; }
 .billing-corner { position: absolute; left: 0; width: 64mm; height: 52mm; pointer-events: none; }
 .billing-corner-top-left { top: 0; }
@@ -489,19 +483,7 @@
   .billing-doc { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .billing-print-area { padding: 0 !important; background: none !important; border-radius: 0 !important; }
   .billing-zoom { zoom: 1; }
-  .billing-frame { display: table; width: 100%; border-collapse: collapse; }
-  .billing-frame > tbody { display: table-row-group; }
-  .billing-frame > tbody > tr { display: table-row; }
-  .billing-frame > tbody > tr > td { display: table-cell; padding: 0 14mm; }
-  .billing-frame-head { display: table-header-group; }
-  .billing-frame-foot { display: table-footer-group; }
-  .billing-frame-head td { padding: 9mm 14mm 5mm !important; }
-  .billing-frame-foot td { padding: 4mm 14mm 7mm !important; }
-  .billing-sheet { display: block; width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; background: none; }
-  .billing-sheet + .billing-sheet { break-before: page; }
-  .billing-sheet-chrome { display: none; }
-  .billing-corner { position: fixed; }
-  .billing-keep,
-  .billing-table tr { break-inside: avoid; }
-  .billing-table thead { display: table-header-group; }
+  .billing-measure { display: none; }
+  .billing-sheet { margin: 0; box-shadow: none; break-after: page; }
+  .billing-sheet:last-child { break-after: auto; }
 }

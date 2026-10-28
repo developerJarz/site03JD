@@ -115,14 +115,14 @@ export function Workspace({ doc, state, onConvert, onDuplicate }: { doc: Billing
       <div className="grid gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(360px,440px)_minmax(0,1fr)] lg:px-10 print:block print:p-0">
         <aside className={cn("lg:sticky lg:top-[8.5rem] lg:max-h-[calc(100dvh-10rem)] lg:overflow-y-auto lg:pr-1 print:hidden", mobileView === "preview" && "hidden lg:block")}>
           {doc.kind === "quotation" ? (
-            <QuotationEditor key={doc.id} q={doc} onChange={billing.upsert} />
+            <QuotationEditor key={doc.id} q={doc} company={company} onChange={billing.upsert} />
           ) : (
             <InvoiceEditor key={doc.id} inv={doc} company={company} onChange={billing.upsert} />
           )}
         </aside>
 
         <div className={cn("min-w-0", mobileView === "edit" && "hidden lg:block print:block")}>
-          <p className="mb-2 text-center text-[0.7rem] text-mist-500 print:hidden">Live A4 preview · red guides mark approximate page edges; printing adds clean page breaks</p>
+          <p className="mb-2 text-center text-[0.7rem] text-mist-500 print:hidden">Live A4 preview · pages split exactly as they print</p>
           <div ref={ref} className="billing-print-area rounded-2xl bg-mist-200/70 p-0 sm:p-4" style={{ ["--doc-zoom" as string]: zoom }}>
             <div className="billing-zoom">{doc.kind === "quotation" ? <QuotationDocument q={doc} company={company} /> : <InvoiceDocument inv={doc} company={company} />}</div>
           </div>

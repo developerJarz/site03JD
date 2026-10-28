@@ -22,8 +22,10 @@ import {
 import { useState } from "react";
 import { formatMoney, primaryCost, quotationTotals, uid } from "@/lib/billing/calc";
 import { applyPreset, applyTrack, defaultTerms, PRESET_IDS, PRESETS, SECTION_DEFAULTS, STACK_SWITCH, TECH_SUGGESTIONS, toggleTag, splitTags } from "@/lib/billing/defaults";
-import type { ClientInfo, PresetId, Quotation, QuoteSectionId, QuoteStatus, SectionConfig } from "@/lib/billing/types";
+import { catalogToCostLine, catalogToFeature } from "@/lib/billing/catalog";
+import type { ClientInfo, CompanyProfile, PresetId, Quotation, QuoteSectionId, QuoteStatus, SectionConfig } from "@/lib/billing/types";
 import { cn } from "@/lib/utils";
+import { CatalogButton, CatalogPicker, CatalogSuggest, OrderLink } from "./catalog-picker";
 import { Area, btn, ConfirmAction, Field, ListEditor, move, Num, Panel, Segmented, Select, StringList, Text, Toggle } from "./fields";
 
 export const QUOTE_STATUS_OPTIONS: { value: QuoteStatus; label: string }[] = [
@@ -75,8 +77,9 @@ export function ClientFields({ client, onChange }: { client: ClientInfo; onChang
   );
 }
 
-export function QuotationEditor({ q, onChange }: { q: Quotation; onChange: (q: Quotation) => void }) {
+export function QuotationEditor({ q, company, onChange }: { q: Quotation; company: CompanyProfile; onChange: (q: Quotation) => void }) {
   const [preset, setPreset] = useState<PresetId>(q.preset === "custom" ? "ecommerce" : q.preset);
+  const [picking, setPicking] = useState(false);
   const set = <K extends keyof Quotation>(key: K, value: Quotation[K]) => onChange({ ...q, [key]: value });
   const totals = quotationTotals(q);
   const money = (n: number) => formatMoney(n, q.currency);
@@ -173,6 +176,7 @@ export function QuotationEditor({ q, onChange }: { q: Quotation; onChange: (q: Q
         return (
           <>
             {headingFields}
+            <CatalogButton onClick={() => setPicking(true)} />
             <ListEditor
               items={q.costs}
               onChange={(v) => set("costs", v)}
@@ -181,14 +185,26 @@ export function QuotationEditor({ q, onChange }: { q: Quotation; onChange: (q: Q
               compact
               render={(c, update) => (
                 <>
-                  <Text value={c.label} onChange={(v) => update({ label: v })} placeholder="e.g. Website / Software Development" />
+                  <CatalogSuggest
+                    value={c.label}
+                    onChange={(v) => update({ label: v })}
+                    onPick={(picked, rate) => {
+                      const line = catalogToCostLine(picked, q.currency, rate);
+                      update({ label: line.label, amount: picked.price === null ? c.amount : line.amount, type: line.type });
+                    }}
+                    currency={q.currency}
+                    company={company}
+                    placeholder="e.g. Website Development — type to search services"
+                  />
                   <div className="grid grid-cols-2 gap-2">
-                    <Num value={c.amount} onChange={(v) => update({ amount: v })} step={500} />
+                    {/* Negative amounts are allowed for discount lines. */}
+                    <Num value={c.amount} onChange={(v) => update({ amount: v })} step={500} min={-1e12} />
                     <Select
                       value={c.type}
                       onChange={(v) => update({ type: v })}
                       options={[
                         { value: "one-time", label: "One-time" },
+                        { value: "monthly", label: "Monthly recurring" },
                         { value: "annual", label: "Annual recurring" },
                       ]}
                     />
@@ -198,7 +214,7 @@ export function QuotationEditor({ q, onChange }: { q: Quotation; onChange: (q: Q
             />
             <dl className="grid grid-cols-3 gap-2 rounded-lg bg-mist-50 p-3 text-xs">
               <Stat k="One-time" v={money(totals.oneTime)} />
-              <Stat k="Annual" v={money(totals.annual)} />
+              <Stat k="Recurring / year" v={money(totals.recurringYear)} />
               <Stat k="First year" v={money(totals.firstYear)} strong />
             </dl>
           </>
@@ -215,7 +231,17 @@ export function QuotationEditor({ q, onChange }: { q: Quotation; onChange: (q: Q
               compact
               render={(f, update) => (
                 <>
-                  <Text value={f.title} onChange={(v) => update({ title: v })} placeholder="Module / Category" />
+                  <CatalogSuggest
+                    value={f.title}
+                    onChange={(v) => update({ title: v })}
+                    onPick={(picked) => {
+                      const row = catalogToFeature(picked);
+                      update({ title: row.title, detail: row.detail });
+                    }}
+                    currency={q.currency}
+                    company={company}
+                    placeholder="Module / Category — type to search services"
+                  />
                   <Area value={f.detail} onChange={(v) => update({ detail: v })} rows={2} placeholder="Detailed features & capabilities" />
                 </>
               )}
@@ -435,6 +461,24 @@ export function QuotationEditor({ q, onChange }: { q: Quotation; onChange: (q: Q
 
   return (
     <div className="space-y-3">
+      {picking && (
+        <CatalogPicker
+          currency={q.currency}
+          company={company}
+          scopeOption
+          onClose={() => setPicking(false)}
+          onAdd={(picked, { withScope, rate }) => {
+            // Drop empty placeholder lines so picked items don't sit under a blank row.
+            const keep = q.costs.filter((c) => !(c.amount === 0 && !c.label.trim()));
+            onChange({
+              ...q,
+              costs: [...keep, ...picked.map(({ item, qty }) => catalogToCostLine(item, q.currency, rate, qty))],
+              features: withScope ? [...q.features, ...picked.filter(({ item }) => item.scope || item.description).map(({ item }) => catalogToFeature(item))] : q.features,
+            });
+          }}
+        />
+      )}
+      {q.source && <OrderLink source={q.source} />}
       <div className="rounded-xl border border-brand-200 bg-brand-50/60 p-3.5">
         <p className="flex items-center gap-2 text-sm font-semibold text-ink-900">
           <Sparkles className="size-4 text-brand-600" aria-hidden /> Load service preset

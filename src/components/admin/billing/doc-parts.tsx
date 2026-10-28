@@ -1,14 +1,9 @@
 import { Globe, Mail, MapPin, Phone } from "lucide-react";
-import { Fragment, type ReactNode } from "react";
+import { Fragment } from "react";
 import type { ClientInfo, CompanyProfile } from "@/lib/billing/types";
 import { cn } from "@/lib/utils";
 
-/**
- * Printed-document building blocks. On screen each page is an A4 "sheet" with
- * its own header and footer; when printing, sheets become plain page-broken
- * blocks inside a table whose thead/tfoot repeat the branding on every page
- * (see the `billing-*` rules in globals.css).
- */
+/** Printed-document building blocks; pages are laid out by PagedDocument. */
 
 export function BrandMark({ company, size = 36 }: { company: CompanyProfile; size?: number }) {
   if (company.logoUrl) {
@@ -41,46 +36,15 @@ export function RunningHeader({ company, label }: { company: CompanyProfile; lab
 
 export const contactLine = (c: CompanyProfile) => [c.address, c.phone, c.email, c.website].filter(Boolean).join("  |  ");
 
-export function RunningFooter({ company, note }: { company: CompanyProfile; note?: string }) {
+export function RunningFooter({ company, note, page, pages }: { company: CompanyProfile; note?: string; page: number; pages: number }) {
   return (
     <div className="flex items-center gap-3 border-t border-mist-200 pt-2.5 text-[8.5px] text-mist-500">
       <span className="h-1 w-6 shrink-0 bg-brand-500" aria-hidden />
       <span className="min-w-0 flex-1 truncate">{contactLine(company)}</span>
       {note && <span className="shrink-0 font-mono font-medium text-mist-600">{note}</span>}
-    </div>
-  );
-}
-
-/** A4 pages for screen preview + one print frame with repeating header/footer. */
-export function DocFrame({ header, footer, pages, decor }: { header: ReactNode; footer: ReactNode; pages: ReactNode[]; decor?: ReactNode }) {
-  return (
-    <div className="billing-doc text-ink-900">
-      <table className="billing-frame">
-        <thead className="billing-frame-head">
-          <tr>
-            <td>{header}</td>
-          </tr>
-        </thead>
-        <tfoot className="billing-frame-foot">
-          <tr>
-            <td>{footer}</td>
-          </tr>
-        </tfoot>
-        <tbody>
-          <tr>
-            <td>
-              {pages.map((content, i) => (
-                <section key={i} className="billing-sheet" aria-label={`Page ${i + 1}`}>
-                  {decor}
-                  <div className="billing-sheet-chrome mb-5">{header}</div>
-                  <div className="billing-sheet-body flex-1">{content}</div>
-                  <div className="billing-sheet-chrome mt-6">{footer}</div>
-                </section>
-              ))}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <span className="shrink-0 font-medium tabular-nums text-mist-600">
+        Page {page} of {pages}
+      </span>
     </div>
   );
 }
@@ -96,11 +60,7 @@ const CORNER_DOTS = Array.from({ length: 25 * 20 }, (_, i) => ({ x: 1.3 + (i % 2
   .map((d) => ({ ...d, o: Math.round(Math.max(0, 1 - Math.hypot(d.x, d.y) / 56) * 90) / 100 }))
   .filter((d) => d.o >= 0.05);
 
-/**
- * Blue geometric accent for a page corner, drawn in millimetres. On screen it
- * sits in the sheet corner; in print it is position:fixed, so it lands in the
- * corner of every page.
- */
+/** Blue geometric accent for a page corner, drawn in millimetres; repeated on every sheet. */
 export function CornerPattern({ corner }: { corner: "top-left" | "bottom-left" }) {
   const id = `billing-${corner}`;
   return (
@@ -124,7 +84,7 @@ export function CornerPattern({ corner }: { corner: "top-left" | "bottom-left" }
 
 export function SectionHeading({ index, title, subtitle }: { index?: number; title: string; subtitle?: string }) {
   return (
-    <div className="billing-keep mb-3.5">
+    <div className="mb-3.5">
       <div className="flex items-baseline gap-2">
         {index !== undefined && <span className="w-[18px] shrink-0 font-mono text-[11px] font-bold text-brand-600">{String(index).padStart(2, "0")}</span>}
         <h2 className="font-display text-[17px] font-semibold leading-tight tracking-tight text-ink-900">{title}</h2>
@@ -196,7 +156,7 @@ export function ContactBar({ company }: { company: CompanyProfile }) {
     { I: Globe, v: company.website },
   ].filter((x) => x.v);
   return (
-    <div className="billing-keep flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 bg-ink-900 px-4 py-3 text-[10px] text-white/80">
+    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 bg-ink-900 px-4 py-3 text-[10px] text-white/80">
       {items.map(({ I, v }) => (
         <span key={v} className="inline-flex items-center gap-1.5">
           <I className="size-3 text-brand-300" aria-hidden />

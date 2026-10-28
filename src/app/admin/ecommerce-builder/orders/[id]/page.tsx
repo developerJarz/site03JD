@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Building2, Download, Globe, Mail, MessageCircle, Phone, Tag } from "lucide-react";
+import { Building2, Download, FilePen, Globe, Mail, MessageCircle, Phone, Receipt, Tag } from "lucide-react";
 import { ConfirmButton } from "@/components/admin/confirm-button";
 import { AssigneeSelect, CreateInvoice, DeletePaymentButton, OrderNoteForm, OrderStatusPicker, PaymentForm, RotateLinkButton } from "@/components/admin/ecommerce-builder/controls";
 import { Card, PageHeader } from "@/components/admin/ui";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ButtonLink, buttonClasses } from "@/components/ui/button";
 import { whatsappLink } from "@/config/contact";
 import { deleteBuilderOrderAction, voidBuilderInvoiceAction } from "@/lib/actions/ecommerce-builder-admin";
+import { can } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/session";
 import { connectDB } from "@/lib/db/connect";
 import { CONFIRMED_STATUSES, PAYMENT_STATUS_META, paymentStatus, type OrderStatus } from "@/lib/ecommerce-builder/constants";
@@ -21,7 +22,8 @@ import { User } from "@/models/User";
 export const metadata: Metadata = { title: "E-commerce order" };
 
 export default async function BuilderOrderPage({ params }: PageProps<"/admin/ecommerce-builder/orders/[id]">) {
-  await requirePermission("builder:orders");
+  const user = await requirePermission("builder:orders");
+  const canBilling = can(user.role, "billing:manage");
   const { id } = await params;
   if (!/^[a-f0-9]{24}$/.test(id)) notFound();
   await connectDB();
@@ -89,6 +91,25 @@ export default async function BuilderOrderPage({ params }: PageProps<"/admin/eco
             <QuoteBreakdownView breakdown={b} />
           </Card>
 
+          {b.customDesign && (
+            <Card title="Custom design request">
+              <dl className="grid gap-4 text-sm sm:grid-cols-[180px_minmax(0,1fr)]">
+                <div>
+                  <dt className="text-xs text-mist-500">Store type</dt>
+                  <dd className="font-medium text-ink-900">{b.customDesign.storeTypeLabel}</dd>
+                </div>
+                <div className="min-w-0">
+                  <dt className="text-xs text-mist-500">Design it like</dt>
+                  <dd>
+                    <a href={b.customDesign.referenceUrl} target="_blank" rel="noopener noreferrer nofollow" className="break-all text-brand-700 hover:underline">
+                      {b.customDesign.referenceUrl}
+                    </a>
+                  </dd>
+                </div>
+              </dl>
+            </Card>
+          )}
+
           {c.requirements && (
             <Card title="Customer requirements">
               <p className="whitespace-pre-wrap leading-relaxed text-ink-800">{c.requirements}</p>
@@ -147,6 +168,20 @@ export default async function BuilderOrderPage({ params }: PageProps<"/admin/eco
               {quote && <RotateLinkButton kind="quote" id={String(quote._id)} />}
             </div>
           </Card>
+
+          {canBilling && (
+            <Card title="Quotations & invoices studio">
+              <p className="text-sm text-mist-600">Turn this order into a fully editable branded quotation or invoice — edit lines, prices, scope and terms before downloading the PDF.</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <ButtonLink href={`/admin/billing?fromOrder=${id}&as=quotation`} variant="dark" size="sm">
+                  <FilePen className="size-4" aria-hidden /> Editable quotation
+                </ButtonLink>
+                <ButtonLink href={`/admin/billing?fromOrder=${id}&as=invoice`} variant="outline" size="sm">
+                  <Receipt className="size-4" aria-hidden /> Quotation + invoice
+                </ButtonLink>
+              </div>
+            </Card>
+          )}
 
           <Card title="Payments" action={<Badge tone={PAYMENT_STATUS_META[pay].tone} dot>{PAYMENT_STATUS_META[pay].label}</Badge>}>
             <dl className="grid grid-cols-3 gap-2 text-center text-sm">

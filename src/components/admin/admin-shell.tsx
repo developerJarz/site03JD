@@ -204,7 +204,7 @@ export function AdminShell({ user, counts, dbReady, children }: AdminShellProps)
 
   return (
     <div className="min-h-dvh bg-mist-50 print:min-h-0 print:bg-white">
-      <a href="#admin-main" className="print:hidden sr-onlyfocus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2">
+      <a href="#admin-main" className="print:hidden sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[80] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2">
         Skip to content
       </a>
 
@@ -235,7 +235,7 @@ export function AdminShell({ user, counts, dbReady, children }: AdminShellProps)
       </AnimatePresence>
 
       <div className="lg:pl-64 print:pl-0">
-        <header className="sticky top-0 z-30 flex h-16 print:hiddenitems-center gap-3 border-b border-mist-200 bg-white/85 px-4 backdrop-blur-xl sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center print:hidden gap-3 border-b border-mist-200 bg-white/85 px-4 backdrop-blur-xl sm:px-6">
           <button onClick={() => setDrawer(true)} className="rounded-lg p-2 text-mist-600 hover:bg-mist-100 lg:hidden" aria-label="Open menu">
             <Menu className="size-5" />
           </button>
