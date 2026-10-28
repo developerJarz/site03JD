@@ -126,8 +126,8 @@ export interface Selection {
 export interface CustomDesignRequest {
   /** A STORE_TYPES id. */
   storeType: string;
-  /** Absolute http(s) URL of the website to design after. */
-  referenceUrl: string;
+  /** Absolute http(s) URL of a website to design after (optional). */
+  referenceUrl?: string;
 }
 
 export interface QuoteLine {
@@ -168,7 +168,7 @@ export interface QuoteBreakdown {
   tax: { label: string; ratePercent: number; amount: Cents } | null;
   total: Cents;
   recurring: QuoteRecurringLine[];
-  /** The custom design request behind the "custom-design" line, if any. */
+  /** The custom design request, if any: the design itself (template id "custom-design") or an extra line. */
   customDesign?: CustomDesignRequest & { storeTypeLabel: string };
   /** Deterministic key of the normalized selection — detects stale quotes. */
   selectionKey: string;

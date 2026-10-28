@@ -242,9 +242,11 @@ export function orderToQuotation(
   const money = (cents: number) => convert(centsToUnits(cents), o.currency, currency, rate) ?? centsToUnits(cents);
   const base = createQuotation({ company, docs, preset: "ecommerce", today });
   const who = o.customer.businessName || o.customer.name;
+  // An order can use a custom design request in place of a ready-made template.
+  const customDesign = b.template.id === "custom-design";
 
   const costs: CostLine[] = [
-    { id: uid(), label: `Website template — ${b.template.name}`, amount: money(b.template.price), type: "one-time" },
+    { id: uid(), label: customDesign ? b.template.name : `Website template — ${b.template.name}`, amount: money(b.template.price), type: "one-time" },
     ...b.lines.map((l) => ({
       id: uid(),
       label: l.qty > 1 ? `${l.name} × ${l.qty}${l.unitLabel ? ` ${l.unitLabel}s` : ""}` : l.name,
@@ -266,7 +268,7 @@ export function orderToQuotation(
   const byCategory = new Map<string, string[]>();
   for (const l of b.lines) byCategory.set(l.categoryName, [...(byCategory.get(l.categoryName) ?? []), l.qty > 1 ? `${l.name} (× ${l.qty})` : l.name]);
   const features: TextRow[] = [
-    { id: uid(), title: "Website Template", detail: b.template.name },
+    { id: uid(), title: customDesign ? "Website Design" : "Website Template", detail: b.template.name },
     ...(b.included.length ? [{ id: uid(), title: "Included in the Base Website", detail: b.included.map((f) => f.name).join(", ") }] : []),
     ...[...byCategory].map(([title, names]) => ({ id: uid(), title, detail: names.join(", ") })),
     ...(b.bundled.length ? [{ id: uid(), title: "Bundled at No Extra Cost", detail: b.bundled.map((f) => `${f.name} (with ${f.with})`).join(", ") }] : []),

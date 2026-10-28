@@ -20,7 +20,7 @@ import { CouponField } from "./coupon-field";
 import { useLiveBdtRate, formatLiveBdt } from "@/hooks/use-live-bdt";
 import { CustomServiceCard, SERVICE_WEBSITE_OPTIONS } from "./custom-service-card";
 import { CustomDesignCard } from "./custom-design-card";
-import { CUSTOM_DESIGN_LINE_ID } from "@/lib/ecommerce-builder/custom-design";
+import { CUSTOM_DESIGN_LINE_ID, storeTypeLabel } from "@/lib/ecommerce-builder/custom-design";
 
 const STORAGE_KEY = "jd-ecom-builder";
 
@@ -169,6 +169,10 @@ export function EcommerceBuilder({
       ? `Custom (${customServiceOther.trim()}) Website`
       : `${selectedServiceOpt.label} Website`
     : "Custom Service & Business Website";
+  // A confirmed custom design request counts as the chosen design.
+  const customDesignName = selection.customDesign ? `Custom design — ${storeTypeLabel(selection.customDesign.storeType)}` : "";
+  const designName = template ? (template.id === "custom-service-website" ? customServiceName : template.name) : customDesignName;
+  const hasDesign = Boolean(designName);
 
   const update = useCallback((next: Selection) => {
     setSelection(next);
@@ -220,7 +224,7 @@ export function EcommerceBuilder({
   };
 
   const generateQuote = async (): Promise<StoredQuote | null> => {
-    if (!liveBreakdown || !selection.templateId) {
+    if (!liveBreakdown || !hasDesign) {
       toast.error("Choose a website design first.");
       scrollToId("templates");
       return null;
@@ -265,7 +269,7 @@ export function EcommerceBuilder({
   const includedFeatures = pb.features.filter((f) => f.pricing === "included");
   const categoryName = (id: string) => pb.categories.find((c) => c.id === id)?.name ?? "";
   const dialogFeature = dialogId ? pb.features.find((f) => f.id === dialogId) ?? null : null;
-  const addOnCount = breakdown ? breakdown.lines.length + breakdown.custom.length : 0;
+  const addOnCount = breakdown ? breakdown.lines.filter((l) => l.id !== CUSTOM_DESIGN_LINE_ID).length + breakdown.custom.length : 0;
 
   const onTabKey = (e: React.KeyboardEvent, index: number) => {
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft" && e.key !== "Home" && e.key !== "End") return;
@@ -277,7 +281,7 @@ export function EcommerceBuilder({
   };
 
   const s = content.sections;
-  const designLine = breakdown?.lines.find((l) => l.id === CUSTOM_DESIGN_LINE_ID);
+  const designFee = breakdown ? (breakdown.lines.find((l) => l.id === CUSTOM_DESIGN_LINE_ID)?.amount ?? (breakdown.template.id === CUSTOM_DESIGN_LINE_ID ? breakdown.template.price : 0)) : 0;
   const featureLines = breakdown ? breakdown.lines.filter((l) => l.id !== CUSTOM_DESIGN_LINE_ID) : [];
 
   /* --------------------------------- Summary -------------------------------- */
@@ -295,6 +299,8 @@ export function EcommerceBuilder({
               ) : (
                 template.name
               )
+            ) : customDesignName ? (
+              <span className="font-semibold text-brand-300">{customDesignName}</span>
             ) : (
               <button type="button" onClick={() => scrollToId("templates")} className="text-brand-300 underline underline-offset-4">
                 Choose a design
@@ -302,17 +308,19 @@ export function EcommerceBuilder({
             )}
           </span>
         </div>
-        <div className="flex justify-between gap-3">
-          <span className="text-white/60">Base website</span>
-          <span className="tabular-nums text-white">{template ? formatMoney(template.price, currency) : "—"}</span>
-        </div>
-        {designLine && breakdown.customDesign && (
+        {(template || !customDesignName) && (
+          <div className="flex justify-between gap-3">
+            <span className="text-white/60">Base website</span>
+            <span className="tabular-nums text-white">{template ? formatMoney(template.price, currency) : "—"}</span>
+          </div>
+        )}
+        {designFee > 0 && breakdown.customDesign && (
           <div className="flex justify-between gap-3">
             <span className="min-w-0 text-white/60">
               Custom design
               <span className="block truncate text-xs text-white/45">{breakdown.customDesign.storeTypeLabel}</span>
             </span>
-            <span className="shrink-0 tabular-nums text-white">{formatMoney(designLine.amount, currency)}</span>
+            <span className="shrink-0 tabular-nums text-white">{formatMoney(designFee, currency)}</span>
           </div>
         )}
         <div className="flex justify-between gap-3">
@@ -367,8 +375,8 @@ export function EcommerceBuilder({
         </div>
       </div>
       <div className="mt-6 grid gap-2">
-        <Button size="md" onClick={() => scrollToId(order ? "order" : template ? "order" : "templates")} arrow>
-          {template ? "Continue to order" : "Choose a design"}
+        <Button size="md" onClick={() => scrollToId(order ? "order" : hasDesign ? "order" : "templates")} arrow>
+          {hasDesign ? "Continue to order" : "Choose a design"}
         </Button>
         <Button size="md" variant="outline-light" onClick={() => scrollToId("quote")}>
           Review full quotation
@@ -653,9 +661,9 @@ export function EcommerceBuilder({
                   </>
                 ) : (
                   <>
-                    <p className="text-sm text-mist-600">{template ? (quote ? "Your selection changed — generate an updated quotation." : "Get a numbered quotation you can download as a PDF and share.") : "Choose a design to generate your quotation."}</p>
+                    <p className="text-sm text-mist-600">{hasDesign ? (quote ? "Your selection changed — generate an updated quotation." : "Get a numbered quotation you can download as a PDF and share.") : "Choose a design to generate your quotation."}</p>
                     {canQuote ? (
-                      <Button variant="dark" size="md" onClick={generateQuote} disabled={!template || quoting || !configurationValid} loading={quoting}>
+                      <Button variant="dark" size="md" onClick={generateQuote} disabled={!hasDesign || quoting || !configurationValid} loading={quoting}>
                         {quote ? "Update quotation" : "Generate quotation"}
                       </Button>
                     ) : (
@@ -682,12 +690,10 @@ export function EcommerceBuilder({
                 <p className="text-mist-700">{closedMessage}</p>
               ) : (
                 <>
-                  {template && breakdown && (
+                  {hasDesign && breakdown && (
                     <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-mist-50 px-5 py-4 text-sm">
                       <span className="text-mist-700">
-                        <strong className="font-medium text-ink-900">
-                          {template.id === "custom-service-website" ? customServiceName : template.name}
-                        </strong>{" "}
+                        <strong className="font-medium text-ink-900">{designName}</strong>{" "}
                         · {addOnCount} add-on{addOnCount === 1 ? "" : "s"}
                       </span>
                       <span className="font-display text-xl font-semibold text-ink-900">{formatMoney(breakdown.total, currency)}</span>
@@ -697,11 +703,11 @@ export function EcommerceBuilder({
                     <OrderForm
                       form={form}
                       selection={selection}
-                      expectedTotal={breakdown && template ? breakdown.total : null}
+                      expectedTotal={breakdown && hasDesign ? breakdown.total : null}
                       quoteToken={quoteFresh && quote ? quote.token : null}
                       idempotencyKey={idempotencyKey}
-                      canSubmit={Boolean(template) && canQuote && configurationValid}
-                      blockedReason={!template ? "Choose a website design first (step 1)." : !canQuote ? "Online orders are temporarily unavailable — please contact us on WhatsApp." : !configurationValid && !calc.ok ? calc.errors[0] : undefined}
+                      canSubmit={hasDesign && canQuote && configurationValid}
+                      blockedReason={!hasDesign ? "Choose a website design or request a custom design first (step 1)." : !canQuote ? "Online orders are temporarily unavailable — please contact us on WhatsApp." : !configurationValid && !calc.ok ? calc.errors[0] : undefined}
                       onSuccess={(o) => {
                         setOrder(o);
                         track("generate_lead", { form: "ecommerce_builder", value: breakdown ? breakdown.total / 100 : undefined, currency });
@@ -736,7 +742,7 @@ export function EcommerceBuilder({
           <button type="button" onClick={() => setDrawer(true)} className="theme-dark flex h-14 w-full items-center justify-between gap-3 rounded-full bg-ink-900 pl-5 pr-2 text-left shadow-[0_18px_40px_-12px_rgb(0_0_0/0.55)]" aria-haspopup="dialog">
             <span className="min-w-0">
               <span className="block truncate text-[0.7rem] uppercase tracking-wider text-white/55">
-                {template ? `${template.id === "custom-service-website" ? customServiceName : template.name} · ${addOnCount} add-on${addOnCount === 1 ? "" : "s"}` : "Choose a design"}
+                {hasDesign ? `${designName} · ${addOnCount} add-on${addOnCount === 1 ? "" : "s"}` : "Choose a design"}
               </span>
               <span className="flex flex-wrap items-baseline gap-2">
                 <span className="block font-display text-lg font-semibold leading-tight text-white tabular-nums">{formatMoney(breakdown.total, currency)}</span>
@@ -753,18 +759,18 @@ export function EcommerceBuilder({
         open={drawer}
         onClose={() => setDrawer(false)}
         title="Your quotation"
-        description={template ? (template.id === "custom-service-website" ? customServiceName : template.name) : "No design selected yet"}
+        description={designName || "No design selected yet"}
         size="md"
         footer={
           <Button
             size="md"
             onClick={() => {
               setDrawer(false);
-              setTimeout(() => scrollToId(template ? "order" : "templates"), 50);
+              setTimeout(() => scrollToId(hasDesign ? "order" : "templates"), 50);
             }}
             arrow
           >
-            {template ? "Continue to order" : "Choose a design"}
+            {hasDesign ? "Continue to order" : "Choose a design"}
           </Button>
         }
       >

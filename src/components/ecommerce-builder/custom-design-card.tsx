@@ -24,11 +24,11 @@ export function CustomDesignCard({ value, onConfirm, onRemove, currency, rate }:
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!storeType) return setError("Choose your store type.");
-    const referenceUrl = normalizeReferenceUrl(url);
-    if (!referenceUrl) return setError("Enter a valid website link, e.g. https://example.com");
+    const referenceUrl = url.trim() ? normalizeReferenceUrl(url) : "";
+    if (url.trim() && !referenceUrl) return setError("Enter a valid website link, e.g. https://example.com — or leave it empty.");
     setError("");
     setEditing(false);
-    onConfirm({ storeType, referenceUrl });
+    onConfirm(referenceUrl ? { storeType, referenceUrl } : { storeType });
   };
 
   const edit = () => {
@@ -56,7 +56,7 @@ export function CustomDesignCard({ value, onConfirm, onRemove, currency, rate }:
             <h3 id={`${id}-title`} className="mt-1 font-display text-xl font-semibold tracking-tight text-ink-900 md:text-[1.35rem]">
               Have a store you love? We’ll design yours like it.
             </h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-mist-600">Select your store type and share a website whose look you want. We design your store in that style, with your own brand.</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-mist-600">Select your store type and we design a store just for your brand — no need to pick a ready-made design below. Have a website whose look you like? Add its link too.</p>
           </div>
         </div>
         <div className="flex shrink-0 flex-row items-baseline gap-2 sm:flex-col sm:items-end sm:gap-1">
@@ -72,11 +72,15 @@ export function CustomDesignCard({ value, onConfirm, onRemove, currency, rate }:
               <Check className="size-4 shrink-0 text-green-600" aria-hidden />
               {storeTypeLabel(value.storeType)} store · {fee} added to your estimate
             </p>
-            <a href={value.referenceUrl} target="_blank" rel="noopener noreferrer nofollow" className="mt-1 inline-flex max-w-full items-center gap-1.5 text-mist-600 hover:text-brand-700">
-              <Link2 className="size-3.5 shrink-0" aria-hidden />
-              <span className="truncate">Styled like {referenceLabel(value.referenceUrl)}</span>
-              <ExternalLink className="size-3 shrink-0" aria-hidden />
-            </a>
+            {value.referenceUrl ? (
+              <a href={value.referenceUrl} target="_blank" rel="noopener noreferrer nofollow" className="mt-1 inline-flex max-w-full items-center gap-1.5 text-mist-600 hover:text-brand-700">
+                <Link2 className="size-3.5 shrink-0" aria-hidden />
+                <span className="truncate">Styled like {referenceLabel(value.referenceUrl)}</span>
+                <ExternalLink className="size-3 shrink-0" aria-hidden />
+              </a>
+            ) : (
+              <p className="mt-1 text-mist-600">No reference website — we’ll propose a design for your brand.</p>
+            )}
           </div>
           <div className="flex shrink-0 gap-2">
             <button type="button" onClick={edit} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-mist-300 bg-white px-3.5 text-xs font-medium text-ink-900 hover:border-ink-900">
@@ -122,7 +126,7 @@ export function CustomDesignCard({ value, onConfirm, onRemove, currency, rate }:
             </div>
             <div>
               <label htmlFor={`${id}-url`} className="mb-1.5 block text-xs font-semibold text-ink-900">
-                Website you like
+                Website you like <span className="font-normal text-mist-500">(optional)</span>
               </label>
               <input
                 id={`${id}-url`}
@@ -141,7 +145,7 @@ export function CustomDesignCard({ value, onConfirm, onRemove, currency, rate }:
               />
             </div>
             <div className="flex gap-2">
-              <button type="submit" disabled={!storeType || !url.trim()} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-ink-900 px-5 text-sm font-semibold text-white transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:opacity-40 md:flex-initial">
+              <button type="submit" disabled={!storeType} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-ink-900 px-5 text-sm font-semibold text-white transition-colors hover:bg-ink-800 disabled:cursor-not-allowed disabled:opacity-40 md:flex-initial">
                 <Check className="size-4" aria-hidden /> Confirm
               </button>
               {editing && (
@@ -152,7 +156,7 @@ export function CustomDesignCard({ value, onConfirm, onRemove, currency, rate }:
             </div>
           </div>
           <p id={`${id}-msg`} aria-live="polite" className={cn("mt-2.5 text-xs", error ? "text-danger-500" : "text-mist-500")}>
-            {error || `Confirming adds a ${fee} design fee to your estimate. Then pick the base package below that fits your features.`}
+            {error || `Confirming adds ${fee} to your estimate as your store design — you can skip the ready-made designs below and go straight to features.`}
           </p>
         </form>
       )}

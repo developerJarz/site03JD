@@ -289,11 +289,19 @@ describe("custom design request", () => {
     assert.deepEqual(q.customDesign, { storeType: "fashion-apparel", referenceUrl: "https://www.example-shop.com/collections/", storeTypeLabel: "Fashion & Apparel" });
   });
 
-  it("shows the fee before a design is chosen and changes the selection key", () => {
-    const r = calculateQuote(pb, { ...sel(null), customDesign: design }, { allowNoTemplate: true });
-    assert.ok(r.ok);
-    assert.equal(r.breakdown.total, CUSTOM_DESIGN_FEE);
-    assert.notEqual(selectionKey(r.selection), selectionKey(sel(null)));
+  it("stands in for a website design, so no template is required", () => {
+    assert.equal(calculateQuote(pb, sel(null)).ok, false);
+    const q = quote(pb, { ...sel(null), customDesign: { storeType: "grocery" } });
+    assert.equal(q.total, CUSTOM_DESIGN_FEE);
+    assert.deepEqual(q.template, { id: CUSTOM_DESIGN_LINE_ID, name: "Custom design — Grocery & Supermarket", price: CUSTOM_DESIGN_FEE });
+    assert.equal(q.lines.length, 0, "the fee is not charged twice");
+    assert.notEqual(selectionKey({ ...sel(null), customDesign: { storeType: "grocery" } }), selectionKey(sel(null)));
+  });
+
+  it("treats the reference link as optional", () => {
+    const q = quote(pb, { ...sel("beauty-commerce"), customDesign: { storeType: "grocery", referenceUrl: "  " } });
+    assert.equal(q.lines[0].name, "Custom design — Grocery & Supermarket");
+    assert.deepEqual(q.customDesign, { storeType: "grocery", storeTypeLabel: "Grocery & Supermarket" });
   });
 
   it("rejects unknown store types and unusable links", () => {
@@ -312,6 +320,7 @@ describe("custom design request", () => {
     assert.equal(removeFeature(withDesign, CUSTOM_DESIGN_LINE_ID).customDesign, undefined);
     assert.equal(sanitizeSelection(pb, withDesign).customDesign?.referenceUrl, "https://www.example-shop.com/collections/");
     assert.equal(sanitizeSelection(pb, { ...withDesign, customDesign: { storeType: "nope", referenceUrl: "x.com" } }).customDesign, undefined);
+    assert.deepEqual(sanitizeSelection(pb, { ...withDesign, customDesign: { storeType: "grocery", referenceUrl: "bad link" } }).customDesign, { storeType: "grocery" });
   });
 
   it("offers 40+ store types with unique ids", () => {

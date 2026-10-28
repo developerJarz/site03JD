@@ -47,9 +47,9 @@ export function CouponField({ pricebook, selection, onChange, validationError }:
           aria-describedby={`${id}-help${message ? ` ${id}-error` : ""}`}
           className="h-11 min-w-0 flex-1 rounded-xl border border-mist-300 bg-white px-4 text-base text-ink-900 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15"
         />
-        <Button type="submit" variant="dark" size="md" disabled={!selection.templateId}>Apply coupon</Button>
+        <Button type="submit" variant="dark" size="md" disabled={!selection.templateId && !selection.customDesign}>Apply coupon</Button>
       </div>
-      <p id={`${id}-help`} className="mt-2 text-xs text-mist-600">{selection.templateId ? "Apply one coupon to your website development total." : "Choose a store design before applying a coupon."}</p>
+      <p id={`${id}-help`} className="mt-2 text-xs text-mist-600">{selection.templateId || selection.customDesign ? "Apply one coupon to your website development total." : "Choose a store design before applying a coupon."}</p>
       {selection.couponCode && (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-brand-50 pl-3 text-sm text-brand-800">
           <span role="status">Coupon <strong>{selection.couponCode}</strong>{validationError ? " needs review" : " applied"}</span>

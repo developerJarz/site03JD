@@ -101,9 +101,13 @@ export default async function BuilderOrderPage({ params }: PageProps<"/admin/eco
                 <div className="min-w-0">
                   <dt className="text-xs text-mist-500">Design it like</dt>
                   <dd>
-                    <a href={b.customDesign.referenceUrl} target="_blank" rel="noopener noreferrer nofollow" className="break-all text-brand-700 hover:underline">
-                      {b.customDesign.referenceUrl}
-                    </a>
+                    {b.customDesign.referenceUrl ? (
+                      <a href={b.customDesign.referenceUrl} target="_blank" rel="noopener noreferrer nofollow" className="break-all text-brand-700 hover:underline">
+                        {b.customDesign.referenceUrl}
+                      </a>
+                    ) : (
+                      <span className="text-mist-500">No reference website given</span>
+                    )}
                   </dd>
                 </div>
               </dl>

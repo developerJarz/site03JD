@@ -61,9 +61,20 @@ export function normalizeSelection(pb: Pricebook, input: Selection, opts: { allo
   const couponCode = typeof input.couponCode === "string" ? normalizeCouponCode(input.couponCode) : "";
   if ((input.couponCode !== undefined && typeof input.couponCode !== "string") || (couponCode && !COUPON_CODE_PATTERN.test(couponCode))) errors.push("Enter a valid coupon code (up to 40 letters, numbers, hyphens or underscores).");
 
+  let customDesign: Selection["customDesign"];
+  if (input.customDesign) {
+    const { storeType, referenceUrl } = input.customDesign;
+    const link = typeof referenceUrl === "string" ? referenceUrl.trim() : "";
+    const url = link ? normalizeReferenceUrl(link) : "";
+    if (typeof storeType !== "string" || !storeTypeLabel(storeType)) errors.push("Choose your store type for the custom design.");
+    else if (link && !url) errors.push("Enter a valid website link for the custom design, e.g. https://example.com.");
+    else customDesign = { storeType, ...(url ? { referenceUrl: url } : {}) };
+  }
+
+  // A confirmed custom design stands in for a website design.
   const templateId = typeof input.templateId === "string" && input.templateId ? input.templateId : null;
   if (!templateId) {
-    if (!opts.allowNoTemplate) errors.push("Choose a website design.");
+    if (!opts.allowNoTemplate && !customDesign && !input.customDesign) errors.push("Choose a website design or request a custom design.");
   }
   else if (!pb.templates.some((t) => t.id === templateId)) errors.push(`The website design “${templateId}” is no longer available.`);
 
@@ -81,15 +92,6 @@ export function normalizeSelection(pb: Pricebook, input: Selection, opts: { allo
       continue;
     }
     features[id] = qty;
-  }
-
-  let customDesign: Selection["customDesign"];
-  if (input.customDesign) {
-    const { storeType, referenceUrl } = input.customDesign;
-    const url = typeof referenceUrl === "string" ? normalizeReferenceUrl(referenceUrl) : "";
-    if (typeof storeType !== "string" || !storeTypeLabel(storeType)) errors.push("Choose your store type for the custom design.");
-    else if (!url) errors.push("Enter a valid website link for the custom design, e.g. https://example.com.");
-    else customDesign = { storeType, referenceUrl: url };
   }
 
   const omitted = new Set<string>();
@@ -123,7 +125,7 @@ export function selectionKey(sel: Selection): string {
     .map(([id, q]) => `${id}=${q}`)
     .join(",");
   const code = normalizeCouponCode(sel.couponCode ?? "");
-  const design = sel.customDesign ? `;d:${sel.customDesign.storeType}|${sel.customDesign.referenceUrl}` : "";
+  const design = sel.customDesign ? `;d:${sel.customDesign.storeType}|${sel.customDesign.referenceUrl ?? ""}` : "";
   return `t:${sel.templateId ?? ""};f:${f};o:${[...sel.omitted].sort().join(",")}${code ? `;c:${code}` : ""}${design}`;
 }
 
@@ -138,7 +140,10 @@ export function calculateQuote(pb: Pricebook, input: Selection, opts: { allowNoT
   const { selection, errors } = normalizeSelection(pb, input, opts);
   if (errors.length) return { ok: false, errors };
 
-  const template = pb.templates.find((t) => t.id === selection.templateId) ?? { id: "", name: "", price: 0 };
+  const design = selection.customDesign ? { ...selection.customDesign, storeTypeLabel: storeTypeLabel(selection.customDesign.storeType) } : undefined;
+  const designName = design ? `Custom design — ${design.storeTypeLabel}${design.referenceUrl ? ` (ref: ${referenceLabel(design.referenceUrl)})` : ""}` : "";
+  // Without a chosen design, the custom design takes its place; otherwise it is an extra line.
+  const template = pb.templates.find((t) => t.id === selection.templateId) ?? (design ? { id: CUSTOM_DESIGN_LINE_ID, name: designName, price: CUSTOM_DESIGN_FEE } : { id: "", name: "", price: 0 });
   const categoryName = new Map(pb.categories.map((c) => [c.id, c.name]));
   const byId = featureMap(pb);
   const requiredBy = requiredByMap(pb, selection.features);
@@ -151,11 +156,10 @@ export function calculateQuote(pb: Pricebook, input: Selection, opts: { allowNoT
   const custom: QuoteBreakdown["custom"] = [];
   const recurring: QuoteBreakdown["recurring"] = [];
 
-  const design = selection.customDesign ? { ...selection.customDesign, storeTypeLabel: storeTypeLabel(selection.customDesign.storeType) } : undefined;
-  if (design) {
+  if (design && template.id !== CUSTOM_DESIGN_LINE_ID) {
     lines.push({
       id: CUSTOM_DESIGN_LINE_ID,
-      name: `Custom design — ${design.storeTypeLabel} (ref: ${referenceLabel(design.referenceUrl)})`,
+      name: designName,
       categoryName: "Custom design",
       pricing: "fixed",
       unitPrice: CUSTOM_DESIGN_FEE,
@@ -303,7 +307,8 @@ export function sanitizeSelection(pb: Pricebook, sel: Partial<Selection> | null 
   const code = typeof sel.couponCode === "string" ? normalizeCouponCode(sel.couponCode) : "";
   const couponCode = code && COUPON_CODE_PATTERN.test(code) && (opts.preserveCoupon || pb.rules.discounts.some((d) => d.code && normalizeCouponCode(d.code) === code)) ? code : undefined;
   const design = sel.customDesign && typeof sel.customDesign === "object" ? sel.customDesign : undefined;
-  const customDesign = design && storeTypeLabel(design.storeType) && normalizeReferenceUrl(design.referenceUrl ?? "") ? design : undefined;
+  const link = design && typeof design.referenceUrl === "string" ? normalizeReferenceUrl(design.referenceUrl) : "";
+  const customDesign = design && storeTypeLabel(design.storeType) ? { storeType: design.storeType, ...(link ? { referenceUrl: link } : {}) } : undefined;
   return normalizeSelection(pb, { templateId, features, omitted, couponCode, customDesign }).selection;
 }
 
