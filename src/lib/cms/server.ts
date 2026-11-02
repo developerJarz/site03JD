@@ -41,7 +41,7 @@ export const RESOURCE_TAGS: Record<ResourceKey, string[]> = {
   team: [TAGS.team],
   testimonials: [TAGS.testimonials],
   faqs: [TAGS.faqs],
-  // Saved preview images update immediately; other catalog edits await Publish pricing.
+  // Catalog edits auto-publish the pricebook (see syncBuilderCatalog in lib/actions/cms.ts), which revalidates the builder.
   "ecommerce-templates": [TAGS.ecommerceBuilder],
   "ecommerce-categories": [],
   "ecommerce-features": [],

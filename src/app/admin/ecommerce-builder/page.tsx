@@ -75,7 +75,7 @@ export default async function BuilderOverviewPage() {
           {catalog && draft && (
             <Card title="Pricing publication" action={live ? <Badge tone="success" dot>Live: v{live.version}</Badge> : <Badge tone="warning" dot>Not published</Badge>}>
               <p className="text-sm text-mist-600">
-                Saved preview images for live templates update immediately. Other template edits, features and pricing rules go live only after you publish. Existing quotes and orders keep the prices they were issued with.
+                Template, category and feature edits go live automatically when you save them. Pricing rules (discounts, tax) go live after you publish. Existing quotes and orders keep the prices they were issued with.
               </p>
               <div className="mt-4 flex items-center gap-2 text-sm">
                 {changed ? (

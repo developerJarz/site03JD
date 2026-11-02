@@ -2,10 +2,13 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { logActivity } from "@/lib/activity";
-import { AuthError, assertPermission, getRequestMeta } from "@/lib/auth/session";
+import { AuthError, assertPermission, getRequestMeta, type SessionUser } from "@/lib/auth/session";
 import { MODELS, RESOURCE_TAGS, buildSchema, normalizeForSave, publicUrl, unflatten } from "@/lib/cms/server";
 import { RESOURCES, isResourceKey } from "@/lib/cms/resources";
+import { TAGS } from "@/lib/data/cache-tags";
 import { connectDB } from "@/lib/db/connect";
+import { BUILDER_PATH } from "@/lib/ecommerce-builder/constants";
+import { publishDraftPricebook } from "@/lib/ecommerce-builder/publish";
 import type { ActionResult } from "./types";
 
 type Intent = "save" | "draft" | "publish";
@@ -14,6 +17,27 @@ type Intent = "save" | "draft" | "publish";
 function refreshPublic(key: keyof typeof RESOURCE_TAGS) {
   for (const tag of RESOURCE_TAGS[key]) revalidateTag(tag, { expire: 0 });
   revalidatePath("/", "layout");
+}
+
+const BUILDER_CATALOG = new Set<string>(["ecommerce-templates", "ecommerce-categories", "ecommerce-features"]);
+
+/**
+ * E-commerce catalog edits go live straight away: re-publish the pricebook and
+ * return a note for the toast. Issued quotes and orders keep their own snapshot.
+ */
+async function syncBuilderCatalog(key: string, user: SessionUser): Promise<string> {
+  if (!BUILDER_CATALOG.has(key)) return "";
+  try {
+    const { ip } = await getRequestMeta();
+    const outcome = await publishDraftPricebook(user, "Auto-published after a catalog edit", ip);
+    if (outcome.status === "blocked") return ` The builder page was NOT updated — ${outcome.error}`;
+    revalidateTag(TAGS.ecommerceBuilder, { expire: 0 });
+    revalidatePath(BUILDER_PATH);
+    return outcome.status === "published" ? " The builder page is updated." : "";
+  } catch (err) {
+    console.error("[cms] builder auto-publish failed", err);
+    return " Saved, but the builder page could not be updated — use Publish pricing on the E-commerce Builder page.";
+  }
 }
 
 function zodErrors(issues: { path: PropertyKey[]; message: string }[]) {
@@ -79,7 +103,8 @@ export async function saveResourceAction(
       if (oldUrl) revalidatePath(oldUrl);
     }
 
-    return { ok: true, message: `${def.singular} ${verb}.`, data: { id: docId!, slug: data.slug as string | undefined } };
+    const note = await syncBuilderCatalog(key, user);
+    return { ok: true, message: `${def.singular} ${verb}.${note}`, data: { id: docId!, slug: data.slug as string | undefined } };
   } catch (err) {
     if (err instanceof AuthError) return { ok: false, error: err.message };
     console.error("[cms] save failed", err);
@@ -97,7 +122,8 @@ export async function deleteResourceAction(key: string, id: string): Promise<Act
     if (!doc) return { ok: false, error: "Already deleted." };
     await logActivity({ actor: user, action: `${def.singular.toLowerCase().replace(/\s+/g, "-")}.deleted`, entityType: key, entityId: id, entityLabel: String(doc[def.titleField] ?? "") });
     refreshPublic(key);
-    return { ok: true, message: `${def.singular} deleted.` };
+    const note = await syncBuilderCatalog(key, user);
+    return { ok: true, message: `${def.singular} deleted.${note}` };
   } catch (err) {
     if (err instanceof AuthError) return { ok: false, error: err.message };
     console.error("[cms] delete failed", err);
@@ -120,7 +146,8 @@ export async function togglePublishAction(key: string, id: string): Promise<Acti
     await doc.save();
     await logActivity({ actor: user, action: `${def.singular.toLowerCase().replace(/\s+/g, "-")}.${live ? "unpublished" : "published"}`, entityType: key, entityId: id, entityLabel: String(doc.get(def.titleField) ?? "") });
     refreshPublic(key);
-    return { ok: true, message: live ? "Moved to draft." : "Published." };
+    const note = await syncBuilderCatalog(key, user);
+    return { ok: true, message: `${live ? "Moved to draft." : "Published."}${note}` };
   } catch (err) {
     if (err instanceof AuthError) return { ok: false, error: err.message };
     return { ok: false, error: "Could not update status." };

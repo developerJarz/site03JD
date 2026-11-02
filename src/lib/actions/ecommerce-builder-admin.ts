@@ -10,11 +10,12 @@ import { BUILDER_PATH, CONFIRMED_STATUSES, ORDER_STATUSES, ORDER_STATUS_META, PA
 import { formatMoney } from "@/lib/ecommerce-builder/pricing";
 import { COUPON_CODE_PATTERN, normalizeCouponCode } from "@/lib/ecommerce-builder/coupons";
 import { invoiceLink, newLinkToken, quoteLinks } from "@/lib/ecommerce-builder/quotes";
-import { loadDraftPricebook, nextNumber, pricebookHash, readBuilderSettings } from "@/lib/ecommerce-builder/server";
+import { publishDraftPricebook } from "@/lib/ecommerce-builder/publish";
+import { nextNumber, readBuilderSettings } from "@/lib/ecommerce-builder/server";
 import { SETTINGS_SECTIONS, type SettingsSection } from "@/lib/ecommerce-builder/settings";
 import { settingsPageDef } from "@/lib/ecommerce-builder/settings-def";
 import { slugify } from "@/lib/utils";
-import { BuilderFeature, BuilderInvoice, BuilderOrder, BuilderPricebook, BuilderQuote, BuilderSettingsModel } from "@/models/builder";
+import { BuilderFeature, BuilderInvoice, BuilderOrder, BuilderQuote, BuilderSettingsModel } from "@/models/builder";
 import { User } from "@/models/User";
 import type { ActionResult } from "./types";
 
@@ -43,21 +44,12 @@ const actorOf = (u: SessionUser) => ({ id: u.id, name: u.name, role: u.role });
 export async function publishPricingAction(note: string): Promise<ActionResult<{ version: number }>> {
   return run(async () => {
     const user = await assertPermission("builder:catalog");
-    await connectDB();
-    const { pricebook, issues } = await loadDraftPricebook();
-    const errors = issues.filter((i) => i.level === "error");
-    if (errors.length) return { ok: false, error: `Fix ${errors.length} issue${errors.length > 1 ? "s" : ""} before publishing: ${errors[0].message}` };
-
-    const hash = pricebookHash(pricebook);
-    const latest = await BuilderPricebook.findOne().sort({ version: -1 }).select("version hash").lean();
-    if (latest?.hash === hash) return { ok: false, error: "Nothing to publish — the live pricing already matches the catalog." };
-
-    const version = (latest?.version ?? 0) + 1;
-    await BuilderPricebook.create({ version, data: { ...pricebook, version }, hash, note: note.trim().slice(0, 300) || undefined, publishedBy: user.id, publishedByName: user.name });
     const { ip } = await getRequestMeta();
-    await logActivity({ actor: actorOf(user), action: "ecommerce-pricing.published", entityType: "ecommerce-pricebook", entityId: String(version), entityLabel: `Pricebook v${version}`, meta: { templates: pricebook.templates.length, features: pricebook.features.length }, ip });
+    const outcome = await publishDraftPricebook(actorOf(user), note, ip);
+    if (outcome.status === "blocked") return { ok: false, error: outcome.error };
+    if (outcome.status === "unchanged") return { ok: false, error: "Nothing to publish — the live pricing already matches the catalog." };
     refreshBuilderPage();
-    return { ok: true, message: `Pricing v${version} is live.`, data: { version } };
+    return { ok: true, message: `Pricing v${outcome.version} is live.`, data: { version: outcome.version } };
   });
 }
 
