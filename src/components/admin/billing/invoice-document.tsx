@@ -1,5 +1,5 @@
 import { Banknote, CalendarClock, Smartphone } from "lucide-react";
-import { formatDocDate, formatMoney, INVOICE_STATUS_META, invoiceStatus, invoiceTotals, lineAmounts, scheduleProgress } from "@/lib/billing/calc";
+import { formatDocDate, formatMoney, INVOICE_STATUS_META, invoiceStatus, invoiceTotals, isDiscountLine, lineAmounts, scheduleProgress } from "@/lib/billing/calc";
 import { DELIVERY } from "@/lib/billing/defaults";
 import type { BillingType, CompanyProfile, Invoice } from "@/lib/billing/types";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ const td = "px-2.5 py-2 align-top";
 
 export function InvoiceDocument({ inv, company }: { inv: Invoice; company: CompanyProfile }) {
   const t = invoiceTotals(inv);
+  const discountLines = inv.items.filter(isDiscountLine);
   const status = invoiceStatus(inv);
   const meta = INVOICE_STATUS_META[status];
   const money = (n: number) => formatMoney(n, inv.currency);
@@ -96,7 +97,7 @@ export function InvoiceDocument({ inv, company }: { inv: Invoice; company: Compa
           <th className={cn(th, "text-right")}>Total</th>
         </tr>
       ),
-      rows: inv.items.map((item, i) => {
+      rows: inv.items.filter((item) => !isDiscountLine(item)).map((item, i) => {
         const a = lineAmounts(item);
         return {
           key: item.id,
@@ -168,6 +169,12 @@ export function InvoiceDocument({ inv, company }: { inv: Invoice; company: Compa
           <dl className="space-y-1.5 px-1">
             <Row k="Subtotal" v={money(t.subtotal)} />
             <Row k="Discount" v={t.discount ? `−${money(t.discount)}` : money(0)} />
+            {discountLines.map((item) => (
+              <div key={item.id} className="flex justify-between gap-2 pl-2 text-[9.5px] text-mist-500">
+                <dt className="min-w-0">{item.title.replace(/^Discount\s*[—–-]\s*/, "") || "Discount"}</dt>
+                <dd className="shrink-0 tabular-nums">−{money(-lineAmounts(item).gross)}</dd>
+              </div>
+            ))}
             {inv.showTax && <Row k="Tax / VAT" v={money(t.tax)} />}
             <div className="flex justify-between border-t border-mist-200 pt-1.5 text-[12px] font-bold text-ink-900">
               <dt>Grand Total</dt>

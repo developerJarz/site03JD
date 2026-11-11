@@ -28,13 +28,18 @@ export function lineAmounts(item: LineItem) {
   return { gross, discount, tax, total: round2(gross - discount + tax) };
 }
 
+/** Negative lines are discounts/credits (e.g. carried over from an order): shown in the totals, not the items table. */
+export const isDiscountLine = (item: LineItem) => lineAmounts(item).gross < 0;
+
 export function invoiceTotals(inv: Pick<Invoice, "items" | "payments">) {
   let subtotal = 0;
   let discount = 0;
   let tax = 0;
   for (const item of inv.items) {
     const a = lineAmounts(item);
-    subtotal += a.gross;
+    // A negative line counts towards the Discount total instead of shrinking the subtotal.
+    if (a.gross < 0) discount -= a.gross;
+    else subtotal += a.gross;
     discount += a.discount;
     tax += a.tax;
   }

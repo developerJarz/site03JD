@@ -60,6 +60,17 @@ describe("invoice", () => {
     assert.deepEqual(totals, { subtotal: 2500, discount: 200, tax: 180, grandTotal: 2480, paid: 1000, balance: 1480 });
   });
 
+  it("counts negative (order discount) lines as discount, not subtotal", () => {
+    const totals = invoiceTotals({
+      items: [
+        { id: "a", title: "Template", description: "", billingType: "one-time", qty: 1, unitPrice: 30000, discount: 0, taxRate: 0 },
+        { id: "b", title: "Discount — Special discount", description: "", billingType: "one-time", qty: 1, unitPrice: -5000, discount: 0, taxRate: 0 },
+      ],
+      payments: [],
+    });
+    assert.deepEqual(totals, { subtotal: 30000, discount: 5000, tax: 0, grandTotal: 25000, paid: 0, balance: 25000 });
+  });
+
   it("derives status from payments and due date", () => {
     const q = createQuotation({ company, docs: [], preset: "erp", today: "2026-10-01" });
     const inv = quotationToInvoice(q, { company, docs: [q], mode: "full", today: "2026-10-01" });
