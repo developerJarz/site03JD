@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Building2, Download, FilePen, Globe, Mail, MessageCircle, Phone, Receipt, Tag } from "lucide-react";
 import { ConfirmButton } from "@/components/admin/confirm-button";
-import { AssigneeSelect, CreateInvoice, DeletePaymentButton, OrderNoteForm, OrderStatusPicker, PaymentForm, RotateLinkButton } from "@/components/admin/ecommerce-builder/controls";
+import { AssigneeSelect, CreateInvoice, DeletePaymentButton, OrderDiscountForm, OrderNoteForm, OrderStatusPicker, PaymentForm, RotateLinkButton } from "@/components/admin/ecommerce-builder/controls";
 import { Card, PageHeader } from "@/components/admin/ui";
 import { QuoteBreakdownView } from "@/components/ecommerce-builder/quote-breakdown";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,7 @@ import { can } from "@/lib/auth/permissions";
 import { requirePermission } from "@/lib/auth/session";
 import { connectDB } from "@/lib/db/connect";
 import { CONFIRMED_STATUSES, PAYMENT_STATUS_META, paymentStatus, type OrderStatus } from "@/lib/ecommerce-builder/constants";
-import { formatMoney } from "@/lib/ecommerce-builder/pricing";
+import { formatMoney, maxManualDiscount } from "@/lib/ecommerce-builder/pricing";
 import type { QuoteBreakdown } from "@/lib/ecommerce-builder/types";
 import { formatDate, formatDateTime, timeAgo } from "@/lib/utils";
 import { BuilderInvoice, BuilderOrder, BuilderQuote } from "@/models/builder";
@@ -186,6 +186,20 @@ export default async function BuilderOrderPage({ params }: PageProps<"/admin/eco
               </div>
             </Card>
           )}
+
+          <Card title="Discount" action={order.manualDiscount ? <Badge tone="success" dot>−{formatMoney(order.manualDiscount.amount, currency)}</Badge> : undefined}>
+            {order.manualDiscount && (
+              <p className="mb-4 text-xs text-mist-500">
+                “{order.manualDiscount.label}” added by {order.manualDiscount.byName} · {timeAgo(order.manualDiscount.at)}
+              </p>
+            )}
+            <OrderDiscountForm
+              id={id}
+              currency={currency}
+              current={order.manualDiscount ? { amount: order.manualDiscount.amount, label: order.manualDiscount.label ?? "", note: order.manualDiscount.note ?? "" } : null}
+              max={maxManualDiscount(b)}
+            />
+          </Card>
 
           <Card title="Payments" action={<Badge tone={PAYMENT_STATUS_META[pay].tone} dot>{PAYMENT_STATUS_META[pay].label}</Badge>}>
             <dl className="grid grid-cols-3 gap-2 text-center text-sm">

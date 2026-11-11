@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { seedPricebook } from "./catalog";
 import { CUSTOM_DESIGN_FEE, CUSTOM_DESIGN_LINE_ID, normalizeReferenceUrl, STORE_TYPES } from "./custom-design";
-import { addFeature, calculateQuote, removeFeature, sanitizeSelection, selectionKey, toggleIncluded } from "./pricing";
+import { addFeature, applyManualDiscount, calculateQuote, MANUAL_DISCOUNT_ID, maxManualDiscount, removeFeature, sanitizeSelection, selectionKey, toggleIncluded } from "./pricing";
 import type { Pricebook, QuoteBreakdown, Selection } from "./types";
 
 const pb = seedPricebook();
@@ -329,5 +329,40 @@ describe("custom design request", () => {
     assert.equal(new Set(ids).size, ids.length);
     assert.equal(normalizeReferenceUrl("http://shop.com"), "http://shop.com/");
     assert.equal(normalizeReferenceUrl("ftp://shop.com"), "");
+  });
+});
+
+describe("manual admin discount", () => {
+  const taxed = withRules({ tax: { enabled: true, label: "VAT", ratePercent: 10 } });
+  const base = () => quote(taxed, sel("beauty-commerce")); // subtotal 10000, tax 1000, total 11000
+
+  it("takes a flat amount off before tax", () => {
+    const r = applyManualDiscount(base(), 2000, "Loyal customer");
+    assert.ok(r.ok);
+    assert.equal(r.breakdown.discountTotal, 2000);
+    assert.equal(r.breakdown.tax?.amount, 800);
+    assert.equal(r.breakdown.total, 8800);
+    assert.deepEqual(r.breakdown.discounts.at(-1), { id: MANUAL_DISCOUNT_ID, label: "Loyal customer", amount: 2000 });
+  });
+
+  it("replaces an earlier manual discount and removes it with 0", () => {
+    const first = applyManualDiscount(base(), 2000, "A");
+    assert.ok(first.ok);
+    const second = applyManualDiscount(first.breakdown, 500, "B");
+    assert.ok(second.ok);
+    assert.equal(second.breakdown.discounts.filter((d) => d.id === MANUAL_DISCOUNT_ID).length, 1);
+    assert.equal(second.breakdown.discountTotal, 500);
+    const removed = applyManualDiscount(second.breakdown, 0, "");
+    assert.ok(removed.ok);
+    assert.equal(removed.breakdown.discounts.length, 0);
+    assert.equal(removed.breakdown.total, 11000);
+  });
+
+  it("never discounts below zero", () => {
+    assert.equal(maxManualDiscount(base()), 10000);
+    assert.equal(applyManualDiscount(base(), 10001, "").ok, false);
+    const all = applyManualDiscount(base(), 10000, "");
+    assert.ok(all.ok);
+    assert.equal(all.breakdown.total, 0);
   });
 });

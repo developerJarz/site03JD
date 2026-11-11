@@ -15,6 +15,7 @@ import {
   recordBuilderPaymentAction,
   rotateInvoiceLinkAction,
   rotateQuoteLinkAction,
+  setBuilderOrderDiscountAction,
   updateBuilderOrderStatusAction,
 } from "@/lib/actions/ecommerce-builder-admin";
 import type { ActionResult } from "@/lib/actions/types";
@@ -194,6 +195,64 @@ export function PaymentForm({ id, currency, balance }: { id: string; currency: s
         <Button type="submit" size="sm" variant="dark" loading={pending} disabled={!(Number(amount) > 0)}>
           Record payment
         </Button>
+      </div>
+    </form>
+  );
+}
+
+/** Flat discount an admin adds after the order is placed. */
+export function OrderDiscountForm({ id, currency, current, max }: { id: string; currency: string; current: { amount: number; label: string; note: string } | null; max: number }) {
+  const { pending, run } = useRun();
+  const [amount, setAmount] = useState(current ? (current.amount / 100).toFixed(2) : "");
+  const [label, setLabel] = useState(current?.label ?? "Special discount");
+  const [note, setNote] = useState(current?.note ?? "");
+  const cents = Math.round(Number(amount) * 100);
+  const valid = Number(amount) > 0 && cents <= max;
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        run(() => setBuilderOrderDiscountAction(id, { amount: cents, label, note }));
+      }}
+      className="grid gap-3 sm:grid-cols-2"
+    >
+      <div>
+        <label htmlFor="disc-amount" className="mb-1 block text-xs font-medium text-mist-600">
+          Flat discount ({currency})
+        </label>
+        <input id="disc-amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ""))} placeholder="0.00" className={controlClass(Boolean(amount) && cents > max, "h-10 text-sm")} />
+        <p className="mt-1 text-[0.7rem] text-mist-500">Up to {(max / 100).toFixed(2)} {currency}</p>
+      </div>
+      <div>
+        <label htmlFor="disc-label" className="mb-1 block text-xs font-medium text-mist-600">
+          Label (shown to customer)
+        </label>
+        <input id="disc-label" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} className={controlClass(false, "h-10 text-sm")} />
+      </div>
+      <div className="sm:col-span-2">
+        <label htmlFor="disc-note" className="mb-1 block text-xs font-medium text-mist-600">
+          Internal reason (optional)
+        </label>
+        <input id="disc-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} className={controlClass(false, "h-10 text-sm")} />
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:col-span-2">
+        <p className="text-xs text-mist-500">Updates the order total, quotation and active invoice.</p>
+        <span className="flex gap-2">
+          {current && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              loading={pending}
+              onClick={() => run(() => setBuilderOrderDiscountAction(id, { amount: 0, label, note }), () => setAmount(""))}
+            >
+              Remove
+            </Button>
+          )}
+          <Button type="submit" size="sm" variant="dark" loading={pending} disabled={!valid}>
+            {current ? "Update discount" : "Apply discount"}
+          </Button>
+        </span>
       </div>
     </form>
   );

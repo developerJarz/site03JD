@@ -254,6 +254,33 @@ export function calculateQuote(pb: Pricebook, input: Selection, opts: { allowNoT
   };
 }
 
+/* ------------------------------ Manual discount ----------------------------- */
+
+/** Discount line id used for a flat discount an admin adds after the order is placed. */
+export const MANUAL_DISCOUNT_ID = "manual-discount";
+
+/** The most a manual discount can take off: the subtotal left after the other discounts. */
+export function maxManualDiscount(b: QuoteBreakdown): Cents {
+  const others = b.discounts.filter((d) => d.id !== MANUAL_DISCOUNT_ID).reduce((s, d) => s + d.amount, 0);
+  return Math.max(0, b.subtotal - others);
+}
+
+/**
+ * Sets (or with amount 0, removes) a flat admin discount on a saved breakdown
+ * and recalculates the totals. Like other discounts it comes off before tax.
+ */
+export function applyManualDiscount(b: QuoteBreakdown, amount: Cents, label: string): { ok: true; breakdown: QuoteBreakdown } | { ok: false; error: string } {
+  if (!Number.isInteger(amount) || amount < 0) return { ok: false, error: "Enter a valid discount amount." };
+  const max = maxManualDiscount(b);
+  if (amount > max) return { ok: false, error: `The discount can be at most ${formatMoney(max, b.currency)}.` };
+  const discounts = b.discounts.filter((d) => d.id !== MANUAL_DISCOUNT_ID);
+  if (amount > 0) discounts.push({ id: MANUAL_DISCOUNT_ID, label: label.trim() || "Special discount", amount });
+  const discountTotal = discounts.reduce((s, d) => s + d.amount, 0);
+  const taxable = b.subtotal - discountTotal;
+  const tax = b.tax ? { ...b.tax, amount: pct(taxable, b.tax.ratePercent) } : null;
+  return { ok: true, breakdown: { ...b, discounts, discountTotal, taxable, tax, total: taxable + (tax?.amount ?? 0) } };
+}
+
 /* ------------------------------ Selection edits ----------------------------- */
 
 /** Adds a feature (and anything it requires). Clicking a bundled feature selects what it comes with. */

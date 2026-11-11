@@ -204,6 +204,20 @@ const OrderSchema = new Schema(
     assignee: { type: Schema.Types.ObjectId, ref: "User", default: null },
     payments: [PaymentSchema],
     amountPaid: { ...cents, default: 0 },
+    /** Flat discount added by an admin after the order was placed (also applied to its quotation and active invoice). */
+    manualDiscount: {
+      type: new Schema(
+        {
+          amount: { ...cents, required: true },
+          label: { type: String, trim: true, maxlength: 80 },
+          note: { type: String, trim: true, maxlength: 300 },
+          byName: String,
+          at: { type: Date, default: Date.now },
+        },
+        { _id: false },
+      ),
+      default: null,
+    },
     termsAcceptedAt: { type: Date, required: true },
     source: { type: String, default: "ecommerce-builder" },
     ip: { type: String, maxlength: 64 },

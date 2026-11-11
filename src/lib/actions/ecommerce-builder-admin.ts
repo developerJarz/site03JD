@@ -7,7 +7,8 @@ import { buildFieldsSchema, unflatten } from "@/lib/cms/server";
 import { TAGS } from "@/lib/data/cache-tags";
 import { connectDB } from "@/lib/db/connect";
 import { BUILDER_PATH, CONFIRMED_STATUSES, ORDER_STATUSES, ORDER_STATUS_META, PAYMENT_METHODS, type OrderStatus } from "@/lib/ecommerce-builder/constants";
-import { formatMoney } from "@/lib/ecommerce-builder/pricing";
+import { applyManualDiscount, formatMoney } from "@/lib/ecommerce-builder/pricing";
+import type { QuoteBreakdown } from "@/lib/ecommerce-builder/types";
 import { COUPON_CODE_PATTERN, normalizeCouponCode } from "@/lib/ecommerce-builder/coupons";
 import { invoiceLink, newLinkToken, quoteLinks } from "@/lib/ecommerce-builder/quotes";
 import { publishDraftPricebook } from "@/lib/ecommerce-builder/publish";
@@ -187,6 +188,52 @@ export async function deleteBuilderPaymentAction(id: string, paymentId: string):
     await order.save();
     await logActivity({ actor: actorOf(user), action: "ecommerce-order.payment-removed", entityType: "ecommerce-order", entityId: id, entityLabel: order.number });
     return { ok: true, message: "Payment removed." };
+  });
+}
+
+/**
+ * Sets a flat discount on a placed order (amount 0 removes it). The order,
+ * its quotation and any active invoice are recalculated so every document
+ * shows the same discounted total.
+ */
+export async function setBuilderOrderDiscountAction(id: string, input: { amount: number; label: string; note: string }): Promise<ActionResult> {
+  return run(async (): Promise<ActionResult> => {
+    if (!isId(id)) return { ok: false, error: "Invalid request." };
+    const amount = Math.round(Number(input.amount));
+    if (!Number.isInteger(amount) || amount < 0 || amount > 100_000_000) return { ok: false, error: "Enter a valid discount amount.", fieldErrors: { amount: "Enter an amount" } };
+    const label = String(input.label ?? "").trim().slice(0, 80) || "Special discount";
+    const note = String(input.note ?? "").trim().slice(0, 300);
+    const user = await assertPermission("builder:orders");
+    await connectDB();
+    const order = await BuilderOrder.findById(id).lean();
+    if (!order) return { ok: false, error: "Order not found." };
+    if (!amount && !order.manualDiscount) return { ok: false, error: "This order has no discount to remove." };
+
+    const next = applyManualDiscount(order.breakdown as QuoteBreakdown, amount, label);
+    if (!next.ok) return { ok: false, error: next.error, fieldErrors: { amount: next.error } };
+    const total = next.breakdown.total;
+    const currency = order.currency ?? "USD";
+    if (total < (order.amountPaid ?? 0)) return { ok: false, error: `That would make the total (${formatMoney(total, currency)}) lower than the payments already recorded (${formatMoney(order.amountPaid ?? 0, currency)}).`, fieldErrors: { amount: "Too large" } };
+
+    await BuilderOrder.updateOne(
+      { _id: id },
+      { $set: { breakdown: next.breakdown, total, manualDiscount: amount ? { amount, label, note, byName: user.name, at: new Date() } : null } },
+    );
+
+    // Keep the quotation and the active invoice in step with the order.
+    const quote = await BuilderQuote.findById(order.quote).select("breakdown").lean();
+    if (quote) {
+      const q = applyManualDiscount(quote.breakdown as QuoteBreakdown, amount, label);
+      if (q.ok) await BuilderQuote.updateOne({ _id: quote._id }, { $set: { breakdown: q.breakdown, total: q.breakdown.total } });
+    }
+    const invoices = await BuilderInvoice.find({ order: order._id, status: "issued" }).select("breakdown").lean();
+    for (const inv of invoices) {
+      const r = applyManualDiscount(inv.breakdown as QuoteBreakdown, amount, label);
+      if (r.ok) await BuilderInvoice.updateOne({ _id: inv._id }, { $set: { breakdown: r.breakdown, total: r.breakdown.total } });
+    }
+
+    await logActivity({ actor: actorOf(user), action: "ecommerce-order.discount", entityType: "ecommerce-order", entityId: id, entityLabel: order.number, meta: { amount, label, note, total } });
+    return { ok: true, message: amount ? `Discount of ${formatMoney(amount, currency)} applied — new total ${formatMoney(total, currency)}.` : "Discount removed." };
   });
 }
 
